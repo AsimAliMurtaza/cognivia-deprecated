@@ -43,7 +43,8 @@ export default function LoginPage() {
     const res = await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: true,
+      callbackUrl: "/dashboard",
     });
 
     setLoading(false);
@@ -104,10 +105,13 @@ export default function LoginPage() {
               textAlign="center"
               color="gray.700"
             >
-              <Heading size="lg" fontWeight="medium" mb={2}>
-                Welcome to Cognivia
+              <Heading size="xl" fontWeight="thin" mb={2}>
+                Welcome to
               </Heading>
-              <Text fontSize="sm" color="gray.600">
+              <Heading size="2xl" fontWeight="thin" mb={8}>
+                Cognivia
+              </Heading>
+              <Text fontSize="md" color="gray.600">
                 Sign in to continue
               </Text>
             </Box>
@@ -187,7 +191,9 @@ export default function LoginPage() {
                     border="1px solid"
                     leftIcon={<FcGoogle />}
                     _hover={{ bg: "gray.50" }}
-                    onClick={() => signIn("google")}
+                    onClick={() =>
+                      signIn("google", { callbackUrl: "/dashboard" })
+                    }
                   >
                     Continue with Google
                   </Button>
