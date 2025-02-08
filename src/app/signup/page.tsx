@@ -17,6 +17,7 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
+import { FiArrowLeft } from "react-icons/fi";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -103,6 +104,19 @@ export default function SignUpPage() {
               <Text fontSize="sm" color="gray.500" mt={4}>
                 Create an account to get started.
               </Text>
+              <Button
+                color="blue.500"
+                _hover={{ color: "blue.900" }}
+                onClick={() => router.push("/")}
+              >
+                <FiArrowLeft
+                  style={{
+                    marginRight: "8px",
+                    marginBottom: "2px",
+                    fontSize: "2em",
+                  }}
+                />
+              </Button>
             </GridItem>
 
             {/* Right Side - Sign Up Form */}

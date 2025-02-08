@@ -47,7 +47,7 @@ export default function Header() {
         {/* Logo */}
         <Heading
           size="xl"
-          bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+          bgGradient="linear(to-r, blue.300, #A5D8DD)"
           bgClip="text"
           fontWeight="bold"
           cursor="pointer"
@@ -55,7 +55,7 @@ export default function Header() {
           transition="all 0.2s"
           _hover={{ transform: "scale(1.05)" }}
         >
-          Cognivia
+          whatever name fits
         </Heading>
 
         {/* Desktop Navigation */}

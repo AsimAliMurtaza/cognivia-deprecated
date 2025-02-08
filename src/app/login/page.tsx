@@ -21,6 +21,7 @@ import {
 import { motion } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { FiArrowLeft } from "react-icons/fi";
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
@@ -90,7 +91,7 @@ export default function LoginPage() {
             overflow="hidden"
             direction={{ base: "column", md: "row" }}
             w="auto"
-            h="auto"
+            h="60%"
             borderRadius="20px"
           >
             {/* Left Section - Content */}
@@ -105,15 +106,26 @@ export default function LoginPage() {
               textAlign="center"
               color="gray.700"
             >
-              <Heading size="xl" fontWeight="thin" mb={2}>
+              <Heading size="lg" fontWeight="thin" color="gray.700">
                 Welcome to
               </Heading>
-              <Heading size="2xl" fontWeight="thin" mb={8}>
+              <Heading size="2xl" fontWeight="thin" color="gray.700" mb={4}>
                 Cognivia
               </Heading>
               <Text fontSize="md" color="gray.600">
-                Sign in to continue
+                Sign in to continue or...
               </Text>
+              <Button
+                color="blue.500"
+                _hover={{ color: "blue.900" }}
+                onClick={() => router.push("/")}
+              >
+                <FiArrowLeft style={{
+                  marginRight: "8px",
+                  marginBottom: "2px",
+                  fontSize: "2em",
+                }} />
+              </Button>
             </Box>
 
             {/* Right Section - Login Form */}
@@ -204,7 +216,9 @@ export default function LoginPage() {
                     leftIcon={<FaGithub />}
                     _hover={{ bg: "gray.50" }}
                     border="1px solid"
-                    onClick={() => signIn("github")}
+                    onClick={() =>
+                      signIn("github", { callbackUrl: "/dashboard" })
+                    }
                   >
                     Continue with GitHub
                   </Button>

@@ -58,7 +58,7 @@ export default function LandingPage() {
         justifyContent="center"
         position="relative"
         overflow="hidden"
-        bg="white"
+        bgGradient="linear(to-br, #E0F7FA, #F3E5F5)" // Soft pastel gradient
       >
         <Container
           maxW="container.lg"
@@ -75,24 +75,30 @@ export default function LandingPage() {
               <Heading
                 size={headingSize}
                 fontWeight="bold"
-                bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+                // bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+                bgGradient="linear(to-r, blue.300, #A5D8DD)"
                 bgClip="text"
                 lineHeight="1.2"
               >
                 AI-Powered Quizzes for Smarter Learning
               </Heading>
               <Text fontSize="xl" color="gray.600" maxW="2xl">
-                Personalized, interactive, and adaptive quizzes designed for you.
+                Personalized, interactive, and adaptive quizzes designed for
+                you.
               </Text>
               <HStack spacing={4}>
                 <Button
                   onClick={() => router.push("/signup")}
                   size="lg"
-                  bg="#6EC3C4"
+                  bgGradient="linear(to-r, #A5D8DD, blue.300)"
                   color="white"
                   rounded="full"
                   px={8}
-                  _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
+                  _hover={{
+                    bgGradient: "linear(to-r, blue.300, #A5D8DD)",
+                    transform: "scale(1.05)",
+                    transition: "fade-in 1.2s",
+                  }}
                 >
                   Get Started
                 </Button>
@@ -115,7 +121,13 @@ export default function LandingPage() {
       </Box>
 
       {/* Features Section */}
-      <Box py={20} id="features" bg="gray.50" position="relative" zIndex={1}>
+      <Box
+        py={20}
+        id="features"
+        bg="gray.50"
+        position="relative"
+        zIndex={1}
+      >
         <Container maxW="container.lg">
           <VStack spacing={8} textAlign="center">
             <motion.div
@@ -127,10 +139,10 @@ export default function LandingPage() {
               <Heading
                 size="xl"
                 fontWeight="bold"
-                bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+                bgGradient="linear(to-r, blue.300, #A5D8DD)"
                 bgClip="text"
               >
-                Why Choose QuizAI?
+                Why Choose Us?
               </Heading>
             </motion.div>
             <motion.div
@@ -140,7 +152,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
             >
               <Text fontSize="lg" color="gray.600" maxW="2xl">
-                Discover the features that make QuizAI the ultimate learning
+                Discover the features that make Cognivia the ultimate learning
                 tool.
               </Text>
             </motion.div>
@@ -211,7 +223,7 @@ export default function LandingPage() {
               <Heading
                 size="xl"
                 fontWeight="bold"
-                bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+                bgGradient="linear(to-r, #6EC3C4, blue.500)"
                 bgClip="text"
               >
                 Affordable Plans for Everyone
