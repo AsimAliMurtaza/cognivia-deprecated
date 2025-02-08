@@ -22,12 +22,26 @@ export default function SignUpPage() {
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+    >
       <VStack spacing={4} p={8} borderRadius="md" boxShadow="lg">
         <Heading>Sign Up</Heading>
-        <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <Button onClick={handleSignup} isLoading={loading} colorScheme="blue">
+        <Input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button onClick={handleSignup} colorScheme="blue">
           Sign Up
         </Button>
       </VStack>
