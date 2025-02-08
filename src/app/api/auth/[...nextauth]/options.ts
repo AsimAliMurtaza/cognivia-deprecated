@@ -4,6 +4,7 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -29,7 +30,11 @@ export const authOptions: NextAuthOptions = {
         await dbConnect();
 
         const user = await User.findOne({ email: credentials.email });
-        if (user && user.password === credentials.password) {
+        const isValidPassword = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+        if (user && isValidPassword) {
           return {
             id: user.id,
             email: user.email,

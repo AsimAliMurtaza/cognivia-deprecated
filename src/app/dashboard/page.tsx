@@ -21,6 +21,7 @@ import {
   CardFooter,
   useColorModeValue,
   Tooltip,
+  Image,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -33,6 +34,7 @@ import {
   FiChevronLeft,
   FiMenu,
 } from "react-icons/fi";
+import ProfileDialog from "@/components/ProfileDialog";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -248,22 +250,8 @@ export default function Dashboard() {
             </Tooltip>
           ))}
 
-          <Divider my={4} />
-
-          {/* Sign Out Button */}
-          <Tooltip label={isSidebarOpen ? "" : "Sign Out"} placement="right">
-            <Button
-              leftIcon={<FiLogOut />}
-              variant="ghost"
-              w="full"
-              justifyContent={isSidebarOpen ? "flex-start" : "center"}
-              color="gray.700"
-              _hover={{ bg: "#E0F7FA", color: "red.500" }}
-              onClick={() => signOut()}
-            >
-              {isSidebarOpen && "Sign Out"}
-            </Button>
-          </Tooltip>
+          <Divider my={12} />
+          <ProfileDialog isSidebarOpen={isSidebarOpen} />
         </VStack>
       </Box>
 
