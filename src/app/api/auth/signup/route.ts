@@ -1,18 +1,28 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
+import User from "@/models/User"; // Import the model
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json();
-  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    await dbConnect(); // Ensure DB is connected
 
-  const db = await dbConnect();
+    const { email, password } = await req.json();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  const existingUser = await db.collection("users").findOne({ email });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    }
 
-  if (existingUser)
-    return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    // Create new user
+    const newUser = new User({ email, password: hashedPassword });
+    await newUser.save();
 
-  await db.collection("users").insertOne({ email, password: hashedPassword });
-  return NextResponse.json({ message: "User created" }, { status: 201 });
+    return NextResponse.json({ message: "User created" }, { status: 201 });
+  } catch (error) {
+    console.error("Signup Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
