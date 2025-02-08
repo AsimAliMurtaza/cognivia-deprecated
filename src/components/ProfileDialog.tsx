@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
 import {
   Box,
   Button,
@@ -35,34 +34,34 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
   const router = useRouter();
 
   // Soft pastel colors
-  const primaryColor = "gray.700"; // Soft teal
-  const secondaryColor = "gray.900"; // Light blue
+  const primaryColor = "gray.700";
+  const secondaryColor = "gray.900";
   const modalBg = useColorModeValue("white", "white");
-  const hoverBg = useColorModeValue("#E0F7FA", "#F3E5F5"); // Light teal for hover
+  const hoverBg = useColorModeValue("#E0F7FA", "#F3E5F5");
 
   return (
     <>
       {/* My Profile Button */}
-      <Tooltip label="My Profile" placement="right">
+      <Tooltip label="My Profile" placement="right" isDisabled={isSidebarOpen}>
         <Button
           variant="ghost"
           w="full"
-          justifyContent="flex-start"
+          justifyContent={isSidebarOpen ? "flex-start" : "center"}
           color="gray.700"
           _hover={{ bg: hoverBg }}
           onClick={onOpen}
           display="flex"
           alignItems="center"
-          gap={3}
+          gap={isSidebarOpen ? 3 : 0} // Remove gap when sidebar is closed
+          px={isSidebarOpen ? 3 : 2} // Adjust padding
         >
           <Image
             src={session?.user?.image || "/user.png"}
-            boxSize={6}
             borderRadius="full"
             border="2px solid"
             borderColor={primaryColor}
           />
-          <Text>My Profile</Text>
+          {isSidebarOpen && <Text>My Profile</Text>}
         </Button>
       </Tooltip>
 
@@ -127,7 +126,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                   leftIcon={<FiLogOut />}
                   variant="ghost"
                   w="full"
-                  justifyContent={isSidebarOpen ? "center" : "center"}
+                  justifyContent="center"
                   color="gray.700"
                   _hover={{
                     bg: "gray.200",
@@ -137,7 +136,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                   _active={{ bg: "#4A8C8D" }}
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                  {isSidebarOpen && "Sign Out"}
+                  Sign Out
                 </Button>
               </VStack>
             </Flex>
