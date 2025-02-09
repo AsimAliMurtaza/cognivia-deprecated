@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link as ScrollLink } from "react-scroll";
 import {
   Box,
   Flex,
@@ -18,17 +18,30 @@ import {
   useDisclosure,
   VStack,
   Divider,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
+import DarkModeToggle from "./DarkModeToggle";
 
 export default function Header() {
   const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  // Dynamic colors for light & dark mode
+  const bgColor = useColorModeValue("white", "gray.900");
+  const textColor = useColorModeValue("gray.700", "gray.100");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const drawerBg = useColorModeValue("white", "gray.800");
+  const hoverBg = useColorModeValue("#E0F7FA", "gray.700");
+  const gradient = useColorModeValue(
+    "linear(to-r, #6EC3C4, #A5D8DD)",
+    "linear(to-r, cyan.400, blue.500)"
+  );
+
   return (
     <Box
       as="nav"
-      bg="white"
+      bg={bgColor}
       py={4}
       boxShadow="md"
       position="fixed"
@@ -36,7 +49,7 @@ export default function Header() {
       w="100%"
       zIndex="1000"
       borderBottom="1px solid"
-      borderColor="gray.200"
+      borderColor={borderColor}
     >
       <Flex
         maxW="container.xl"
@@ -48,7 +61,7 @@ export default function Header() {
         {/* Logo */}
         <Heading
           size="xl"
-          bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+          bgGradient={gradient}
           bgClip="text"
           fontWeight="bold"
           cursor="pointer"
@@ -62,12 +75,19 @@ export default function Header() {
         {/* Desktop Navigation */}
         <HStack spacing={6} display={{ base: "none", md: "flex" }}>
           {["About Us", "Features", "Pricing", "Contact"].map((link, index) => (
-            <Link key={index} href={`#${link.toLowerCase().replace(" ", "")}`} passHref>
+            <ScrollLink
+              key={index}
+              to={link.toLowerCase().replace(" ", "")}
+              smooth={true}
+              duration={500}
+              offset={-70}
+              spy={true}
+            >
               <Button
                 variant="ghost"
                 fontSize="lg"
                 fontWeight="medium"
-                color="gray.700"
+                color={textColor}
                 transition="all 0.2s ease-in-out"
                 _hover={{
                   color: "#6EC3C4",
@@ -77,7 +97,7 @@ export default function Header() {
               >
                 {link}
               </Button>
-            </Link>
+            </ScrollLink>
           ))}
         </HStack>
 
@@ -90,7 +110,7 @@ export default function Header() {
             color="#6EC3C4"
             transition="all 0.3s ease-in-out"
             _hover={{
-              bg: "#E0F7FA",
+              bg: hoverBg,
               transform: "scale(1.05)",
             }}
           >
@@ -107,29 +127,30 @@ export default function Header() {
           >
             Get Started
           </Button>
+          <DarkModeToggle />
         </HStack>
 
         {/* Mobile Menu Button */}
         <IconButton
           display={{ base: "inline-flex", md: "none" }}
-          icon={<HamburgerIcon color="gray.600" />}
+          icon={<HamburgerIcon color={textColor} />}
           variant="ghost"
           onClick={onOpen}
           aria-label="Open Menu"
           transition="all 0.2s ease-in-out"
-          _hover={{ bg: "#E0F7FA", transform: "scale(1.1)" }}
+          _hover={{ bg: hoverBg, transform: "scale(1.1)" }}
         />
       </Flex>
 
       {/* Mobile Drawer */}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
-        <DrawerContent bg="white" boxShadow="lg">
-          <DrawerCloseButton color="gray.600" />
+        <DrawerContent bg={drawerBg} boxShadow="lg">
+          <DrawerCloseButton color={textColor} />
           <DrawerHeader>
             <Heading
               size="xl"
-              bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+              bgGradient={gradient}
               bgClip="text"
               fontWeight="bold"
             >
@@ -141,31 +162,34 @@ export default function Header() {
             <VStack spacing={4} align="start">
               {["About Us", "Features", "Pricing", "Contact"].map(
                 (link, index) => (
-                  <Link
+                  <ScrollLink
                     key={index}
-                    href={`#${link.toLowerCase().replace(" ", "")}`}
-                    passHref
+                    to={link.toLowerCase().replace(" ", "")}
+                    smooth={true}
+                    duration={500}
+                    offset={-70}
+                    spy={true}
+                    onClick={onClose}
                   >
                     <Button
                       variant="ghost"
                       fontSize="lg"
-                      color="gray.700"
-                      onClick={onClose}
+                      color={textColor}
                       w="full"
                       justifyContent="flex-start"
                       transition="all 0.2s ease-in-out"
                       _hover={{
                         color: "#6EC3C4",
-                        bg: "#E0F7FA",
+                        bg: hoverBg,
                       }}
                     >
                       {link}
                     </Button>
-                  </Link>
+                  </ScrollLink>
                 )
               )}
 
-              <Divider borderColor="gray.300" />
+              <Divider borderColor={borderColor} />
 
               <Button
                 onClick={() => router.push("/login")}
@@ -175,7 +199,7 @@ export default function Header() {
                 w="full"
                 transition="all 0.3s ease-in-out"
                 _hover={{
-                  bg: "#E0F7FA",
+                  bg: hoverBg,
                   transform: "scale(1.02)",
                 }}
               >

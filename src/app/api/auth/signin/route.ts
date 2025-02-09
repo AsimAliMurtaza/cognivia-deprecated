@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
-import User from "@/models/User"; // Import Mongoose model
-import { signJwtToken } from "@/lib/jwt"; // Utility to create JWT
+import User from "@/models/User";
+import { signJwtToken } from "@/lib/jwt";
 
 export async function POST(req: Request) {
   try {
-    await dbConnect(); // Ensure database connection
+    await dbConnect();
 
     const { email, password } = await req.json();
 
-    // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
@@ -18,7 +17,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
@@ -27,7 +25,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return NextResponse.json(
@@ -36,7 +33,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate JWT token (Optional, if using custom JWT auth)
     const token = signJwtToken({ id: user._id, email: user.email });
 
     return NextResponse.json(
@@ -47,9 +43,11 @@ export async function POST(req: Request) {
       },
       { status: 200 }
     );
-
   } catch (error) {
     console.error("Sign-in Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

@@ -23,8 +23,12 @@ export default function FeatureCard({
         bg="white"
         _hover={{ boxShadow: "xl" }}
       >
-        <Heading size="md" color="blue.600">{title}</Heading>
-        <Text color="gray.700" mt={2}>{description}</Text>
+        <Heading size="md" color="blue.600">
+          {title}
+        </Heading>
+        <Text color="gray.700" mt={2}>
+          {description}
+        </Text>
       </Box>
     </motion.div>
   );

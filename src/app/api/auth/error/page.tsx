@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Heading, Text, VStack, Flex, useColorModeValue } from "@chakra-ui/react";
+import { Button, Heading, Text, VStack, Flex, useColorModeValue } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 

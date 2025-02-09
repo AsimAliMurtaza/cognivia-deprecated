@@ -1,16 +1,30 @@
 "use client";
 
-import { Box, Text, HStack, IconButton, Divider } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  HStack,
+  IconButton,
+  Divider,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
+  // Dynamic Colors for Light & Dark Mode
+  const bgGradient = useColorModeValue(
+    "linear(to-r, #E0F7FA, #F3E5F5)",
+    "gray.900"
+  );
+  const textColor = useColorModeValue("gray.700", "gray.300");
+  const dividerColor = useColorModeValue("gray.300", "gray.500");
+
   return (
     <Box
       textAlign="center"
       py={6}
-      color="gray.700"
-      bgGradient="linear(to-r, #E0F7FA, #F3E5F5)"
-      borderTopRadius="xl"
+      color={textColor}
+      bg={bgGradient}
       boxShadow="md"
     >
       {/* Social Media Links */}
@@ -22,8 +36,11 @@ export default function Footer() {
           icon={<FaFacebook />}
           variant="ghost"
           size="lg"
-          color="blue.600"
-          _hover={{ color: "blue.800", transform: "scale(1.1)" }}
+          color={useColorModeValue("blue.600", "blue.400")}
+          _hover={{
+            color: useColorModeValue("blue.800", "blue.500"),
+            transform: "scale(1.1)",
+          }}
         />
         <IconButton
           as="a"
@@ -32,8 +49,11 @@ export default function Footer() {
           icon={<FaTwitter />}
           variant="ghost"
           size="lg"
-          color="blue.400"
-          _hover={{ color: "blue.600", transform: "scale(1.1)" }}
+          color={useColorModeValue("blue.400", "blue.300")}
+          _hover={{
+            color: useColorModeValue("blue.600", "blue.500"),
+            transform: "scale(1.1)",
+          }}
         />
         <IconButton
           as="a"
@@ -42,8 +62,11 @@ export default function Footer() {
           icon={<FaLinkedin />}
           variant="ghost"
           size="lg"
-          color="blue.700"
-          _hover={{ color: "blue.900", transform: "scale(1.1)" }}
+          color={useColorModeValue("blue.700", "blue.400")}
+          _hover={{
+            color: useColorModeValue("blue.900", "blue.500"),
+            transform: "scale(1.1)",
+          }}
         />
         <IconButton
           as="a"
@@ -52,15 +75,18 @@ export default function Footer() {
           icon={<FaInstagram />}
           variant="ghost"
           size="lg"
-          color="pink.500"
-          _hover={{ color: "pink.700", transform: "scale(1.1)" }}
+          color={useColorModeValue("pink.500", "pink.400")}
+          _hover={{
+            color: useColorModeValue("pink.700", "pink.500"),
+            transform: "scale(1.1)",
+          }}
         />
       </HStack>
 
-      <Divider borderColor="gray.300" maxW="80%" />
+      <Divider borderColor={dividerColor} maxW="80%" mx="auto" my={3} />
 
       {/* Copyright Text */}
-      <Text fontSize="sm" mt={4} fontWeight="medium">
+      <Text fontSize="sm" fontWeight="medium">
         &copy; {new Date().getFullYear()} <b>Cognivia</b>. All rights reserved.
       </Text>
     </Box>
