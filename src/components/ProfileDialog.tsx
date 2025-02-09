@@ -20,6 +20,7 @@ import {
   Divider,
   Heading,
   useColorModeValue,
+  color,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { FiLogOut } from "react-icons/fi";
@@ -33,32 +34,33 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
 
-  // Soft pastel colors
   const primaryColor = "gray.700";
   const secondaryColor = "gray.900";
   const modalBg = useColorModeValue("white", "white");
-  const hoverBg = useColorModeValue("#E0F7FA", "#F3E5F5");
 
   return (
     <>
       {/* My Profile Button */}
       <Tooltip label="My Profile" placement="right" isDisabled={isSidebarOpen}>
+        <Divider mb={18} />
+
         <Button
           variant="ghost"
           w="full"
           justifyContent={isSidebarOpen ? "flex-start" : "center"}
           color="gray.700"
-          _hover={{ bg: hoverBg }}
           onClick={onOpen}
           display="flex"
           alignItems="center"
-          gap={isSidebarOpen ? 3 : 0} // Remove gap when sidebar is closed
-          px={isSidebarOpen ? 3 : 2} // Adjust padding
+          gap={isSidebarOpen ? 3 : 0}
+          px={isSidebarOpen ? 3 : 2}
         >
           <Image
             src={session?.user?.image || "/user.png"}
             borderRadius="full"
             border="2px solid"
+            h="25px"
+            w="25px"
             borderColor={primaryColor}
           />
           {isSidebarOpen && <Text>My Profile</Text>}
@@ -84,7 +86,10 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
             <Flex direction="column" align="center" gap={4}>
               {/* Profile Picture */}
               <Image
-                src={session?.user?.image || "https://www.shutterstock.com/image-vector/user-account-avatar-icon-pictogram-600nw-1860375778.jpg"}
+                src={
+                  session?.user?.image ||
+                  "https://www.shutterstock.com/image-vector/user-account-avatar-icon-pictogram-600nw-1860375778.jpg"
+                }
                 boxSize="100px"
                 borderRadius="full"
                 boxShadow="md"

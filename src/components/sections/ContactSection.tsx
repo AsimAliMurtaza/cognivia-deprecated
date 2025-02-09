@@ -8,16 +8,14 @@ import {
   Heading,
   Text,
   VStack,
-  HStack,
   Input,
   Textarea,
   FormControl,
   FormLabel,
-  IconButton,
   useToast,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { FaFacebook, FaTwitter, FaLinkedin, FaEnvelope } from "react-icons/fa";
 
 export default function ContactSection() {
   const [name, setName] = useState("");
@@ -56,8 +54,15 @@ export default function ContactSection() {
     }, 2000);
   };
 
+  // Dynamic Colors for Light & Dark Mode
+  const bgColor = useColorModeValue("gray.50", "gray.800");
+  const textColor = useColorModeValue("gray.800", "gray.100");
+  const cardBg = useColorModeValue("white", "gray.700");
+  const inputBg = useColorModeValue("gray.100", "gray.600");
+  const inputBorder = useColorModeValue("gray.300", "gray.500");
+
   return (
-    <Box py={20} id="contact" bg="gray.50" position="relative" zIndex={1}>
+    <Box py={20} id="contact" bg={bgColor} position="relative" zIndex={1}>
       <Container maxW="container.lg">
         <VStack spacing={8} textAlign="center">
           <motion.div
@@ -69,7 +74,7 @@ export default function ContactSection() {
             <Heading
               size="xl"
               fontWeight="bold"
-              bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
+              bgGradient="linear(to-r, teal.400, blue.400)"
               bgClip="text"
             >
               Get in Touch
@@ -81,13 +86,13 @@ export default function ContactSection() {
             transition={{ duration: 0.7, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Text fontSize="lg" color="gray.600" maxW="2xl">
+            <Text fontSize="lg" color={textColor} maxW="2xl">
               Have questions? Reach out to us anytime. We're here to help!
             </Text>
           </motion.div>
         </VStack>
 
-        {/* Contact Form & Social Links */}
+        {/* Contact Form */}
         <VStack spacing={8} mt={10} align="center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -96,7 +101,7 @@ export default function ContactSection() {
             viewport={{ once: true }}
           >
             <Box
-              bg="white"
+              bg={cardBg}
               p={8}
               borderRadius="lg"
               boxShadow="lg"
@@ -104,34 +109,43 @@ export default function ContactSection() {
               w="auto"
             >
               <FormControl mb={4} isRequired>
-                <FormLabel>Name</FormLabel>
+                <FormLabel color={textColor}>Name</FormLabel>
                 <Input
                   placeholder="Your Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   focusBorderColor="blue.400"
+                  bg={inputBg}
+                  borderColor={inputBorder}
+                  color={textColor}
                 />
               </FormControl>
 
               <FormControl mb={4} isRequired>
-                <FormLabel>Email</FormLabel>
+                <FormLabel color={textColor}>Email</FormLabel>
                 <Input
                   type="email"
                   placeholder="Your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   focusBorderColor="blue.400"
+                  bg={inputBg}
+                  borderColor={inputBorder}
+                  color={textColor}
                 />
               </FormControl>
 
               <FormControl mb={4} isRequired>
-                <FormLabel>Message</FormLabel>
+                <FormLabel color={textColor}>Message</FormLabel>
                 <Textarea
                   placeholder="Your Message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
                   focusBorderColor="blue.400"
+                  bg={inputBg}
+                  borderColor={inputBorder}
+                  color={textColor}
                 />
               </FormControl>
 
@@ -141,6 +155,7 @@ export default function ContactSection() {
                 size="lg"
                 isLoading={loading}
                 onClick={handleSubmit}
+                _hover={{ transform: "scale(1.05)" }}
               >
                 Send Message
               </Button>

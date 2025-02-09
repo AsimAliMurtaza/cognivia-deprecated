@@ -120,11 +120,13 @@ export default function LoginPage() {
                 _hover={{ color: "blue.900" }}
                 onClick={() => router.push("/")}
               >
-                <FiArrowLeft style={{
-                  marginRight: "8px",
-                  marginBottom: "2px",
-                  fontSize: "2em",
-                }} />
+                <FiArrowLeft
+                  style={{
+                    marginRight: "8px",
+                    marginBottom: "2px",
+                    fontSize: "2em",
+                  }}
+                />
               </Button>
             </Box>
 
