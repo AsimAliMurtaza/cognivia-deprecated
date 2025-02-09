@@ -48,8 +48,8 @@ export default function Dashboard() {
     return null;
   }
 
-  const sidebarBg = useColorModeValue("#F3E5F5", "#gray.50"); // Soft pastel purple
-  const mainBg = useColorModeValue("#E0F7FA", "gray.50"); // Soft pastel teal
+  const sidebarBg = "linear(to-br, #F3E5F5, #E0F7FA)" // Soft pastel purple
+  const mainBg ="linear(to-br, #E0F7FA, #F3E5F5)" // Soft pastel gradient
   const cardBg = useColorModeValue("white", "white");
 
   const modules = [
@@ -192,11 +192,11 @@ export default function Dashboard() {
   };
 
   return (
-    <Flex minH="100vh" bg={mainBg}>
+    <Flex minH="100vh" bgGradient={mainBg}>
       {/* Sidebar */}
       <Box
         w={isSidebarOpen ? "250px" : "70px"}
-        bg={sidebarBg}
+        bgGradient={sidebarBg}
         p={4}
         boxShadow="lg"
         borderRight="1px solid"
@@ -242,7 +242,8 @@ export default function Dashboard() {
                 w="full"
                 justifyContent={isSidebarOpen ? "flex-start" : "center"}
                 color={selectedModule === module.name ? "#6EC3C4" : "gray.700"}
-                _hover={{ bg: "#E0F7FA", color: "#6EC3C4" }}
+                _hover={{ bg: "#F3E5F5", color: "#6EC3C4" }}
+                
                 onClick={() => setSelectedModule(module.name)}
               >
                 {isSidebarOpen && module.name}

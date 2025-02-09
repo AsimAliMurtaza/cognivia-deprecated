@@ -17,6 +17,7 @@ import {
   DrawerCloseButton,
   useDisclosure,
   VStack,
+  Divider,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 
@@ -29,33 +30,33 @@ export default function Header() {
       as="nav"
       bg="white"
       py={4}
-      boxShadow="sm"
+      boxShadow="md"
       position="fixed"
       top="0"
-      w={"100%"}
-      zIndex="100"
+      w="100%"
+      zIndex="1000"
       borderBottom="1px solid"
-      borderColor="gray.100"
+      borderColor="gray.200"
     >
       <Flex
         maxW="container.xl"
         mx="auto"
-        px={4}
+        px={6}
         align="center"
         justify="space-between"
       >
         {/* Logo */}
         <Heading
           size="xl"
-          bgGradient="linear(to-r, blue.300, #A5D8DD)"
+          bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
           bgClip="text"
           fontWeight="bold"
           cursor="pointer"
           onClick={() => router.push("/")}
-          transition="all 0.2s"
+          transition="all 0.3s ease-in-out"
           _hover={{ transform: "scale(1.05)" }}
         >
-          whatever name fits
+          Cognivia
         </Heading>
 
         {/* Desktop Navigation */}
@@ -67,10 +68,11 @@ export default function Header() {
                 fontSize="lg"
                 fontWeight="medium"
                 color="gray.700"
-                transition="all 0.2s"
+                transition="all 0.2s ease-in-out"
                 _hover={{
                   color: "#6EC3C4",
                   transform: "translateY(-2px)",
+                  textDecoration: "underline",
                 }}
               >
                 {link}
@@ -84,8 +86,9 @@ export default function Header() {
           <Button
             onClick={() => router.push("/login")}
             variant="outline"
-            color="#6EC3C4"
             borderColor="#6EC3C4"
+            color="#6EC3C4"
+            transition="all 0.3s ease-in-out"
             _hover={{
               bg: "#E0F7FA",
               transform: "scale(1.05)",
@@ -95,10 +98,10 @@ export default function Header() {
           </Button>
           <Button
             onClick={() => router.push("/signup")}
-            bg="#6EC3C4"
+            bgGradient="linear(to-r, #6EC3C4, #5AA8A9)"
             color="white"
+            transition="all 0.3s ease-in-out"
             _hover={{
-              bg: "#5AA8A9",
               transform: "scale(1.05)",
             }}
           >
@@ -113,14 +116,15 @@ export default function Header() {
           variant="ghost"
           onClick={onOpen}
           aria-label="Open Menu"
-          _hover={{ bg: "#E0F7FA" }}
+          transition="all 0.2s ease-in-out"
+          _hover={{ bg: "#E0F7FA", transform: "scale(1.1)" }}
         />
       </Flex>
 
       {/* Mobile Drawer */}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
-        <DrawerContent bg="white">
+        <DrawerContent bg="white" boxShadow="lg">
           <DrawerCloseButton color="gray.600" />
           <DrawerHeader>
             <Heading
@@ -149,6 +153,7 @@ export default function Header() {
                       onClick={onClose}
                       w="full"
                       justifyContent="flex-start"
+                      transition="all 0.2s ease-in-out"
                       _hover={{
                         color: "#6EC3C4",
                         bg: "#E0F7FA",
@@ -159,12 +164,16 @@ export default function Header() {
                   </Link>
                 )
               )}
+
+              <Divider borderColor="gray.300" />
+
               <Button
                 onClick={() => router.push("/login")}
                 variant="outline"
                 color="#6EC3C4"
                 borderColor="#6EC3C4"
                 w="full"
+                transition="all 0.3s ease-in-out"
                 _hover={{
                   bg: "#E0F7FA",
                   transform: "scale(1.02)",
@@ -174,11 +183,11 @@ export default function Header() {
               </Button>
               <Button
                 onClick={() => router.push("/signup")}
-                bg="#6EC3C4"
+                bgGradient="linear(to-r, #6EC3C4, #5AA8A9)"
                 color="white"
                 w="full"
+                transition="all 0.3s ease-in-out"
                 _hover={{
-                  bg: "#5AA8A9",
                   transform: "scale(1.02)",
                 }}
               >
