@@ -32,6 +32,7 @@ import {
 } from "react-icons/fi";
 import ProfileDialog from "@/components/ProfileDialog";
 import SettingsPage from "@/components/Settings";
+import AIAssistant from "@/components/AIAssistant";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -100,6 +101,8 @@ export default function Dashboard() {
         );
       case "Settings":
         return <SettingsPage />;
+      case "AI Assistant":
+        return <AIAssistant />;
       default:
         return (
           <Card bg={cardBg} borderRadius="lg" boxShadow="md" p={4}>
@@ -176,10 +179,10 @@ export default function Dashboard() {
       </Box>
 
       {/* Main Content */}
-      <Box flex={1} p={8}>
-        <Heading size="xl" mb={6} color={textColor}>
-          {selectedModule}
-        </Heading>
+      <Box sx={{
+        flex: 1,
+        overflowY: "none",
+      }}>
         {renderModuleContent()}
       </Box>
     </Flex>
