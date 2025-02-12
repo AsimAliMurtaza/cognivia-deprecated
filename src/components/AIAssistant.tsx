@@ -85,12 +85,13 @@ export default function AIAssistant() {
       const decoder = new TextDecoder();
       let fullResponse = "";
 
+      // Stream the response
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
         fullResponse += chunk;
-        setCurrentResponse(fullResponse); // Stream response
+        setCurrentResponse((prev) => prev + chunk); // Update UI incrementally
       }
 
       // Append new message to chat
@@ -242,9 +243,15 @@ export default function AIAssistant() {
               </Box>
             ))}
             {loading && (
-              <Flex justify="center" align="center" p={4}>
-                <Spinner size="lg" color="blue.500" />
-              </Flex>
+              <Box mb={4} p={4} bg={useColorModeValue("gray.50", "gray.600")} borderRadius="md">
+                <Text fontWeight="bold" color={textColor}>
+                  You: {query}
+                </Text>
+                <Text color={textColor}>
+                  {currentResponse}
+                  {loading && <Spinner size="sm" ml={2} />}
+                </Text>
+              </Box>
             )}
           </Box>
 

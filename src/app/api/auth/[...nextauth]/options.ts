@@ -30,26 +30,49 @@ export const authOptions: NextAuthOptions = {
         await dbConnect();
 
         const user = await User.findOne({ email: credentials.email });
+
+        if (!user) {
+          throw new Error("User not found");
+        }
+
         const isValidPassword = await bcrypt.compare(
           credentials.password,
           user.password
         );
-        if (user && isValidPassword) {
-          return {
-            id: user.id,
-            email: user.email,
-            image: user.image,
-            name: user.name,
-            gender: user.gender,
-          };
-        } else {
+
+        if (!isValidPassword) {
           throw new Error("Invalid credentials");
         }
+
+        return {
+          id: user.id,
+          email: user.email,
+          image: user.image,
+          name: user.name,
+          gender: user.gender,
+        };
       },
     }),
   ],
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
+  },
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id; // Store user ID in the token
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.id) {
+        (session.user as any).id = token.id; // Explicitly add `id` to `session.user`
+      }
+      return session;
+    },
   },
 };
