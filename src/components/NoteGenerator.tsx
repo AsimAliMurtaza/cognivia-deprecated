@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import {
@@ -18,7 +18,6 @@ import {
   ModalCloseButton,
   useDisclosure,
   Card,
-  CardBody,
   CardHeader,
   HStack,
   Spinner,
@@ -26,12 +25,15 @@ import {
   IconButton,
   Flex,
   Grid,
+  Tooltip
 } from "@chakra-ui/react";
 import {
   AiOutlineFileText,
   AiOutlineYoutube,
   AiOutlineFileImage,
   AiOutlinePlus,
+  AiOutlineDelete,
+  AiOutlineCopy
 } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -62,7 +64,7 @@ export default function SmartNotesGenerator() {
 
   const handleOptionSelect = (type) => {
     setSourceType(type);
-    closeInputModal();
+    onClose(); // Close the selection modal immediately after choosing an option
     openInputModal();
   };
 
@@ -90,8 +92,11 @@ export default function SmartNotesGenerator() {
       }
 
       setGeneratedNotes(notes);
-      setChatHistory([...chatHistory, { sourceType, content: notes }]);
-      setInputDisabled(false);
+      setChatHistory([
+        ...chatHistory,
+        { sourceType, content: notes, date: getFormattedDate() },
+      ]);
+      resetInputs();
     } catch (error) {
       toast({
         title: "Error",
@@ -100,17 +105,22 @@ export default function SmartNotesGenerator() {
       });
     } finally {
       setLoading(false);
-      closeInputModal();
+      closeInputModal(); // Close the input modal after generating notes
     }
   };
 
   const handleNewNote = () => {
     setGeneratedNotes("");
+    resetInputs();
+    onOpen();
+  };
+
+  const resetInputs = () => {
     setPromptText("");
     setYoutubeLink("");
     setFile(null);
     setInputDisabled(false);
-    onOpen();
+    setSourceType(null);
   };
 
   const mockAPICall = (input) => {
@@ -118,6 +128,29 @@ export default function SmartNotesGenerator() {
       setTimeout(() => {
         resolve(input);
       }, 2000);
+    });
+  };
+
+  const handleChatClick = (chat) => {
+    setGeneratedNotes(chat.content);
+  };
+
+  const handleDeleteChat = (index) => {
+    const updatedHistory = chatHistory.filter((_, i) => i !== index);
+    setChatHistory(updatedHistory);
+    if (generatedNotes === chatHistory[index].content) {
+      setGeneratedNotes("");
+    }
+  };
+
+  const handleCopyText = (text) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "Text copied to clipboard.",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
     });
   };
 
@@ -171,14 +204,25 @@ export default function SmartNotesGenerator() {
                 size="sm"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
+                cursor="pointer"
               >
-                <CardHeader>
-                  <Heading size="sm" color="teal.600">
-                    {getFormattedDate()}
-                  </Heading>
-                  <Text fontWeight="thin" fontSize="md" color="teal.600">
-                    {generatedNotes.slice(0, 15) + "..."}
-                  </Text>
+                <CardHeader display="flex" justifyContent="space-between" alignItems="center">
+                  <Box onClick={() => handleChatClick(chat)}>
+                    <Heading size="sm" color="teal.600">
+                      {chat.date}
+                    </Heading>
+                    <Text fontWeight="thin" fontSize="md" color="teal.600">
+                      {chat.content.slice(0, 15) + "..."}
+                    </Text>
+                  </Box>
+                  <Tooltip label="Delete Chat">
+                    <IconButton
+                      icon={<AiOutlineDelete />}
+                      size="sm"
+                      colorScheme="red"
+                      onClick={() => handleDeleteChat(index)}
+                    />
+                  </Tooltip>
                 </CardHeader>
               </MotionCard>
             ))}
@@ -188,7 +232,7 @@ export default function SmartNotesGenerator() {
         {/* Right Pane: Generated Notes */}
         <Box flex="2" bg="gray.50" borderRadius="lg" p={4} boxShadow="md">
           <Heading size="md" mb={4} color="teal.600">
-            {generatedNotes.slice(0, 15) + "..."}
+            {generatedNotes ? generatedNotes.slice(0, 15) + "..." : "Generated Notes"}
           </Heading>
           {generatedNotes && (
             <MotionBox
@@ -200,7 +244,17 @@ export default function SmartNotesGenerator() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Text whiteSpace="pre-wrap">{generatedNotes}</Text>
+              <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                <Text whiteSpace="pre-wrap">{generatedNotes}</Text>
+                <Tooltip label="Copy Text">
+                  <IconButton
+                    icon={<AiOutlineCopy />}
+                    size="sm"
+                    colorScheme="teal"
+                    onClick={() => handleCopyText(generatedNotes)}
+                  />
+                </Tooltip>
+              </Flex>
             </MotionBox>
           )}
         </Box>
