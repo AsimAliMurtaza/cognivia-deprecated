@@ -32,6 +32,8 @@ import {
 } from "react-icons/fi";
 import ProfileDialog from "@/components/ProfileDialog";
 import SettingsPage from "@/components/Settings";
+import AIAssistant from "@/components/AIAssistant";
+import NoteGenerator from "@/components/NoteGenerator";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -100,6 +102,10 @@ export default function Dashboard() {
         );
       case "Settings":
         return <SettingsPage />;
+      case "AI Assistant":
+        return <AIAssistant />;
+      case "Smart Notes":
+        return <NoteGenerator />;  
       default:
         return (
           <Card bg={cardBg} borderRadius="lg" boxShadow="md" p={4}>
