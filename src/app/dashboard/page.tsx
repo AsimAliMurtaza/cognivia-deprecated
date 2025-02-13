@@ -16,7 +16,6 @@ import {
   Card,
   CardHeader,
   CardBody,
-  useColorMode,
   useColorModeValue,
   Tooltip,
 } from "@chakra-ui/react";
@@ -40,19 +39,18 @@ export default function Dashboard() {
   const router = useRouter();
   const [selectedModule, setSelectedModule] = useState("Overview");
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const { colorMode, toggleColorMode } = useColorMode();
-
-  if (status === "loading") return <p>Loading...</p>;
-  if (!session) {
-    router.push("/login");
-    return null;
-  }
 
   // Light & Dark Mode Colors
   const sidebarBg = useColorModeValue("gray.100", "gray.900");
   const mainBg = useColorModeValue("gray.50", "gray.800");
   const textColor = useColorModeValue("gray.800", "gray.100");
   const cardBg = useColorModeValue("white", "gray.700");
+
+  if (status === "loading") return <p>Loading...</p>;
+  if (!session) {
+    router.push("/login");
+    return null;
+  }
 
   const modules = [
     { name: "Overview", icon: FiHome },
@@ -75,7 +73,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardBody>
               <Text color={textColor}>
-                Welcome back, {session.user?.email}! Here's your progress.
+                Welcome back, {session.user?.email}! Here&#39;s your progress.
               </Text>
               <Grid templateColumns="repeat(3, 1fr)" gap={6} mt={4}>
                 <Card bg="teal.400" color="white" borderRadius="lg" p={4}>
@@ -105,7 +103,7 @@ export default function Dashboard() {
       case "AI Assistant":
         return <AIAssistant />;
       case "Smart Notes":
-        return <NoteGenerator />;  
+        return <NoteGenerator />;
       default:
         return (
           <Card bg={cardBg} borderRadius="lg" boxShadow="md" p={4}>
@@ -182,10 +180,12 @@ export default function Dashboard() {
       </Box>
 
       {/* Main Content */}
-      <Box sx={{
-        flex: 1,
-        overflowY: "none",
-      }}>
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "none",
+        }}
+      >
         {renderModuleContent()}
       </Box>
     </Flex>

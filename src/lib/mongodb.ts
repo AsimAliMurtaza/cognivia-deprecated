@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -8,10 +8,19 @@ if (!MONGODB_URI) {
   );
 }
 
-// Use globalThis for better compatibility
-let cached = (globalThis as any).mongoose || { conn: null, promise: null };
+// Define an interface for caching
+interface MongooseCache {
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
+}
 
-async function dbConnect() {
+// Use globalThis for better compatibility in Next.js
+const globalWithMongoose = globalThis as unknown as { mongoose?: MongooseCache };
+
+// Ensure a single global connection cache
+const cached: MongooseCache = globalWithMongoose.mongoose ?? { conn: null, promise: null };
+
+async function dbConnect(): Promise<Mongoose> {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
@@ -40,7 +49,7 @@ async function dbConnect() {
   return cached.conn;
 }
 
-// Ensure caching across hot reloads in Next.js
-(globalThis as any).mongoose = cached;
+// Store the connection cache globally to persist across hot reloads
+globalWithMongoose.mongoose = cached;
 
 export default dbConnect;

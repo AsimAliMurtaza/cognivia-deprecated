@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import {
@@ -19,13 +19,12 @@ import {
   useDisclosure,
   Card,
   CardHeader,
-  HStack,
   Spinner,
   useToast,
   IconButton,
   Flex,
   Grid,
-  Tooltip
+  Tooltip,
 } from "@chakra-ui/react";
 import {
   AiOutlineFileText,
@@ -33,7 +32,7 @@ import {
   AiOutlineFileImage,
   AiOutlinePlus,
   AiOutlineDelete,
-  AiOutlineCopy
+  AiOutlineCopy,
 } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -43,15 +42,23 @@ const MotionCard = motion(Card);
 const MotionButton = motion(Button);
 const MotionModalContent = motion(ModalContent);
 
+type SourceType = "prompt" | "youtube" | "file" | null;
+
+interface Chat {
+  sourceType: SourceType;
+  content: string;
+  date: string;
+}
+
 export default function SmartNotesGenerator() {
-  const [promptText, setPromptText] = useState("");
-  const [youtubeLink, setYoutubeLink] = useState("");
-  const [file, setFile] = useState(null);
-  const [generatedNotes, setGeneratedNotes] = useState("");
-  const [chatHistory, setChatHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [inputDisabled, setInputDisabled] = useState(false);
-  const [sourceType, setSourceType] = useState(null);
+  const [promptText, setPromptText] = useState<string>("");
+  const [youtubeLink, setYoutubeLink] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
+  const [generatedNotes, setGeneratedNotes] = useState<string>("");
+  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [inputDisabled, setInputDisabled] = useState<boolean>(false);
+  const [sourceType, setSourceType] = useState<SourceType>(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -62,7 +69,7 @@ export default function SmartNotesGenerator() {
 
   const toast = useToast();
 
-  const handleOptionSelect = (type) => {
+  const handleOptionSelect = (type: SourceType) => {
     setSourceType(type);
     onClose(); // Close the selection modal immediately after choosing an option
     openInputModal();
@@ -77,15 +84,17 @@ export default function SmartNotesGenerator() {
     try {
       switch (sourceType) {
         case "prompt":
-          notes = await mockAPICall(promptText);
+          notes = (await mockAPICall(promptText)) as string;
           break;
         case "youtube":
-          notes = await mockAPICall(
+          notes = (await mockAPICall(
             `Generate notes from YouTube link: ${youtubeLink}`
-          );
+          )) as string;
           break;
         case "file":
-          notes = await mockAPICall(`Generate notes from file: ${file?.name}`);
+          notes = (await mockAPICall(
+            `Generate notes from file: ${file?.name}`
+          )) as string;
           break;
         default:
           notes = "Invalid source type";
@@ -98,6 +107,7 @@ export default function SmartNotesGenerator() {
       ]);
       resetInputs();
     } catch (error) {
+      console.error("Error generating notes:", error); // Log the error
       toast({
         title: "Error",
         description: "Failed to generate notes.",
@@ -109,12 +119,6 @@ export default function SmartNotesGenerator() {
     }
   };
 
-  const handleNewNote = () => {
-    setGeneratedNotes("");
-    resetInputs();
-    onOpen();
-  };
-
   const resetInputs = () => {
     setPromptText("");
     setYoutubeLink("");
@@ -123,7 +127,7 @@ export default function SmartNotesGenerator() {
     setSourceType(null);
   };
 
-  const mockAPICall = (input) => {
+  const mockAPICall = (input: string): Promise<string> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(input);
@@ -131,11 +135,11 @@ export default function SmartNotesGenerator() {
     });
   };
 
-  const handleChatClick = (chat) => {
+  const handleChatClick = (chat: Chat) => {
     setGeneratedNotes(chat.content);
   };
 
-  const handleDeleteChat = (index) => {
+  const handleDeleteChat = (index: number) => {
     const updatedHistory = chatHistory.filter((_, i) => i !== index);
     setChatHistory(updatedHistory);
     if (generatedNotes === chatHistory[index].content) {
@@ -143,7 +147,7 @@ export default function SmartNotesGenerator() {
     }
   };
 
-  const handleCopyText = (text) => {
+  const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: "Copied",
@@ -206,7 +210,11 @@ export default function SmartNotesGenerator() {
                 transition={{ type: "spring", stiffness: 300 }}
                 cursor="pointer"
               >
-                <CardHeader display="flex" justifyContent="space-between" alignItems="center">
+                <CardHeader
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Box onClick={() => handleChatClick(chat)}>
                     <Heading size="sm" color="teal.600">
                       {chat.date}
@@ -221,6 +229,7 @@ export default function SmartNotesGenerator() {
                       size="sm"
                       colorScheme="red"
                       onClick={() => handleDeleteChat(index)}
+                      aria-label={""}
                     />
                   </Tooltip>
                 </CardHeader>
@@ -232,7 +241,9 @@ export default function SmartNotesGenerator() {
         {/* Right Pane: Generated Notes */}
         <Box flex="2" bg="gray.50" borderRadius="lg" p={4} boxShadow="md">
           <Heading size="md" mb={4} color="teal.600">
-            {generatedNotes ? generatedNotes.slice(0, 15) + "..." : "Generated Notes"}
+            {generatedNotes
+              ? generatedNotes.slice(0, 15) + "..."
+              : "Generated Notes"}
           </Heading>
           {generatedNotes && (
             <MotionBox
@@ -252,6 +263,7 @@ export default function SmartNotesGenerator() {
                     size="sm"
                     colorScheme="teal"
                     onClick={() => handleCopyText(generatedNotes)}
+                    aria-label={""}
                   />
                 </Tooltip>
               </Flex>
@@ -379,7 +391,7 @@ export default function SmartNotesGenerator() {
                 <Input
                   type="file"
                   accept="image/*,.pdf,.doc,.docx"
-                  onChange={(e) => setFile(e.target.files[0])}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
                   isDisabled={inputDisabled}
                   borderRadius="md"
                 />
