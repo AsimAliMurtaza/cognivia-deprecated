@@ -87,7 +87,8 @@ export default function ContactSection() {
             viewport={{ once: true }}
           >
             <Text fontSize="lg" color={textColor} maxW="2xl">
-              Have questions? Reach out to us anytime. We're here to help!
+              Have questions? Reach out to us anytime. We&apos;re here to
+              help!
             </Text>
           </motion.div>
         </VStack>

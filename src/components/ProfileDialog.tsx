@@ -2,7 +2,6 @@
 
 import { useSession, signOut } from "next-auth/react";
 import {
-  Box,
   Button,
   Text,
   Image,
@@ -20,7 +19,6 @@ import {
   Divider,
   Heading,
   useColorModeValue,
-  color,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { FiLogOut } from "react-icons/fi";
@@ -56,7 +54,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
           px={isSidebarOpen ? 3 : 2}
         >
           <Image
-            src={session?.user?.image || "/user.png"}
+            src={session?.user?.image || ""}
             borderRadius="full"
             border="2px solid"
             h="25px"
