@@ -127,12 +127,34 @@ export default function SmartNotesGenerator() {
     setSourceType(null);
   };
 
-  const mockAPICall = (input: string): Promise<string> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(input);
-      }, 2000);
-    });
+  const mockAPICall = async (input: string): Promise<string> => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/ask?query=${encodeURIComponent(input)}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to generate notes");
+
+      // Read the response as a stream
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to read response");
+
+      let result = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += new TextDecoder().decode(value);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Failed to generate notes.";
+    }
   };
 
   const handleChatClick = (chat: Chat) => {
@@ -229,7 +251,7 @@ export default function SmartNotesGenerator() {
                       size="sm"
                       colorScheme="red"
                       onClick={() => handleDeleteChat(index)}
-                      aria-label={""}
+                      aria-label="Delete Chat"
                     />
                   </Tooltip>
                 </CardHeader>
@@ -263,7 +285,7 @@ export default function SmartNotesGenerator() {
                     size="sm"
                     colorScheme="teal"
                     onClick={() => handleCopyText(generatedNotes)}
-                    aria-label={""}
+                    aria-label="Copy Text"
                   />
                 </Tooltip>
               </Flex>
