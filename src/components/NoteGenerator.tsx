@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from "react";
 import {
   Box,
@@ -25,7 +23,7 @@ import {
   IconButton,
   Flex,
   Grid,
-  Tooltip
+  Tooltip,
 } from "@chakra-ui/react";
 import {
   AiOutlineFileText,
@@ -33,7 +31,7 @@ import {
   AiOutlineFileImage,
   AiOutlinePlus,
   AiOutlineDelete,
-  AiOutlineCopy
+  AiOutlineCopy,
 } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -123,12 +121,32 @@ export default function SmartNotesGenerator() {
     setSourceType(null);
   };
 
-  const mockAPICall = (input) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(input);
-      }, 2000);
-    });
+  const mockAPICall = async (input) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/ask?query=${encodeURIComponent(input)}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to generate notes");
+
+      // Read the response as a stream
+      const reader = response.body.getReader();
+      let result = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += new TextDecoder().decode(value);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Failed to generate notes.";
+    }
   };
 
   const handleChatClick = (chat) => {
