@@ -8,14 +8,11 @@ import {
   Avatar,
   Button,
   Container,
-  Heading,
-  Text,
   VStack,
   Input,
   FormControl,
   FormLabel,
   useToast,
-  IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FiCamera, FiSave } from "react-icons/fi";
@@ -32,11 +29,11 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(false);
 
   // Soft pastel colors
-  const bg = useColorModeValue("#F3E5F5", "gray.800"); // Soft purple for light mode
   const cardBg = useColorModeValue("white", "gray.700");
   const primaryColor = "#6EC3C4"; // Soft teal
-  const hoverBg = useColorModeValue("#E0F7FA", "gray.600"); // Light teal for hover
   const textColor = useColorModeValue("gray.700", "gray.200");
+  const inputBg = useColorModeValue("white", "gray.600");
+  const inputBorderColor = useColorModeValue("gray.300", "gray.500");
 
   // Redirect to login if not authenticated
   if (status === "loading") return <p>Loading...</p>;
@@ -88,7 +85,13 @@ export default function EditProfilePage() {
         {/* Profile Picture Upload */}
         <VStack spacing={6}>
           <Box position="relative">
-            <Avatar size="xl" name={name} src={image} border="2px solid" borderColor={primaryColor} />
+            <Avatar
+              size="xl"
+              name={name}
+              src={image}
+              border="2px solid"
+              borderColor={primaryColor}
+            />
             <FormLabel
               htmlFor="file-upload"
               position="absolute"
@@ -119,10 +122,13 @@ export default function EditProfilePage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              bg={useColorModeValue("white", "gray.600")}
-              borderColor={useColorModeValue("gray.300", "gray.500")}
+              bg={inputBg}
+              borderColor={inputBorderColor}
               _hover={{ borderColor: primaryColor }}
-              _focus={{ borderColor: primaryColor, boxShadow: `0 0 0 1px ${primaryColor}` }}
+              _focus={{
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 1px ${primaryColor}`,
+              }}
             />
           </FormControl>
 
@@ -132,10 +138,13 @@ export default function EditProfilePage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              bg={useColorModeValue("white", "gray.600")}
-              borderColor={useColorModeValue("gray.300", "gray.500")}
+              bg={inputBg}
+              borderColor={inputBorderColor}
               _hover={{ borderColor: primaryColor }}
-              _focus={{ borderColor: primaryColor, boxShadow: `0 0 0 1px ${primaryColor}` }}
+              _focus={{
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 1px ${primaryColor}`,
+              }}
             />
           </FormControl>
 

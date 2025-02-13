@@ -25,7 +25,7 @@ export default function SettingsPage() {
   const [subscription, setSubscription] = useState("Basic");
 
   // Soft pastel colors
-  const bg = useColorModeValue("#F3E5F5", "gray.800"); // Soft purple for light mode
+  const bg = useColorModeValue("gray.50", "gray.800"); // Soft purple for light mode
   const textColor = useColorModeValue("gray.700", "gray.200");
   const borderColor = useColorModeValue("gray.300", "gray.600");
   const primaryColor = "#6EC3C4"; // Soft teal

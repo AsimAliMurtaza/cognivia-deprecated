@@ -6,18 +6,16 @@ import {
   Button,
   Input,
   Text,
-  VStack,
   Heading,
   useToast,
   Container,
   IconButton,
   Flex,
   useColorModeValue,
-  Divider,
   HStack,
   Spinner,
 } from "@chakra-ui/react";
-import { FaRobot, FaCopy, FaTrash, FaFolderOpen, FaPlus } from "react-icons/fa";
+import { FaRobot, FaCopy, FaTrash, FaPlus } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
 // Function to get today's date in YYYY-MM-DD format
@@ -45,6 +43,9 @@ export default function AIAssistant() {
   const textColor = useColorModeValue("gray.800", "gray.200");
   const inputBg = useColorModeValue("white", "gray.600");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+  const chatItemBg = useColorModeValue("gray.100", "gray.700");
+  const chatItemHoverBg = useColorModeValue("gray.200", "gray.600");
+  const chatMessageBg = useColorModeValue("gray.50", "gray.600");
 
   // Load chat history from local storage
   useEffect(() => {
@@ -193,12 +194,12 @@ export default function AIAssistant() {
                   key={date}
                   mb={2}
                   p={3}
-                  bg={useColorModeValue("gray.100", "gray.700")}
+                  bg={chatItemBg}
                   borderRadius="md"
                   align="center"
                   justify="space-between"
                   cursor="pointer"
-                  _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
+                  _hover={{ bg: chatItemHoverBg }}
                   onClick={() => handleOpenChat(date)}
                 >
                   <Text color={textColor}>{date} - {data.title}</Text>
@@ -228,7 +229,7 @@ export default function AIAssistant() {
             bg={chatBg}
           >
             {currentChat.map((msg, index) => (
-              <Box key={index} mb={4} p={4} bg={useColorModeValue("gray.50", "gray.600")} borderRadius="md">
+              <Box key={index} mb={4} p={4} bg={chatMessageBg} borderRadius="md">
                 <Text fontWeight="bold" color={textColor}>
                   You: {msg.query}
                 </Text>
@@ -243,7 +244,7 @@ export default function AIAssistant() {
               </Box>
             ))}
             {loading && (
-              <Box mb={4} p={4} bg={useColorModeValue("gray.50", "gray.600")} borderRadius="md">
+              <Box mb={4} p={4} bg={chatMessageBg} borderRadius="md">
                 <Text fontWeight="bold" color={textColor}>
                   You: {query}
                 </Text>

@@ -209,7 +209,7 @@ export default function LoginPage() {
                 </VStack>
 
                 <Text fontSize="sm" mt={6} textAlign="center" color={textColor}>
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Button variant="link" color="blue.500" _hover={{ textDecoration: "underline" }} onClick={() => router.push("/signup")}>
                     Create one
                   </Button>
