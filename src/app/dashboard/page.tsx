@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -12,7 +11,10 @@ import {
   CardHeader,
   CardBody,
   useColorModeValue,
+  Flex,
+  useBreakpointValue,
 } from "@chakra-ui/react";
+import { FaCheckCircle, FaChartLine, FaStickyNote } from "react-icons/fa";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -22,7 +24,9 @@ export default function DashboardPage() {
   const cardBg = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("gray.800", "gray.100");
 
-  if (status === "loading") return <p>Loading...</p>;
+  // Responsive layout
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
   if (!session) {
     router.push("/login");
     return null;
@@ -30,34 +34,102 @@ export default function DashboardPage() {
 
   return (
     <Box>
-      <Card bg={cardBg} borderRadius="lg" boxShadow="md" p={4}>
+      <Card
+        bg={cardBg}
+        borderRadius="2xl" // Rounded corners
+        boxShadow="lg" // Subtle shadow
+        p={6}
+      >
         <CardHeader>
-          <Heading color={textColor} size="md">
+          <Heading color={textColor} size="lg" mb={2}>
             Overview
           </Heading>
-        </CardHeader>
-        <CardBody>
-          <Text color={textColor}>
+          <Text color={textColor} fontSize="md" opacity={0.8}>
             Welcome back, {session.user?.email}! Here&#39;s your progress.
           </Text>
-          <Grid templateColumns="repeat(3, 1fr)" gap={6} mt={4}>
-            <Card bg="teal.400" color="white" borderRadius="lg" p={4}>
-              <Text fontSize="lg" fontWeight="bold">
-                Completed Quizzes
+        </CardHeader>
+        <CardBody>
+          <Grid
+            templateColumns={isMobile ? "1fr" : "repeat(3, 1fr)"} // Stack on mobile, grid on desktop
+            gap={6}
+            mt={4}
+          >
+            {/* Completed Quizzes Card */}
+            <Card
+              bgGradient="linear(to-br, teal.400, teal.500)" // Gradient background
+              color="white"
+              borderRadius="2xl" // Rounded corners
+              p={6}
+              boxShadow="md" // Subtle shadow
+              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }} // Hover effect
+            >
+              <Flex align="center" mb={4}>
+                <Box
+                  as={FaCheckCircle}
+                  size="24px"
+                  color="white"
+                  mr={3}
+                  opacity={0.8}
+                />
+                <Text fontSize="lg" fontWeight="bold">
+                  Completed Quizzes
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="bold">
+                12
               </Text>
-              <Text fontSize="2xl">12</Text>
             </Card>
-            <Card bg="blue.400" color="white" borderRadius="lg" p={4}>
-              <Text fontSize="lg" fontWeight="bold">
-                Average Score
+
+            {/* Average Score Card */}
+            <Card
+              bgGradient="linear(to-br, blue.400, blue.500)" // Gradient background
+              color="white"
+              borderRadius="2xl" // Rounded corners
+              p={6}
+              boxShadow="md" // Subtle shadow
+              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }} // Hover effect
+            >
+              <Flex align="center" mb={4}>
+                <Box
+                  as={FaChartLine}
+                  size="24px"
+                  color="white"
+                  mr={3}
+                  opacity={0.8}
+                />
+                <Text fontSize="lg" fontWeight="bold">
+                  Average Score
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="bold">
+                85%
               </Text>
-              <Text fontSize="2xl">85%</Text>
             </Card>
-            <Card bg="purple.400" color="white" borderRadius="lg" p={4}>
-              <Text fontSize="lg" fontWeight="bold">
-                Notes Created
+
+            {/* Notes Created Card */}
+            <Card
+              bgGradient="linear(to-br, purple.400, purple.500)" // Gradient background
+              color="white"
+              borderRadius="2xl" // Rounded corners
+              p={6}
+              boxShadow="md" // Subtle shadow
+              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }} // Hover effect
+            >
+              <Flex align="center" mb={4}>
+                <Box
+                  as={FaStickyNote}
+                  size="24px"
+                  color="white"
+                  mr={3}
+                  opacity={0.8}
+                />
+                <Text fontSize="lg" fontWeight="bold">
+                  Notes Created
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="bold">
+                24
               </Text>
-              <Text fontSize="2xl">24</Text>
             </Card>
           </Grid>
         </CardBody>

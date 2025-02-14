@@ -41,7 +41,6 @@ export default function TextQuizGeneration() {
   };
   const handleCardPress = () => {
     console.log(isCardPressed);
-    e.stopPropagation();
     setIsCardPressed(true)
   }
 

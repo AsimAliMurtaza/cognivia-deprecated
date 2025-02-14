@@ -14,12 +14,20 @@ import {
   useColorModeValue,
   HStack,
   Spinner,
+  useBreakpointValue,
+  VStack,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { FaRobot, FaCopy, FaTrash, FaPlus } from "react-icons/fa";
+import { FaRobot, FaCopy, FaTrash, FaPlus, FaBars } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiChevronLeft, FiMenu } from "react-icons/fi";
 
 // Function to get today's date in YYYY-MM-DD format
 const getFormattedDate = () => new Date().toISOString().split("T")[0];
+
+// Framer Motion components
+const MotionBox = motion(Box);
 
 export default function AIAssistant() {
   const [query, setQuery] = useState<string>("");
@@ -34,15 +42,20 @@ export default function AIAssistant() {
   >({});
   const [loading, setLoading] = useState<boolean>(false);
   const [currentResponse, setCurrentResponse] = useState<string>("");
+  const [isSidebarOpen, setSidebarOpen] = useState(false); // Sidebar closed by default on mobile
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Responsive behavior
+  const isMobile = useBreakpointValue({ base: true, md: false });
 
   // Color mode values
   const sidebarBg = useColorModeValue("white", "gray.800");
-  const mainBg = useColorModeValue("gray.50", "gray.900");
-  const chatBg = useColorModeValue("white", "gray.700");
+  const mainBg = useColorModeValue("gray.50", "gray.800");
+  const chatBg = useColorModeValue("white", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.200");
   const inputBg = useColorModeValue("white", "gray.600");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = useColorModeValue("gray.200", "teal.100");
   const chatItemBg = useColorModeValue("gray.100", "gray.700");
   const chatItemHoverBg = useColorModeValue("gray.200", "gray.600");
   const chatMessageBg = useColorModeValue("gray.50", "gray.600");
@@ -138,6 +151,15 @@ export default function AIAssistant() {
     });
   };
 
+  const toggleHistorySidebar = () => {
+    console.log(isOpen);
+    setSidebarOpen(!isSidebarOpen);
+    if (isMobile) {
+      if (!isSidebarOpen) onOpen();
+      else onClose();
+    }
+  };
+
   const handleDeleteChat = (dateKey: string) => {
     const updatedHistory = { ...chatHistory };
     delete updatedHistory[dateKey];
@@ -154,6 +176,7 @@ export default function AIAssistant() {
 
   const handleOpenChat = (dateKey: string) => {
     setCurrentChat(chatHistory[dateKey].messages);
+    if (isMobile) setSidebarOpen(false); // Close sidebar on mobile after opening a chat
   };
 
   const handleNewChat = () => {
@@ -162,70 +185,177 @@ export default function AIAssistant() {
   };
 
   return (
-    <Container maxW="full" h="100vh" p={0} centerContent>
-      <Flex w="full" h="100vh" bg={mainBg}>
+      <Flex w="full" h="100vh" borderRadius={"20px"}>
         {/* Left Sidebar: Chat History */}
-        <Flex
-          direction="column"
-          w="25%"
-          h="100vh"
-          p={4}
-          borderRight="1px solid"
-          borderColor={borderColor}
-          bg={sidebarBg}
-        >
-          <Heading size="md" color={textColor} mb={4}>
-            Chat History
-          </Heading>
-          <Button
-            colorScheme="blue"
-            variant="solid"
-            onClick={handleNewChat}
-            mb={4}
-            leftIcon={<FaPlus />}
-          >
-            New Chat
-          </Button>
-          <Box flex={1} overflowY="auto">
-            {Object.entries(chatHistory)
-              .sort(([dateA], [dateB]) => (dateA > dateB ? -1 : 1))
-              .map(([date, data]) => (
-                <Flex
-                  key={date}
-                  mb={2}
-                  p={3}
-                  bg={chatItemBg}
-                  borderRadius="md"
-                  align="center"
-                  justify="space-between"
-                  cursor="pointer"
-                  _hover={{ bg: chatItemHoverBg }}
-                  onClick={() => handleOpenChat(date)}
+        {isMobile ? (
+          // Mobile: Overlay sidebar with animations
+          <AnimatePresence>
+            {(!isMobile || isSidebarOpen) && (
+              <MotionBox
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "tween", duration: 0.3 }}
+                position="fixed"
+                top={0}
+                left={0}
+                w="250px"
+                h="100vh"
+                bg={sidebarBg}
+                boxShadow="lg"
+                zIndex={20}
+                borderRadius="0 12px 12px 0" // Rounded corners
+              >
+                <Box
+                  p={4}
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  borderColor={borderColor}
                 >
-                  <Text color={textColor}>
-                    {date} - {data.title}
-                  </Text>
+                  <Heading size="md" color="teal.400" mb={4}>
+                    Chat History
+                  </Heading>
                   <IconButton
-                    aria-label="Delete chat"
-                    icon={<FaTrash />}
-                    size="xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteChat(date);
-                    }}
+                    icon={isSidebarOpen ? <FiChevronLeft /> : <FiMenu />}
+                    aria-label="Toggle Sidebar"
+                    onClick={toggleHistorySidebar}
+                    variant="ghost"
+                    size="sm"
+                    color={textColor}
                   />
-                </Flex>
-              ))}
-          </Box>
-        </Flex>
+                </Box>
+                <VStack align="start" spacing={4} p={4}>
+                  <Button
+                    colorScheme="blue"
+                    variant="solid"
+                    onClick={handleNewChat}
+                    mb={4}
+                    leftIcon={<FaPlus />}
+                  >
+                    New Chat
+                  </Button>
+                  <Box flex={1} overflowY="auto">
+                    {Object.entries(chatHistory)
+                      .sort(([dateA], [dateB]) => (dateA > dateB ? -1 : 1))
+                      .map(([date, data]) => (
+                        <Flex
+                          key={date}
+                          mb={2}
+                          p={3}
+                          bg={chatItemBg}
+                          borderRadius="md"
+                          align="center"
+                          justify="space-between"
+                          cursor="pointer"
+                          _hover={{ bg: chatItemHoverBg }}
+                          onClick={() => handleOpenChat(date)}
+                        >
+                          <Text color={textColor}>
+                            {date} - {data.title}
+                          </Text>
+                          <IconButton
+                            aria-label="Delete chat"
+                            icon={<FaTrash />}
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteChat(date);
+                            }}
+                          />
+                        </Flex>
+                      ))}
+                  </Box>
+                </VStack>
+              </MotionBox>
+            )}
+          </AnimatePresence>
+        ) : (
+          // Desktop: Fixed sidebar
+          <Flex
+            direction="column"
+            w="auto"
+            h="92vh"
+            mt={4}
+            p={6}
+            border="1px solid"
+            borderColor={borderColor}
+            bg={sidebarBg}
+            borderRadius="12px 12px 12px 12px" // Rounded corners
+          >
+            <Heading size="md" color={textColor} mb={4}>
+              Chat History
+            </Heading>
+            <Button
+              colorScheme="blue"
+              variant="solid"
+              onClick={handleNewChat}
+              mb={4}
+              leftIcon={<FaPlus />}
+            >
+              New Chat
+            </Button>
+            <Box flex={1} overflowY="auto">
+              {Object.entries(chatHistory)
+                .sort(([dateA], [dateB]) => (dateA > dateB ? -1 : 1))
+                .map(([date, data]) => (
+                  <Flex
+                    key={date}
+                    mb={2}
+                    p={3}
+                    bg={chatItemBg}
+                    borderRadius="md"
+                    align="center"
+                    justify="space-between"
+                    cursor="pointer"
+                    _hover={{ bg: chatItemHoverBg }}
+                    onClick={() => handleOpenChat(date)}
+                  >
+                    <Text color={textColor}>
+                      {date} - {data.title}
+                    </Text>
+                    <IconButton
+                      aria-label="Delete chat"
+                      icon={<FaTrash />}
+                      size="xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteChat(date);
+                      }}
+                    />
+                  </Flex>
+                ))}
+            </Box>
+          </Flex>
+        )}
 
         {/* Main Chat Window */}
-        <Flex direction="column" w="75%" h="100vh" p={4} bg={mainBg}>
+        <Flex
+          direction="column"
+          w={isMobile ? "full" : "90%"}
+          h="100vh"
+          p={4}
+          borderRadius={"20px"}
+        >
+          {/* Burger Menu for Mobile */}
+          {isMobile && (
+            <Button
+              w={"auto"}
+              aria-label="Open Sidebar"
+              onClick={() => setSidebarOpen(true)}
+              variant="ghost"
+              size="sm"
+              color={textColor}
+              mb={4}
+            >
+              History
+            </Button>
+          )}
+
           <Box
             flex={1}
             overflowY="auto"
             p={4}
-            borderRadius="md"
+            borderRadius="12px" // Rounded corners
             border="1px solid"
             borderColor={borderColor}
             bg={chatBg}
@@ -236,7 +366,7 @@ export default function AIAssistant() {
                 mb={4}
                 p={4}
                 bg={chatMessageBg}
-                borderRadius="md"
+                borderRadius="12px" // Rounded corners
               >
                 <Text fontWeight="bold" color={textColor}>
                   You: {msg.query}
@@ -252,7 +382,7 @@ export default function AIAssistant() {
               </Box>
             ))}
             {loading && (
-              <Box mb={4} p={4} bg={chatMessageBg} borderRadius="md">
+              <Box mb={4} p={4} bg={chatMessageBg} borderRadius="12px">
                 <Text fontWeight="bold" color={textColor}>
                   You: {query}
                 </Text>
@@ -268,7 +398,8 @@ export default function AIAssistant() {
           <HStack
             p={4}
             bg={useColorModeValue("gray.100", "gray.800")}
-            borderRadius="md"
+            borderRadius="12px" // Rounded corners
+            mt={4}
           >
             <Input
               placeholder="Ask a question..."
@@ -291,6 +422,5 @@ export default function AIAssistant() {
           </HStack>
         </Flex>
       </Flex>
-    </Container>
   );
 }
