@@ -1,7 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Button, Container, Heading, Text, VStack, HStack, Icon, Input, Image } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Icon,
+  Input,
+  Image,
+  useColorModeValue,
+} from "@chakra-ui/react"
 import { ArrowLeft, Upload } from "lucide-react"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -33,9 +45,16 @@ export default function ImageQuizGeneration() {
   }
 
   const handleCardPress = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevents unintended selections when clicking inside the card
+    e.stopPropagation()
     setIsCardPressed(true)
   }
+
+  // Dynamic color mode support
+  const bgColor = useColorModeValue("gray.50", "gray.800")
+  const boxBg = useColorModeValue("white", "gray.700")
+  const textColor = useColorModeValue("gray.800", "gray.100")
+  const borderColor = useColorModeValue("teal.300", "teal.500")
+  const inputBg = useColorModeValue("gray.100", "gray.600")
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -48,25 +67,26 @@ export default function ImageQuizGeneration() {
   }
 
   return (
-    <Box minH="100vh" bg={isCardPressed ? "white" : "azure"} py={12}>
-      <Container maxW="3xl">
+    <Box minH="100vh" bg={bgColor} py={12}>
+      <Container maxW={{ base: "90%", md: "3xl" }}>
         <MotionBox variants={containerVariants} initial="hidden" animate="visible">
           <VStack spacing={8} align="stretch">
-            {/* Preventing file selection when clicking the back link */}
-            <Link href="/dashboard" passHref>
-              <HStack spacing={2} color="teal.500" cursor="pointer">
+            {/* Back Button */}
+            <Link href="/dashboard/quizzes" passHref>
+              <HStack spacing={2} color="teal.500" _hover={{ color: "teal.700" }} cursor="pointer">
                 <Icon as={ArrowLeft} boxSize={4} />
-                <Text>Back</Text>
+                <Text fontWeight="medium">Back</Text>
               </HStack>
             </Link>
 
-            {/* Smaller Card */}
-            <Box bg="white" p={6} borderRadius="lg" boxShadow="sm">
+            {/* Quiz Generation Card */}
+            <Box bg={boxBg} p={6} borderRadius="lg" boxShadow="md" border="1px solid" borderColor={borderColor}>
               <VStack spacing={6} align="stretch">
-                <Heading as="h1" size="lg">
+                <Heading as="h1" size="md" color="teal.500">
                   Generate Quiz from Image
                 </Heading>
 
+                {/* File Upload Section */}
                 <Box
                   borderWidth={2}
                   borderStyle="dashed"
@@ -78,6 +98,7 @@ export default function ImageQuizGeneration() {
                   cursor="pointer"
                   _hover={{ borderColor: "teal.500" }}
                   onClick={handleCardPress}
+                  bg={inputBg}
                 >
                   <Input
                     type="file"
@@ -94,55 +115,73 @@ export default function ImageQuizGeneration() {
                   />
                   <VStack spacing={2}>
                     <Icon as={Upload} boxSize={10} color="gray.400" />
-                    <Text fontWeight="medium">Click to upload or drag and drop</Text>
+                    <Text fontWeight="medium" color={textColor}>
+                      Click to upload or drag and drop
+                    </Text>
                     <Text fontSize="sm" color="gray.500">
                       PNG, JPG, or GIF files
                     </Text>
                   </VStack>
                 </Box>
 
+                {/* Image Preview */}
                 {preview && (
                   <Box borderRadius="md" overflow="hidden">
                     <Image src={preview || "/placeholder.svg"} alt="Preview" objectFit="cover" width="100%" />
                   </Box>
                 )}
 
+                {/* Generate Button */}
                 <MotionButton
                   colorScheme="teal"
-                  size="lg"
+                  size="md"
                   isDisabled={!image}
                   onClick={handleGenerate}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  w="full"
                 >
                   Generate Quiz
                 </MotionButton>
 
+                {/* Generated Quiz Output */}
                 {generatedQuiz && (
                   <MotionBox
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
-                    bg="gray.50"
-                    p={6}
+                    bg={useColorModeValue("blue.50", "gray.600")}
+                    p={4}
                     borderRadius="md"
+                    border="1px solid"
+                    borderColor={borderColor}
                   >
-                    <VStack align="stretch" spacing={4}>
-                      <Heading as="h3" size="md">
+                    <VStack align="stretch" spacing={3}>
+                      <Heading as="h3" size="sm" color="teal.500">
                         Generated Quiz
                       </Heading>
-                      <Text color="gray.600">{generatedQuiz}</Text>
-                      <HStack spacing={4}>
+                      <Text color={textColor} fontSize="sm">
+                        {generatedQuiz}
+                      </Text>
+                      <HStack spacing={3}>
                         <MotionButton
                           variant="outline"
                           colorScheme="teal"
+                          size="sm"
                           onClick={handleGenerate}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
+                          flex={1}
                         >
                           Regenerate
                         </MotionButton>
-                        <MotionButton colorScheme="teal" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <MotionButton
+                          colorScheme="teal"
+                          size="sm"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          flex={1}
+                        >
                           Start Quiz
                         </MotionButton>
                       </HStack>

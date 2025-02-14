@@ -202,7 +202,9 @@ export default function AIAssistant() {
                   _hover={{ bg: chatItemHoverBg }}
                   onClick={() => handleOpenChat(date)}
                 >
-                  <Text color={textColor}>{date} - {data.title}</Text>
+                  <Text color={textColor}>
+                    {date} - {data.title}
+                  </Text>
                   <IconButton
                     aria-label="Delete chat"
                     icon={<FaTrash />}
@@ -229,7 +231,13 @@ export default function AIAssistant() {
             bg={chatBg}
           >
             {currentChat.map((msg, index) => (
-              <Box key={index} mb={4} p={4} bg={chatMessageBg} borderRadius="md">
+              <Box
+                key={index}
+                mb={4}
+                p={4}
+                bg={chatMessageBg}
+                borderRadius="md"
+              >
                 <Text fontWeight="bold" color={textColor}>
                   You: {msg.query}
                 </Text>
@@ -257,7 +265,11 @@ export default function AIAssistant() {
           </Box>
 
           {/* Chat Input at Bottom */}
-          <HStack p={4} bg={useColorModeValue("gray.100", "gray.800")} borderRadius="md">
+          <HStack
+            p={4}
+            bg={useColorModeValue("gray.100", "gray.800")}
+            borderRadius="md"
+          >
             <Input
               placeholder="Ask a question..."
               value={query}
