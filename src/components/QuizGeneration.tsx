@@ -81,10 +81,7 @@ export default function QuizGenerationModule() {
     },
   };
 
-  const bgGradient = useColorModeValue(
-    "linear(to-r, #d1e8e2, #c2dfff, #e1caff)",
-    "linear(to-r, #1a202c, #2d3748, #4a5568)"
-  );
+  const bgGradient = useColorModeValue("gray.50", "gray.800");
   const headingColor = useColorModeValue("teal.800", "purple.300");
   const textColor = useColorModeValue("gray.700", "gray.300");
 
