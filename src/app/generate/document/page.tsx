@@ -35,16 +35,18 @@ export default function DocumentQuizGeneration() {
     setGeneratedQuiz(`Generated quiz based on document: ${file.name}`)
   }
 
+
   // Dynamic color mode support
-  const bgColor = useColorModeValue("gray.50", "gray.800")
+  const bgGradient = useColorModeValue("gray.50", "gray.800")
   const cardBg = useColorModeValue("white", "gray.700")
   const textColor = useColorModeValue("gray.800", "gray.100")
   const borderColor = useColorModeValue("gray.300", "teal.500")
   const hoverBg = useColorModeValue("teal.50", "teal.700")
   const inputBg = useColorModeValue("gray.100", "gray.600")
+  const outputBg = useColorModeValue("blue.50", "gray.600")
 
   return (
-    <Box minH="100vh" bgColor={bgColor} py={12}>
+    <Box minH="100vh" bgGradient={bgGradient} py={12}>
       <Container maxW={{ base: "90%", md: "lg" }}>
         <MotionBox initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           <VStack spacing={6} align="stretch">
@@ -102,7 +104,8 @@ export default function DocumentQuizGeneration() {
 
                 {/* File Preview */}
                 {file && (
-                  <HStack p={3} bg={useColorModeValue("gray.100", "gray.600")} borderRadius="md" justify="space-between">
+                  <HStack p={3} bg={inputBg} borderRadius="md" justify="space-between">
+
                     <Text fontSize="sm" color={textColor}>
                       {file.name}
                     </Text>
@@ -124,14 +127,8 @@ export default function DocumentQuizGeneration() {
 
                 {/* Generated Quiz Output */}
                 {generatedQuiz && (
-                  <MotionBox
-                    bg={useColorModeValue("blue.50", "gray.600")}
-                    p={4}
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor={borderColor}
-                    textAlign="center"
-                  >
+                  <MotionBox bg={outputBg} p={4} borderRadius="md" border="1px solid" borderColor={borderColor}>
+
                     <VStack align="stretch" spacing={3}>
                       <Heading as="h3" size="sm" color="teal.500">
                         Generated Quiz

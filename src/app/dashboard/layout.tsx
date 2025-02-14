@@ -65,6 +65,7 @@ export default function DashboardLayout({
   ];
 
   const toggleSidebar = () => {
+    console.log(isOpen)
     setSidebarOpen(!isSidebarOpen);
     if (isMobile) {
       if (!isSidebarOpen) onOpen();
