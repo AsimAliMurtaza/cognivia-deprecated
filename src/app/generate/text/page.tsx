@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from "react";
+
 import {
   Box,
   Button,
@@ -23,6 +25,7 @@ const MotionButton = motion(Button);
 export default function TextQuizGeneration() {
   const [prompt, setPrompt] = useState("");
   const [generatedQuiz, setGeneratedQuiz] = useState("");
+  const [isCardPressed, setIsCardPressed] = useState(false);
 
   // ✅ Move useColorModeValue calls to the top
   const bgColor = useColorModeValue("gray.50", "gray.800");
@@ -36,6 +39,11 @@ export default function TextQuizGeneration() {
     // Placeholder for actual quiz generation logic
     setGeneratedQuiz(`Generated quiz based on prompt: ${prompt}`);
   };
+  const handleCardPress = () => {
+    console.log(isCardPressed);
+    e.stopPropagation();
+    setIsCardPressed(true)
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -86,8 +94,10 @@ export default function TextQuizGeneration() {
                 </Heading>
 
                 <Text color={textColor} fontSize="sm">
+
                   Enter your text prompt below, and our AI will generate a
                   customized quiz for you.
+
                 </Text>
 
                 <Textarea
@@ -103,6 +113,8 @@ export default function TextQuizGeneration() {
                     borderColor: "teal.500",
                     boxShadow: "0 0 0 1px teal.500",
                   }}
+
+                  onClick={handleCardPress}
                   color={textColor}
                 />
 

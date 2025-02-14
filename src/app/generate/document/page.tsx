@@ -35,8 +35,9 @@ export default function DocumentQuizGeneration() {
     setGeneratedQuiz(`Generated quiz based on document: ${file.name}`)
   }
 
-  // ✅ Fix: Move all useColorModeValue calls to the top level
-  const bgGradient = useColorModeValue("linear(to-b, teal.50, blue.50)", "linear(to-b, gray.800, gray.900)")
+
+  // Dynamic color mode support
+  const bgGradient = useColorModeValue("gray.50", "gray.800")
   const cardBg = useColorModeValue("white", "gray.700")
   const textColor = useColorModeValue("gray.800", "gray.100")
   const borderColor = useColorModeValue("gray.300", "teal.500")

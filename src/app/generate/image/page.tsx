@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from "react";
+
 import {
   Box,
   Button,
@@ -70,7 +72,7 @@ export default function ImageQuizGeneration() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-
+  
   return (
     <Box minH="100vh" bg={bgColor} py={12}>
       <Container maxW={{ base: "90%", md: "3xl" }}>
@@ -114,7 +116,9 @@ export default function ImageQuizGeneration() {
                   borderRadius="md"
                   p={6}
                   textAlign="center"
+
                   borderColor={borderColor}
+
                   position="relative"
                   cursor="pointer"
                   _hover={{ borderColor: "teal.500" }}
