@@ -1,11 +1,19 @@
-"use client"
+"use client";
 
-import { Box, Container, Heading, Text, SimpleGrid, VStack, useColorModeValue } from "@chakra-ui/react"
-import { FileText, Upload, ImageIcon } from "lucide-react"
-import { motion } from "framer-motion"
-import Link from "next/link"
+import {
+  Box,
+  Container,
+  Heading,
+  Text,
+  SimpleGrid,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { FileText, Upload, ImageIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
-const MotionBox = motion(Box)
+const MotionBox = motion(Box);
 
 interface FeatureCardProps {
   icon: React.ElementType;
@@ -14,9 +22,20 @@ interface FeatureCardProps {
   href: string;
 }
 
-const FeatureCard = ({ icon: Icon, title, description, href }: FeatureCardProps) => {
-  const bgColor = useColorModeValue("rgba(255, 255, 255, 0.8)", "rgba(26, 32, 44, 0.8)")
-  const borderColor = useColorModeValue("teal.300", "purple.300")
+const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+  href,
+}: FeatureCardProps) => {
+  const bgColor = useColorModeValue(
+    "rgba(255, 255, 255, 0.8)",
+    "rgba(26, 32, 44, 0.8)"
+  );
+  const borderColor = useColorModeValue("teal.300", "purple.300");
+  const iconColor = useColorModeValue("teal.500", "purple.300");
+  const titleColor = useColorModeValue("teal.700", "purple.200");
+  const textColor = useColorModeValue("gray.700", "gray.300");
 
   return (
     <Link href={href} style={{ textDecoration: "none" }}>
@@ -28,23 +47,26 @@ const FeatureCard = ({ icon: Icon, title, description, href }: FeatureCardProps)
         border="1px solid"
         borderColor={borderColor}
         backdropFilter="blur(10px)"
-        whileHover={{ scale: 1.05, style: { boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.15)" } }}
+        whileHover={{
+          scale: 1.05,
+          style: { boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.15)" },
+        }}
         transition={{ duration: 0.3 }}
         cursor="pointer"
       >
         <VStack spacing={4} align="center">
-          <Icon size={40} color="teal" />
-          <Heading size="md" textAlign="center" color="teal.700">
+          <Icon size={40} color={iconColor} />
+          <Heading size="md" textAlign="center" color={titleColor}>
             {title}
           </Heading>
-          <Text color="gray.700" textAlign="center" fontSize="sm">
+          <Text color={textColor} textAlign="center" fontSize="sm">
             {description}
           </Text>
         </VStack>
       </MotionBox>
     </Link>
-  )
-}
+  );
+};
 
 export default function QuizGenerationModule() {
   const containerVariants = {
@@ -57,18 +79,32 @@ export default function QuizGenerationModule() {
         staggerChildren: 0.2,
       },
     },
-  }
+  };
+
+  const bgGradient = useColorModeValue(
+    "linear(to-r, #d1e8e2, #c2dfff, #e1caff)",
+    "linear(to-r, #1a202c, #2d3748, #4a5568)"
+  );
+  const headingColor = useColorModeValue("teal.800", "purple.300");
+  const textColor = useColorModeValue("gray.700", "gray.300");
 
   return (
-    <Box minH="100vh" bgGradient="linear(to-r, #d1e8e2, #c2dfff, #e1caff)" py={16}>
+    <Box minH="100vh" bgGradient={bgGradient} borderRadius="30px" py={16}>
       <Container maxW="6xl">
-        <VStack spacing={12} as={motion.div} variants={containerVariants} initial="hidden" animate="visible">
+        <VStack
+          spacing={12}
+          as={motion.div}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <VStack spacing={4} textAlign="center">
-            <Heading as="h1" size="2xl" fontWeight="bold" color="teal.800">
+            <Heading as="h1" size="2xl" fontWeight="bold" color={headingColor}>
               AI-Powered Quiz Generation
             </Heading>
-            <Text fontSize="xl" color="gray.700" maxW="2xl">
-              Create personalized quizzes effortlessly using our advanced AI technology. Choose your preferred method below to get started.
+            <Text fontSize="xl" color={textColor} maxW="2xl">
+              Create personalized quizzes effortlessly using our advanced AI
+              technology. Choose your preferred method below to get started.
             </Text>
           </VStack>
 
@@ -95,5 +131,5 @@ export default function QuizGenerationModule() {
         </VStack>
       </Container>
     </Box>
-  )
+  );
 }
