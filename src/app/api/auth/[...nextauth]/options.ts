@@ -1,10 +1,21 @@
-import type { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions, Session as NextAuthSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+
+// Extend session and token types to avoid `any`
+interface ExtendedSession extends NextAuthSession {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    gender?: string | null;
+  };
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -68,11 +79,14 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
-      if (token.id) {
-        (session.user as any).id = token.id; // Explicitly add `id` to `session.user`
-      }
-      return session;
+    async session({ session, token }): Promise<ExtendedSession> {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string, // Ensure `id` is typed properly
+        },
+      };
     },
   },
 };

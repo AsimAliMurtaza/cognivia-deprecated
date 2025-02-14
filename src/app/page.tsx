@@ -1,21 +1,7 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  Text,
-  Grid,
-  GridItem,
-  Flex,
-  HStack,
-  VStack,
-  useBreakpointValue,
-} from "@chakra-ui/react";
-import { motion, useAnimation } from "framer-motion";
-import { useRouter } from "next/navigation";
-import FeatureCard from "@/components/FeatureCard";
+import { Box } from "@chakra-ui/react";
+import { useAnimation } from "framer-motion";
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
