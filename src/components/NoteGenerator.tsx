@@ -69,7 +69,8 @@ export default function SmartNotesGenerator() {
   } = useDisclosure();
 
   const toast = useToast();
-  const bgColor = useColorModeValue("gray.50", "gray.800");
+  const bgColor = useColorModeValue("gray.50", "gray.900");
+  const bgCardColor = useColorModeValue("gray.50", "gray.800");
   const cardBgColor = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("teal.600", "teal.200");
   const buttonColorScheme = useColorModeValue("teal", "blue");
@@ -186,7 +187,7 @@ export default function SmartNotesGenerator() {
   };
 
   return (
-    <Box p={6} maxW="1200px" mx="auto">
+    <Box bg={bgColor} p={6} maxW="1200px" mx="auto" borderRadius="20px">
       <Flex justifyContent="space-between" alignItems="center" mb={8}>
         <Heading size="lg" fontWeight="thin" textAlign="left" color={textColor}>
           Smart Notes Generator
@@ -212,7 +213,7 @@ export default function SmartNotesGenerator() {
         {/* Left Pane: Notes History */}
         <Box
           flex="1"
-          bg={bgColor}
+          bg={bgCardColor}
           maxWidth={{ base: "100%", md: "250px" }}
           borderRadius="2xl"
           p={4}
@@ -263,7 +264,13 @@ export default function SmartNotesGenerator() {
         </Box>
 
         {/* Right Pane: Generated Notes */}
-        <Box flex="2" bg={bgColor} borderRadius="lg" p={4} boxShadow="md">
+        <Box
+          flex="2"
+          bg={bgCardColor}
+          borderRadius="lg"
+          p={4}
+          boxShadow="md"
+        >
           <Heading size="md" mb={4} color={textColor}>
             {generatedNotes
               ? generatedNotes.slice(0, 15) + "..."

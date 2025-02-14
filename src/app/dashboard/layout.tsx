@@ -13,6 +13,8 @@ import {
   Button,
   useBreakpointValue,
   useDisclosure,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -27,6 +29,7 @@ import {
 import ProfileDialog from "@/components/ProfileDialog";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 // Framer Motion Components
 const MotionBox = motion(Box);
@@ -40,13 +43,13 @@ export default function DashboardLayout({
   const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-
   // Light & Dark Mode Colors
   const sidebarBg = useColorModeValue("gray.100", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.100");
 
   // Responsive Behavior
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const { data: session, status } = useSession();
 
   const modules = [
     { name: "Overview", icon: FiHome, path: "/dashboard" },
@@ -65,8 +68,19 @@ export default function DashboardLayout({
     { name: "Settings", icon: FiSettings, path: "/dashboard/settings" },
   ];
 
+  if (status === "loading")
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" color="teal.500" thickness="4px" />
+      </Center>
+    );
+  if (!session) {
+    router.push("/login");
+    return null;
+  }
+
   const toggleSidebar = () => {
-    console.log(isOpen)
+    console.log(isOpen);
     setSidebarOpen(!isSidebarOpen);
     if (isMobile) {
       if (!isSidebarOpen) onOpen();
@@ -102,7 +116,7 @@ export default function DashboardLayout({
               >
                 {isSidebarOpen && (
                   <Heading size="md" color="teal.400">
-                    Cognivia 
+                    Cognivia
                   </Heading>
                 )}
                 <IconButton
@@ -162,7 +176,7 @@ export default function DashboardLayout({
       )}
 
       {/* Main Content */}
-      <Box flex={1} p={4} >
+      <Box flex={1} p={4}>
         {!isSidebarOpen && isMobile && (
           <IconButton
             icon={<FiMenu />}
