@@ -34,6 +34,7 @@ import ProfileDialog from "@/components/ProfileDialog";
 import SettingsPage from "@/components/Settings";
 import AIAssistant from "@/components/AIAssistant";
 import NoteGenerator from "@/components/NoteGenerator";
+import QuizGeneration from "@/components/QuizGeneration";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -105,7 +106,9 @@ export default function Dashboard() {
       case "AI Assistant":
         return <AIAssistant />;
       case "Smart Notes":
-        return <NoteGenerator />;  
+        return <NoteGenerator />; 
+      case "Quizzes":
+        return <QuizGeneration />;
       default:
         return (
           <Card bg={cardBg} borderRadius="lg" boxShadow="md" p={4}>
