@@ -182,7 +182,6 @@ export default function ImageQuizGeneration() {
                     initial="hidden"
                     animate="visible"
                     bg={outputBg} // ✅ Use predefined variable here
-
                     p={4}
                     borderRadius="md"
                     border="1px solid"
