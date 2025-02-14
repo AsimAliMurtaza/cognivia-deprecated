@@ -51,7 +51,7 @@ export default function DocumentQuizGeneration() {
         <MotionBox initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           <VStack spacing={6} align="stretch">
             {/* Back Button */}
-            <Link href="/dashboard" passHref>
+            <Link href="/dashboard/quizzes" passHref>
               <HStack spacing={2} color="teal.500" _hover={{ color: "teal.700" }} cursor="pointer">
                 <Icon as={ArrowLeft} boxSize={4} />
                 <Text fontWeight="medium">Back</Text>
