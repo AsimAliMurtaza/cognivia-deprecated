@@ -17,7 +17,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { FaRobot, FaCopy, FaTrash, FaPlus, FaBars } from "react-icons/fa";
+import { FaRobot, FaCopy, FaTrash, FaPlus } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronLeft, FiMenu } from "react-icons/fi";
