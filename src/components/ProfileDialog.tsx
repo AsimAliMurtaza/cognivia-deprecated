@@ -18,10 +18,11 @@ import {
   Flex,
   Divider,
   Heading,
+  useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiSun, FiMoon } from "react-icons/fi";
 
 interface ProfileDialogProps {
   isSidebarOpen: boolean;
@@ -30,6 +31,7 @@ interface ProfileDialogProps {
 export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
   const { data: session } = useSession();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { colorMode, toggleColorMode } = useColorMode();
   const router = useRouter();
 
   // Color mode styles

@@ -35,8 +35,9 @@ export default function DocumentQuizGeneration() {
     setGeneratedQuiz(`Generated quiz based on document: ${file.name}`)
   }
 
-  // ✅ Fix: Move all useColorModeValue calls to the top level
-  const bgGradient = useColorModeValue("linear(to-b, teal.50, blue.50)", "linear(to-b, gray.800, gray.900)")
+
+  // Dynamic color mode support
+  const bgGradient = useColorModeValue("gray.50", "gray.800")
   const cardBg = useColorModeValue("white", "gray.700")
   const textColor = useColorModeValue("gray.800", "gray.100")
   const borderColor = useColorModeValue("gray.300", "teal.500")
@@ -50,7 +51,7 @@ export default function DocumentQuizGeneration() {
         <MotionBox initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           <VStack spacing={6} align="stretch">
             {/* Back Button */}
-            <Link href="/dashboard" passHref>
+            <Link href="/dashboard/quizzes" passHref>
               <HStack spacing={2} color="teal.500" _hover={{ color: "teal.700" }} cursor="pointer">
                 <Icon as={ArrowLeft} boxSize={4} />
                 <Text fontWeight="medium">Back</Text>
@@ -104,6 +105,7 @@ export default function DocumentQuizGeneration() {
                 {/* File Preview */}
                 {file && (
                   <HStack p={3} bg={inputBg} borderRadius="md" justify="space-between">
+
                     <Text fontSize="sm" color={textColor}>
                       {file.name}
                     </Text>
@@ -126,6 +128,7 @@ export default function DocumentQuizGeneration() {
                 {/* Generated Quiz Output */}
                 {generatedQuiz && (
                   <MotionBox bg={outputBg} p={4} borderRadius="md" border="1px solid" borderColor={borderColor}>
+
                     <VStack align="stretch" spacing={3}>
                       <Heading as="h3" size="sm" color="teal.500">
                         Generated Quiz

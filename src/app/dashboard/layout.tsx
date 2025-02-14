@@ -40,7 +40,6 @@ export default function DashboardLayout({
   const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-
   // Light & Dark Mode Colors
   const sidebarBg = useColorModeValue("gray.100", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.100");
@@ -102,7 +101,7 @@ export default function DashboardLayout({
               >
                 {isSidebarOpen && (
                   <Heading size="md" color="teal.400">
-                    Cognivia 
+                    Cognivia
                   </Heading>
                 )}
                 <IconButton

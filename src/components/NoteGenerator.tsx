@@ -69,6 +69,7 @@ export default function SmartNotesGenerator() {
   } = useDisclosure();
 
   const toast = useToast();
+
   const bgColor = useColorModeValue("gray.50", "gray.800");
   const cardBgColor = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("teal.600", "teal.200");
