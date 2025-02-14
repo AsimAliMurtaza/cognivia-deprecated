@@ -8,7 +8,6 @@ import {
   Text,
   Heading,
   useToast,
-  Container,
   IconButton,
   Flex,
   useColorModeValue,
@@ -18,7 +17,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { FaRobot, FaCopy, FaTrash, FaPlus, FaBars } from "react-icons/fa";
+import { FaRobot, FaCopy, FaTrash, FaPlus } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronLeft, FiMenu } from "react-icons/fi";
@@ -51,7 +50,6 @@ export default function AIAssistant() {
 
   // Color mode values
   const sidebarBg = useColorModeValue("white", "gray.800");
-  const mainBg = useColorModeValue("gray.50", "gray.800");
   const chatBg = useColorModeValue("white", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.200");
   const inputBg = useColorModeValue("white", "gray.600");
