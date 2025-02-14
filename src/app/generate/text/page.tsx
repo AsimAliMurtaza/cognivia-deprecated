@@ -52,7 +52,6 @@ export default function TextQuizGeneration() {
       transition: { duration: 0.5, staggerChildren: 0.2 },
     },
   };
-
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -80,6 +79,7 @@ export default function TextQuizGeneration() {
             </Link>
 
             {/* Quiz Input Box */}
+
             <Box
               bg={boxBg}
               p={6}
@@ -88,6 +88,7 @@ export default function TextQuizGeneration() {
               border="1px solid"
               borderColor={borderColor}
             >
+
               <VStack spacing={5} align="stretch">
                 <Heading as="h1" size="md" color="teal.500">
                   Generate Quiz from Text
