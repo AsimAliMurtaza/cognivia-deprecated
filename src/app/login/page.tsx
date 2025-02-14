@@ -42,6 +42,7 @@ export default function LoginPage() {
   const inputBgColor = useColorModeValue("white", "gray.700");
   const buttonBgColor = useColorModeValue("blue.500", "blue.400");
   const buttonHoverColor = useColorModeValue("blue.600", "blue.300");
+  const githubColor = useColorModeValue("gray.900", "white");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -198,7 +199,7 @@ export default function LoginPage() {
                   <Button
                     variant="outline"
                     w="full"
-                    color="gray.900"
+                    color={githubColor}
                     leftIcon={<FaGithub />}
                     _hover={{ bg: "gray.50", _dark: { bg: "gray.700" } }}
                     border="1px solid"

@@ -18,10 +18,11 @@ import {
   Flex,
   Divider,
   Heading,
+  useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiSun, FiMoon } from "react-icons/fi";
 
 interface ProfileDialogProps {
   isSidebarOpen: boolean;
@@ -30,51 +31,61 @@ interface ProfileDialogProps {
 export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
   const { data: session } = useSession();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { colorMode, toggleColorMode } = useColorMode();
   const router = useRouter();
 
-  const primaryColor = "gray.700";
-  const secondaryColor = "gray.900";
-  const modalBg = useColorModeValue("white", "white");
+  // Color mode styles
+  const bgColor = useColorModeValue("white", "gray.800");
+  const textColor = useColorModeValue("gray.800", "gray.100");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const hoverBg = useColorModeValue("gray.100", "gray.700");
 
   return (
     <>
-      {/* My Profile Button */}
-      <Tooltip label="My Profile" placement="right" isDisabled={isSidebarOpen}>
-        <Divider mb={18} />
+      {/* Profile & Theme Toggle */}
+      <Divider mb={4} />
 
-        <Button
-          variant="ghost"
-          w="full"
-          justifyContent={isSidebarOpen ? "flex-start" : "center"}
-          color="gray.700"
-          onClick={onOpen}
-          display="flex"
-          alignItems="center"
-          gap={isSidebarOpen ? 3 : 0}
-          px={isSidebarOpen ? 3 : 2}
+      <Flex w="full" direction="column" align="center">
+        {/* Profile Button */}
+        <Tooltip
+          label="My Profile"
+          placement="right"
+          isDisabled={isSidebarOpen}
         >
-          <Image
-            src={session?.user?.image || ""}
-            borderRadius="full"
-            border="2px solid"
-            h="25px"
-            w="25px"
-            borderColor={primaryColor}
-          />
-          {isSidebarOpen && <Text>My Profile</Text>}
-        </Button>
-      </Tooltip>
+          <Button
+            variant="ghost"
+            w="full"
+            justifyContent={isSidebarOpen ? "flex-start" : "center"}
+            color={textColor}
+            onClick={onOpen}
+            display="flex"
+            alignItems="center"
+            gap={isSidebarOpen ? 3 : 0}
+            px={isSidebarOpen ? 3 : 2}
+            _hover={{ bg: hoverBg }}
+          >
+            <Image
+              src={
+                session?.user?.image ||
+                "https://www.shutterstock.com/image-vector/user-account-avatar-icon-pictogram-600nw-1860375778.jpg"
+              }
+              borderRadius="full"
+              border="2px solid"
+              h="30px"
+              w="30px"
+              borderColor={borderColor}
+            />
+            {isSidebarOpen && <Text>My Profile</Text>}
+          </Button>
+        </Tooltip>
+      </Flex>
 
       {/* Profile Modal */}
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
-        <ModalContent borderRadius="2xl" boxShadow="2xl" bg={modalBg}>
+        <ModalContent borderRadius="lg" boxShadow="xl" bg={bgColor}>
           <ModalHeader textAlign="center">
-            <Heading
-              size="md"
-              bgGradient={`linear(to-r, ${primaryColor}, ${secondaryColor})`}
-              bgClip="text"
-            >
+            <Heading size="md" bgClip="text" color={textColor}>
               My Profile
             </Heading>
           </ModalHeader>
@@ -92,15 +103,18 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                 borderRadius="full"
                 boxShadow="md"
                 border="2px solid"
-                borderColor={primaryColor}
+                borderColor={borderColor}
               />
 
               {/* User Details */}
-              <VStack spacing={1}>
-                <Text fontSize="lg" fontWeight="bold" color="gray.700">
+              <VStack spacing={1} textAlign="center">
+                <Text fontSize="lg" fontWeight="bold" color={textColor}>
                   {session?.user?.name || "Guest User"}
                 </Text>
-                <Text fontSize="md" color="gray.600">
+                <Text
+                  fontSize="md"
+                  color={useColorModeValue("gray.600", "gray.400")}
+                >
                   {session?.user?.email || "No email provided"}
                 </Text>
               </VStack>
@@ -112,16 +126,14 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                 <Button
                   w="full"
                   variant="outline"
-                  bg={primaryColor}
-                  color={"white"}
+                  borderColor={borderColor}
+                  color={textColor}
                   _hover={{
-                    bg: "gray.100",
+                    bg: hoverBg,
                     transform: "scale(1.05)",
-                    color: "black",
                   }}
-                  _active={{ bg: "#4A8C8D" }}
+                  _active={{ transform: "scale(0.95)" }}
                   onClick={() => router.push("/profile")}
-                  transition="all 0.2s"
                 >
                   Edit Profile
                 </Button>
@@ -130,13 +142,12 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                   variant="ghost"
                   w="full"
                   justifyContent="center"
-                  color="gray.700"
+                  color="red.500"
                   _hover={{
-                    bg: "gray.200",
+                    bg: hoverBg,
                     transform: "scale(1.05)",
-                    color: "red.500",
                   }}
-                  _active={{ bg: "#4A8C8D" }}
+                  _active={{ transform: "scale(0.95)" }}
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   Sign Out
@@ -150,14 +161,12 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
               variant="ghost"
               onClick={onClose}
               w="full"
+              color={textColor}
               _hover={{
-                bg: "gray.200",
+                bg: hoverBg,
                 transform: "scale(1.05)",
-                color: "black",
               }}
-              bg="gray.300"
-              color={"black"}
-              _active={{ bg: "#4A8C8D" }}
+              _active={{ transform: "scale(0.95)" }}
             >
               Close
             </Button>

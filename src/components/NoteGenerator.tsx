@@ -25,6 +25,8 @@ import {
   Flex,
   Grid,
   Tooltip,
+  useColorMode,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   AiOutlineFileText,
@@ -68,6 +70,11 @@ export default function SmartNotesGenerator() {
   } = useDisclosure();
 
   const toast = useToast();
+  const { colorMode, toggleColorMode } = useColorMode();
+  const bgColor = useColorModeValue("gray.50", "gray.800");
+  const cardBgColor = useColorModeValue("white", "gray.700");
+  const textColor = useColorModeValue("teal.600", "teal.200");
+  const buttonColorScheme = useColorModeValue("teal", "blue");
 
   const handleOptionSelect = (type: SourceType) => {
     setSourceType(type);
@@ -127,12 +134,34 @@ export default function SmartNotesGenerator() {
     setSourceType(null);
   };
 
-  const mockAPICall = (input: string): Promise<string> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(input);
-      }, 2000);
-    });
+  const mockAPICall = async (input: string): Promise<string> => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/ask?query=${encodeURIComponent(input)}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to generate notes");
+
+      // Read the response as a stream
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to read response");
+
+      let result = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += new TextDecoder().decode(value);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Failed to generate notes.";
+    }
   };
 
   const handleChatClick = (chat: Chat) => {
@@ -160,18 +189,14 @@ export default function SmartNotesGenerator() {
 
   return (
     <Box p={6} maxW="1200px" mx="auto">
-      <Heading
-        size="lg"
-        fontWeight="thin"
-        textAlign="left"
-        mb={8}
-        color="teal.500"
-      >
-        Smart Notes Generator
-      </Heading>
+      <Flex justifyContent="space-between" alignItems="center" mb={8}>
+        <Heading size="lg" fontWeight="thin" textAlign="left" color={textColor}>
+          Smart Notes Generator
+        </Heading>
+      </Flex>
 
       <MotionButton
-        colorScheme="teal"
+        colorScheme={buttonColorScheme}
         onClick={onOpen}
         leftIcon={<AiOutlinePlus />}
         size="md"
@@ -185,18 +210,18 @@ export default function SmartNotesGenerator() {
       </MotionButton>
 
       {/* Main Layout: Left (History) and Right (Generated Notes) */}
-      <Flex direction="row" gap={6} h="60vh">
+      <Flex direction={{ base: "column", md: "row" }} gap={6} h="60vh">
         {/* Left Pane: Notes History */}
         <Box
           flex="1"
-          bg="gray.50"
-          maxWidth="250px"
+          bg={bgColor}
+          maxWidth={{ base: "100%", md: "250px" }}
           borderRadius="2xl"
           p={4}
           overflowY="auto"
           boxShadow="lg"
         >
-          <Heading size="md" mb={4} color="teal.600">
+          <Heading size="md" mb={4} color={textColor}>
             Notes History
           </Heading>
           <VStack spacing={4} align="stretch">
@@ -209,6 +234,7 @@ export default function SmartNotesGenerator() {
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
                 cursor="pointer"
+                bg={cardBgColor}
               >
                 <CardHeader
                   display="flex"
@@ -216,10 +242,10 @@ export default function SmartNotesGenerator() {
                   alignItems="center"
                 >
                   <Box onClick={() => handleChatClick(chat)}>
-                    <Heading size="sm" color="teal.600">
+                    <Heading size="sm" color={textColor}>
                       {chat.date}
                     </Heading>
-                    <Text fontWeight="thin" fontSize="md" color="teal.600">
+                    <Text fontWeight="thin" fontSize="md" color={textColor}>
                       {chat.content.slice(0, 15) + "..."}
                     </Text>
                   </Box>
@@ -229,7 +255,7 @@ export default function SmartNotesGenerator() {
                       size="sm"
                       colorScheme="red"
                       onClick={() => handleDeleteChat(index)}
-                      aria-label={""}
+                      aria-label="Delete Chat"
                     />
                   </Tooltip>
                 </CardHeader>
@@ -239,8 +265,8 @@ export default function SmartNotesGenerator() {
         </Box>
 
         {/* Right Pane: Generated Notes */}
-        <Box flex="2" bg="gray.50" borderRadius="lg" p={4} boxShadow="md">
-          <Heading size="md" mb={4} color="teal.600">
+        <Box flex="2" bg={bgColor} borderRadius="lg" p={4} boxShadow="md">
+          <Heading size="md" mb={4} color={textColor}>
             {generatedNotes
               ? generatedNotes.slice(0, 15) + "..."
               : "Generated Notes"}
@@ -248,7 +274,7 @@ export default function SmartNotesGenerator() {
           {generatedNotes && (
             <MotionBox
               borderRadius="lg"
-              bg="white"
+              bg={cardBgColor}
               p={4}
               boxShadow="sm"
               initial={{ opacity: 0, y: -20 }}
@@ -261,9 +287,9 @@ export default function SmartNotesGenerator() {
                   <IconButton
                     icon={<AiOutlineCopy />}
                     size="sm"
-                    colorScheme="teal"
+                    colorScheme={buttonColorScheme}
                     onClick={() => handleCopyText(generatedNotes)}
-                    aria-label={""}
+                    aria-label="Copy Text"
                   />
                 </Tooltip>
               </Flex>
@@ -282,14 +308,18 @@ export default function SmartNotesGenerator() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
+            bg={cardBgColor}
           >
-            <ModalHeader textAlign="center" color="teal.600">
+            <ModalHeader textAlign="center" color={textColor}>
               Select Note Generation Method
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Grid
-                templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
+                templateColumns={{
+                  base: "1fr",
+                  md: "repeat(auto-fit, minmax(200px, 1fr))",
+                }}
                 gap={6}
               >
                 <MotionCard
@@ -299,10 +329,11 @@ export default function SmartNotesGenerator() {
                   boxShadow="md"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  bg={cardBgColor}
                 >
                   <CardHeader textAlign="center">
-                    <AiOutlineFileText size={40} color="teal.500" />
-                    <Text mt={2} fontWeight="semibold" color="teal.600">
+                    <AiOutlineFileText size={40} color={textColor} />
+                    <Text mt={2} fontWeight="semibold" color={textColor}>
                       Write a Prompt
                     </Text>
                   </CardHeader>
@@ -315,10 +346,11 @@ export default function SmartNotesGenerator() {
                   boxShadow="md"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  bg={cardBgColor}
                 >
                   <CardHeader textAlign="center">
-                    <AiOutlineYoutube size={40} color="teal.500" />
-                    <Text mt={2} fontWeight="semibold" color="teal.600">
+                    <AiOutlineYoutube size={40} color={textColor} />
+                    <Text mt={2} fontWeight="semibold" color={textColor}>
                       Enter YouTube Link
                     </Text>
                   </CardHeader>
@@ -331,10 +363,11 @@ export default function SmartNotesGenerator() {
                   boxShadow="md"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  bg={cardBgColor}
                 >
                   <CardHeader textAlign="center">
-                    <AiOutlineFileImage size={40} color="teal.500" />
-                    <Text mt={2} fontWeight="semibold" color="teal.600">
+                    <AiOutlineFileImage size={40} color={textColor} />
+                    <Text mt={2} fontWeight="semibold" color={textColor}>
                       Upload Image/Doc
                     </Text>
                   </CardHeader>
@@ -360,8 +393,9 @@ export default function SmartNotesGenerator() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
+            bg={cardBgColor}
           >
-            <ModalHeader textAlign="center" color="teal.600">
+            <ModalHeader textAlign="center" color={textColor}>
               Provide Your Input
             </ModalHeader>
             <ModalCloseButton />
@@ -399,7 +433,7 @@ export default function SmartNotesGenerator() {
             </ModalBody>
             <ModalFooter>
               <MotionButton
-                colorScheme="teal"
+                colorScheme={buttonColorScheme}
                 onClick={handleGenerateNotes}
                 isDisabled={
                   inputDisabled || (!promptText && !youtubeLink && !file)
