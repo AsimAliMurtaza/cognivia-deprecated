@@ -51,7 +51,7 @@ export default function DocumentQuizGeneration() {
         <MotionBox initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           <VStack spacing={6} align="stretch">
             {/* Back Button */}
-            <Link href="/dashboard/quizzes" passHref>
+            <Link href="/dashboard" passHref>
               <HStack spacing={2} color="teal.500" _hover={{ color: "teal.700" }} cursor="pointer">
                 <Icon as={ArrowLeft} boxSize={4} />
                 <Text fontWeight="medium">Back</Text>
@@ -105,7 +105,6 @@ export default function DocumentQuizGeneration() {
                 {/* File Preview */}
                 {file && (
                   <HStack p={3} bg={inputBg} borderRadius="md" justify="space-between">
-
                     <Text fontSize="sm" color={textColor}>
                       {file.name}
                     </Text>
@@ -128,7 +127,6 @@ export default function DocumentQuizGeneration() {
                 {/* Generated Quiz Output */}
                 {generatedQuiz && (
                   <MotionBox bg={outputBg} p={4} borderRadius="md" border="1px solid" borderColor={borderColor}>
-
                     <VStack align="stretch" spacing={3}>
                       <Heading as="h3" size="sm" color="teal.500">
                         Generated Quiz
