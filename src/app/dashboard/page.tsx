@@ -17,7 +17,7 @@ import {
 import { FaCheckCircle, FaChartLine, FaStickyNote } from "react-icons/fa";
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
 
   // Light & Dark Mode Colors

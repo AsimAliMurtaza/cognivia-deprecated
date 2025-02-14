@@ -8,7 +8,6 @@ import {
   Text,
   Heading,
   useToast,
-  Container,
   IconButton,
   Flex,
   useColorModeValue,
@@ -51,7 +50,6 @@ export default function AIAssistant() {
 
   // Color mode values
   const sidebarBg = useColorModeValue("white", "gray.800");
-  const mainBg = useColorModeValue("gray.50", "gray.800");
   const chatBg = useColorModeValue("white", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.200");
   const inputBg = useColorModeValue("white", "gray.600");
