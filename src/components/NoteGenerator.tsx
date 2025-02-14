@@ -25,7 +25,6 @@ import {
   Flex,
   Grid,
   Tooltip,
-  useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
 import {
@@ -70,7 +69,6 @@ export default function SmartNotesGenerator() {
   } = useDisclosure();
 
   const toast = useToast();
-  const { colorMode, toggleColorMode } = useColorMode();
   const bgColor = useColorModeValue("gray.50", "gray.800");
   const cardBgColor = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("teal.600", "teal.200");
