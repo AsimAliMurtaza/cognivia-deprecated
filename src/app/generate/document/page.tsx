@@ -105,6 +105,7 @@ export default function DocumentQuizGeneration() {
                 {/* File Preview */}
                 {file && (
                   <HStack p={3} bg={inputBg} borderRadius="md" justify="space-between">
+
                     <Text fontSize="sm" color={textColor}>
                       {file.name}
                     </Text>

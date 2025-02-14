@@ -104,6 +104,7 @@ export default function ImageQuizGeneration() {
               border="1px solid"
               borderColor={borderColor}
             >
+
               <VStack spacing={6} align="stretch">
                 <Heading as="h1" size="md" color="teal.500">
                   Generate Quiz from Image
