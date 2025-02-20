@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Flex, useToast } from "@chakra-ui/react";
-import ChatHistory from "../components/ChatHistory";
-import ChatWindow from "../components/ChatWindow";
+import ChatHistory from "../components/ai-assistant-components/ChatHistory";
+import ChatWindow from "../components/ai-assistant-components/ChatWindow";
 
 // Generate a unique ID for each chat
 const generateChatId = () => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
