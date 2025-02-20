@@ -57,6 +57,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
         >
           <Image
             src={session?.user?.image || "/user.png"}
+            boxSize={isSidebarOpen ? "30px" : "24px"}
             borderRadius="full"
             border="2px solid"
             borderColor={primaryColor}
@@ -84,7 +85,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
             <Flex direction="column" align="center" gap={4}>
               {/* Profile Picture */}
               <Image
-                src={session?.user?.image || "/user.png"}
+                src={session?.user?.image || ""}
                 boxSize="100px"
                 borderRadius="full"
                 boxShadow="md"

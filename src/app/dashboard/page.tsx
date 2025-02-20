@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -42,11 +42,15 @@ export default function Dashboard() {
   const [selectedModule, setSelectedModule] = useState("Overview");
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
   if (status === "loading") return <p>Loading...</p>;
-  if (!session) {
-    router.push("/login");
-    return null;
-  }
+  if (!session) return null;
 
   const sidebarBg = useColorModeValue("#F3E5F5", "#gray.50"); // Soft pastel purple
   const mainBg = useColorModeValue("#E0F7FA", "gray.50"); // Soft pastel teal
@@ -146,11 +150,6 @@ export default function Dashboard() {
             <CardHeader>
               <Heading size="md">AI Assistant</Heading>
             </CardHeader>
-            <CardBody>
-              <Text>
-                Ask questions and get instant answers from our AI assistant.
-              </Text>
-            </CardBody>
           </Card>
         );
       case "Performance Report":

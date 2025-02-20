@@ -12,8 +12,9 @@ import {
   HStack,
   VStack,
   useBreakpointValue,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
 import FeatureCard from "@/components/FeatureCard";
 import { useEffect } from "react";
@@ -25,30 +26,18 @@ export default function LandingPage() {
   const controls = useAnimation();
   const headingSize = useBreakpointValue({ base: "2xl", md: "4xl" });
 
+  // Scroll-based gradient animation
+  const { scrollYProgress } = useScroll();
+  const gradientY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);
 
   return (
-    <Box
-      bg="white"
-      position="relative"
-      overflow="hidden"
-      bgGradient="linear(to-br, #E0F7FA, #F3E5F5)" // Soft pastel gradient
-      _before={{
-        content: '""',
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage:
-          "url('https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTExL3Jhd3BpeGVsb2ZmaWNlMl93aGl0ZV9iYWNrZ3JvdW5kX3doaXRlX2Fic3RyYWN0X3ZlY3Rvcl9ub2lzZV9zbV8xOTM0MjllMS1iNjlhLTQ0ZGYtOWEzZi01ZWI3YjIyNDRjYWItbTNxbjJocGYucG5n.png')", // Subtle pattern
-        opacity: 0.1,
-        zIndex: 0,
-        pointerEvents: "none",
-      }}
-    >
+    <Box position="relative" overflow="hidden" bg="white">
+      {/* Animated Gradient Background */}
+
       <Header />
       {/* Hero Section */}
       <Box
@@ -58,7 +47,7 @@ export default function LandingPage() {
         justifyContent="center"
         position="relative"
         overflow="hidden"
-        bgGradient="linear(to-br, #E0F7FA, #F3E5F5)" // Soft pastel gradient
+        bgGradient="linear-gradient(to bottom right, #E0F7FA, #F3E5F5)"
       >
         <Container
           maxW="container.lg"
@@ -75,14 +64,19 @@ export default function LandingPage() {
               <Heading
                 size={headingSize}
                 fontWeight="bold"
-                // bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
                 bgGradient="linear(to-r, blue.300, #A5D8DD)"
                 bgClip="text"
                 lineHeight="1.2"
+                fontFamily="'Poppins', sans-serif"
               >
                 AI-Powered Quizzes for Smarter Learning
               </Heading>
-              <Text fontSize="xl" color="gray.600" maxW="2xl">
+              <Text
+                fontSize="xl"
+                color="gray.600"
+                maxW="2xl"
+                fontFamily="'Inter', sans-serif"
+              >
                 Personalized, interactive, and adaptive quizzes designed for
                 you.
               </Text>
@@ -97,8 +91,9 @@ export default function LandingPage() {
                   _hover={{
                     bgGradient: "linear(to-r, blue.300, #A5D8DD)",
                     transform: "scale(1.05)",
-                    transition: "fade-in 1.2s",
                   }}
+                  transition="all 0.2s"
+                  fontFamily="'Inter', sans-serif"
                 >
                   Get Started
                 </Button>
@@ -111,6 +106,8 @@ export default function LandingPage() {
                   rounded="full"
                   px={8}
                   _hover={{ bg: "#E0F7FA", transform: "scale(1.05)" }}
+                  transition="all 0.2s"
+                  fontFamily="'Inter', sans-serif"
                 >
                   Login
                 </Button>
@@ -127,6 +124,7 @@ export default function LandingPage() {
         bg="gray.50"
         position="relative"
         zIndex={1}
+        bgGradient="linear-gradient(to-tr, #E0F7FA, #F3E5F5)"
       >
         <Container maxW="container.lg">
           <VStack spacing={8} textAlign="center">
@@ -141,6 +139,7 @@ export default function LandingPage() {
                 fontWeight="bold"
                 bgGradient="linear(to-r, blue.300, #A5D8DD)"
                 bgClip="text"
+                fontFamily="'Poppins', sans-serif"
               >
                 Why Choose Us?
               </Heading>
@@ -151,7 +150,12 @@ export default function LandingPage() {
               transition={{ duration: 0.7, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text
+                fontSize="lg"
+                color="gray.600"
+                maxW="2xl"
+                fontFamily="'Inter', sans-serif"
+              >
                 Discover the features that make Cognivia the ultimate learning
                 tool.
               </Text>
@@ -166,29 +170,35 @@ export default function LandingPage() {
                   title: "AI-Powered Quizzes",
                   description:
                     "Automatically generated quizzes tailored to your learning needs.",
+                  icon: "🧠",
                 },
                 {
                   title: "Real-Time Feedback",
                   description:
                     "Get instant feedback and insights to improve your learning.",
+                  icon: "📊",
                 },
                 {
                   title: "Gamified Learning",
                   description: "Earn badges, rank up, and challenge friends.",
+                  icon: "🎮",
                 },
                 {
                   title: "Adaptive Learning",
                   description:
                     "Smart AI adjusts difficulty based on performance.",
+                  icon: "📈",
                 },
                 {
                   title: "Personalized Insights",
                   description: "Track progress with AI-driven reports.",
+                  icon: "📝",
                 },
                 {
                   title: "Mobile Friendly",
                   description:
                     "Access quizzes anytime, anywhere from any device.",
+                  icon: "📱",
                 },
               ].map((feature, index) => (
                 <GridItem key={index}>
@@ -201,6 +211,7 @@ export default function LandingPage() {
                     <FeatureCard
                       title={feature.title}
                       description={feature.description}
+                      icon={feature.icon}
                     />
                   </motion.div>
                 </GridItem>
@@ -211,7 +222,14 @@ export default function LandingPage() {
       </Box>
 
       {/* Pricing Section */}
-      <Box py={20} id="pricing" bg="white" position="relative" zIndex={1}>
+      <Box
+        py={20}
+        id="pricing"
+        bg="white"
+        position="relative"
+        zIndex={1}
+        bgGradient="linear-gradient(to bottom right, #E0F7FA, #F3E5F5)"
+      >
         <Container maxW="container.lg" textAlign="center">
           <VStack spacing={8}>
             <motion.div
@@ -225,6 +243,7 @@ export default function LandingPage() {
                 fontWeight="bold"
                 bgGradient="linear(to-r, #6EC3C4, blue.500)"
                 bgClip="text"
+                fontFamily="'Poppins', sans-serif"
               >
                 Affordable Plans for Everyone
               </Heading>
@@ -235,7 +254,12 @@ export default function LandingPage() {
               transition={{ duration: 0.7, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text
+                fontSize="lg"
+                color="gray.600"
+                maxW="2xl"
+                fontFamily="'Inter', sans-serif"
+              >
                 Choose a plan that fits your needs and start learning smarter
                 today.
               </Text>
@@ -254,6 +278,8 @@ export default function LandingPage() {
                 rounded="full"
                 px={8}
                 _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
+                transition="all 0.2s"
+                fontFamily="'Inter', sans-serif"
               >
                 View Pricing
               </Button>
@@ -263,7 +289,14 @@ export default function LandingPage() {
       </Box>
 
       {/* Contact Section */}
-      <Box py={20} id="contact" bg="gray.50" position="relative" zIndex={1}>
+      <Box
+        py={20}
+        id="contact"
+        bg="gray.50"
+        position="relative"
+        zIndex={1}
+        bgGradient="linear-gradient(to top right, #E0F7FA, #F3E5F5)"
+      >
         <Container maxW="container.lg" textAlign="center">
           <VStack spacing={8}>
             <motion.div
@@ -277,6 +310,7 @@ export default function LandingPage() {
                 fontWeight="bold"
                 bgGradient="linear(to-r, #6EC3C4, #A5D8DD)"
                 bgClip="text"
+                fontFamily="'Poppins', sans-serif"
               >
                 Get in Touch
               </Heading>
@@ -287,7 +321,12 @@ export default function LandingPage() {
               transition={{ duration: 0.7, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text
+                fontSize="lg"
+                color="gray.600"
+                maxW="2xl"
+                fontFamily="'Inter', sans-serif"
+              >
                 Have questions? Reach out to us anytime. We're here to help!
               </Text>
             </motion.div>
@@ -305,6 +344,8 @@ export default function LandingPage() {
                 rounded="full"
                 px={8}
                 _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
+                transition="all 0.2s"
+                fontFamily="'Inter', sans-serif"
               >
                 Contact Us
               </Button>

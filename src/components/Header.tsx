@@ -36,6 +36,7 @@ export default function Header() {
       zIndex="100"
       borderBottom="1px solid"
       borderColor="gray.100"
+      borderBottomRadius={20}
     >
       <Flex
         maxW="container.xl"
@@ -46,22 +47,26 @@ export default function Header() {
       >
         {/* Logo */}
         <Heading
-          size="xl"
-          bgGradient="linear(to-r, blue.300, #A5D8DD)"
+          size="2xl"
+          bgGradient="linear(to-br, blue.300, #A5D8Dd)"
           bgClip="text"
-          fontWeight="bold"
+          fontWeight="normal"
           cursor="pointer"
           onClick={() => router.push("/")}
           transition="all 0.2s"
-          _hover={{ transform: "scale(1.05)" }}
+          _hover={{ transform: "scale(1.02)" }}
         >
-          whatever name fits
+          Cognivia
         </Heading>
 
         {/* Desktop Navigation */}
         <HStack spacing={6} display={{ base: "none", md: "flex" }}>
           {["About Us", "Features", "Pricing", "Contact"].map((link, index) => (
-            <Link key={index} href={`#${link.toLowerCase().replace(" ", "")}`} passHref>
+            <Link
+              key={index}
+              href={`#${link.toLowerCase().replace(" ", "")}`}
+              passHref
+            >
               <Button
                 variant="ghost"
                 fontSize="lg"
