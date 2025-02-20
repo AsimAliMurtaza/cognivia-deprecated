@@ -15,9 +15,12 @@ import {
   useToast,
   Grid,
   GridItem,
+  useColorMode,
+  useColorModeValue,
+  IconButton,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiSun, FiMoon } from "react-icons/fi";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -26,6 +29,16 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const toast = useToast();
+
+  const { colorMode, toggleColorMode } = useColorMode();
+  const bgColor = useColorModeValue(
+    "linear(to-br, #E0F7FA, #F3E5F5)",
+    "gray.800"
+  );
+  const boxColor = useColorModeValue("white", "gray.900");
+  const textColor = useColorModeValue("gray.700", "gray.200");
+  const buttonHoverColor = useColorModeValue("blue.900", "blue.300");
+  const inputBgColor = useColorModeValue("white", "gray.700");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -69,8 +82,7 @@ export default function SignUpPage() {
       justifyContent="center"
       alignItems="center"
       height="100vh"
-      bgGradient="linear(to-br, #E0F7FA, #F3E5F5)"
-      bg="gray.100"
+      bgGradient={bgColor}
     >
       <motion.div
         initial={{ opacity: 0, y: -30 }}
@@ -78,7 +90,7 @@ export default function SignUpPage() {
         transition={{ duration: 0.5 }}
       >
         <Box
-          bg="white"
+          bg={boxColor}
           borderRadius="20px"
           boxShadow="lg"
           maxW="900px"
@@ -95,18 +107,18 @@ export default function SignUpPage() {
               justifyContent="center"
               textAlign="center"
             >
-              <Heading size="lg" fontWeight="thin" color="gray.700">
+              <Heading size="lg" fontWeight="thin" color={textColor}>
                 Welcome to
               </Heading>
-              <Heading size="2xl" fontWeight="thin" color="gray.700" mb={4}>
+              <Heading size="2xl" fontWeight="thin" color={textColor} mb={4}>
                 Cognivia
               </Heading>
-              <Text fontSize="sm" color="gray.500" mt={4}>
+              <Text fontSize="sm" color={textColor} mt={4}>
                 Create an account to get started.
               </Text>
               <Button
                 color="blue.500"
-                _hover={{ color: "blue.900" }}
+                _hover={{ color: buttonHoverColor }}
                 onClick={() => router.push("/")}
               >
                 <FiArrowLeft
@@ -122,25 +134,33 @@ export default function SignUpPage() {
             {/* Right Side - Sign Up Form */}
             <GridItem>
               <VStack spacing={5} align="stretch">
+                {/* Color Mode Toggle Button */}
+                <IconButton
+                  aria-label="Toggle dark mode"
+                  icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
+                  onClick={toggleColorMode}
+                  alignSelf="flex-end"
+                  variant="ghost"
+                />
+
                 {error && (
                   <Text color="red.500" fontSize="sm" textAlign="center">
                     {error}
                   </Text>
                 )}
-                :
-                {
-                  <Heading size="md" fontWeight="lg" mb={4} color={"gray.700"}>
-                    Create your account
-                  </Heading>
-                }
+
+                <Heading size="md" fontWeight="lg" mb={4} color={textColor}>
+                  Create your account
+                </Heading>
+
                 <FormControl id="signUp-email" isRequired>
-                  <FormLabel fontSize="sm" color="gray.700">
+                  <FormLabel fontSize="sm" color={textColor}>
                     Email
                   </FormLabel>
                   <Input
                     type="email"
                     placeholder="Enter your email"
-                    bg="white"
+                    bg={inputBgColor}
                     color="black"
                     border="1px solid #ccc"
                     onChange={handleInputChange}
@@ -148,14 +168,15 @@ export default function SignUpPage() {
                     _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                   />
                 </FormControl>
+
                 <FormControl id="signUp-password" isRequired>
-                  <FormLabel fontSize="sm" color="gray.700">
+                  <FormLabel fontSize="sm" color={textColor}>
                     Password
                   </FormLabel>
                   <Input
                     type="password"
                     placeholder="Enter your password"
-                    bg="white"
+                    bg={inputBgColor}
                     color="black"
                     border="1px solid #ccc"
                     onChange={handleInputChange}
@@ -163,6 +184,7 @@ export default function SignUpPage() {
                     _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                   />
                 </FormControl>
+
                 <Button
                   onClick={handleSignup}
                   bg="blue.500"
@@ -173,8 +195,10 @@ export default function SignUpPage() {
                 >
                   Sign Up
                 </Button>
+
                 <Divider />
-                <Text fontSize="sm" textAlign="center" color="gray.600">
+
+                <Text fontSize="sm" textAlign="center" color={textColor}>
                   Already have an account?{" "}
                   <Button
                     variant="link"
