@@ -63,7 +63,7 @@ export default function Header() {
           size="xl"
           bgGradient={gradient}
           bgClip="text"
-          fontWeight="bold"
+          fontWeight="normal"
           cursor="pointer"
           onClick={() => router.push("/")}
           transition="all 0.3s ease-in-out"
