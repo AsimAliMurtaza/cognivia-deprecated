@@ -22,30 +22,31 @@ import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronLeft, FiMenu } from "react-icons/fi";
 
-// Function to get today's date in YYYY-MM-DD format
-const getFormattedDate = () => new Date().toISOString().split("T")[0];
+// Generate a unique ID for each chat
+const generateChatId = () => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-// Framer Motion components
 const MotionBox = motion(Box);
 
 export default function AIAssistant() {
   const [query, setQuery] = useState<string>("");
-  const [currentChat, setCurrentChat] = useState<
-    { query: string; response: string }[]
-  >([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<
     Record<
       string,
-      { title: string; messages: { query: string; response: string }[] }
+      {
+        id: string;
+        title: string;
+        messages: { query: string; response: string }[];
+        timestamp: number;
+      }
     >
   >({});
   const [loading, setLoading] = useState<boolean>(false);
   const [currentResponse, setCurrentResponse] = useState<string>("");
-  const [isSidebarOpen, setSidebarOpen] = useState(false); // Sidebar closed by default on mobile
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // Responsive behavior
   const isMobile = useBreakpointValue({ base: true, md: false });
 
   // Color mode values
@@ -62,7 +63,8 @@ export default function AIAssistant() {
   useEffect(() => {
     const savedHistory = localStorage.getItem("chatHistory");
     if (savedHistory) {
-      setChatHistory(JSON.parse(savedHistory));
+      const parsedHistory = JSON.parse(savedHistory);
+      setChatHistory(parsedHistory);
     }
   }, []);
 
@@ -97,32 +99,42 @@ export default function AIAssistant() {
       const decoder = new TextDecoder();
       let fullResponse = "";
 
-      // Stream the response
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
         fullResponse += chunk;
-        setCurrentResponse((prev) => prev + chunk); // Update UI incrementally
+        setCurrentResponse((prev) => prev + chunk);
       }
 
-      // Append new message to chat
       const newMessage = { query, response: fullResponse };
-      setCurrentChat((prev) => [...prev, newMessage]);
 
-      // Store chat history
-      const dateKey = getFormattedDate();
-      const firstFewWords = query.split(" ").slice(0, 4).join(" ") + "...";
-
-      setChatHistory((prevHistory) => {
-        const updatedHistory = { ...prevHistory };
-        if (!updatedHistory[dateKey]) {
-          updatedHistory[dateKey] = { title: firstFewWords, messages: [] };
-        }
-        updatedHistory[dateKey].messages.push(newMessage);
-
-        return updatedHistory;
-      });
+      // Create a new chat if none is selected
+      if (!currentChatId) {
+        const newChatId = generateChatId();
+        const firstFewWords = query.split(" ").slice(0, 4).join(" ") + "...";
+        
+        setChatHistory(prev => ({
+          ...prev,
+          [newChatId]: {
+            id: newChatId,
+            title: firstFewWords,
+            messages: [newMessage],
+            timestamp: Date.now()
+          }
+        }));
+        setCurrentChatId(newChatId);
+      } else {
+        // Update existing chat
+        setChatHistory(prev => ({
+          ...prev,
+          [currentChatId]: {
+            ...prev[currentChatId],
+            messages: [...prev[currentChatId].messages, newMessage],
+            timestamp: Date.now()
+          }
+        }));
+      }
     } catch (error) {
       console.error("Error fetching AI response", error);
       toast({
@@ -150,7 +162,6 @@ export default function AIAssistant() {
   };
 
   const toggleHistorySidebar = () => {
-    console.log(isOpen);
     setSidebarOpen(!isSidebarOpen);
     if (isMobile) {
       if (!isSidebarOpen) onOpen();
@@ -158,11 +169,18 @@ export default function AIAssistant() {
     }
   };
 
-  const handleDeleteChat = (dateKey: string) => {
-    const updatedHistory = { ...chatHistory };
-    delete updatedHistory[dateKey];
-    setChatHistory(updatedHistory);
-    setCurrentChat([]);
+  const handleDeleteChat = (chatId: string) => {
+    setChatHistory(prev => {
+      const newHistory = { ...prev };
+      delete newHistory[chatId];
+      return newHistory;
+    });
+
+    if (currentChatId === chatId) {
+      setCurrentChatId(null);
+      setCurrentResponse("");
+    }
+
     toast({
       title: "Chat Deleted",
       description: "The selected chat history has been removed.",
@@ -172,21 +190,24 @@ export default function AIAssistant() {
     });
   };
 
-  const handleOpenChat = (dateKey: string) => {
-    setCurrentChat(chatHistory[dateKey].messages);
-    if (isMobile) setSidebarOpen(false); // Close sidebar on mobile after opening a chat
+  const handleOpenChat = (chatId: string) => {
+    setCurrentChatId(chatId);
+    setCurrentResponse("");
+    if (isMobile) setSidebarOpen(false);
   };
 
   const handleNewChat = () => {
-    setCurrentChat([]);
+    setCurrentChatId(null);
     setCurrentResponse("");
   };
+
+  // Get current chat messages
+  const currentMessages = currentChatId ? chatHistory[currentChatId]?.messages || [] : [];
 
   return (
     <Flex w="full" h="100vh" borderRadius={"20px"}>
       {/* Left Sidebar: Chat History */}
       {isMobile ? (
-        // Mobile: Overlay sidebar with animations
         <AnimatePresence>
           {(!isMobile || isSidebarOpen) && (
             <MotionBox
@@ -202,14 +223,9 @@ export default function AIAssistant() {
               bg={sidebarBg}
               boxShadow="lg"
               zIndex={20}
-              borderRadius="0 12px 12px 0" // Rounded corners
+              borderRadius="0 12px 12px 0"
             >
-              <Box
-                p={4}
-                display={"flex"}
-                justifyContent={"space-between"}
-                borderColor={borderColor}
-              >
+              <Box p={4} display={"flex"} justifyContent={"space-between"} borderColor={borderColor}>
                 <Heading size="md" color="teal.400" mb={4}>
                   Chat History
                 </Heading>
@@ -232,24 +248,25 @@ export default function AIAssistant() {
                 >
                   New Chat
                 </Button>
-                <Box flex={1} overflowY="auto">
+                <Box flex={1} overflowY="auto" w="100%">
                   {Object.entries(chatHistory)
-                    .sort(([dateA], [dateB]) => (dateA > dateB ? -1 : 1))
-                    .map(([date, data]) => (
+                    .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+                    .map(([chatId, data]) => (
                       <Flex
-                        key={date}
+                        key={chatId}
                         mb={2}
                         p={3}
-                        bg={chatItemBg}
+                        bg={currentChatId === chatId ? chatItemHoverBg : chatItemBg}
                         borderRadius="md"
                         align="center"
                         justify="space-between"
                         cursor="pointer"
                         _hover={{ bg: chatItemHoverBg }}
-                        onClick={() => handleOpenChat(date)}
+                        onClick={() => handleOpenChat(chatId)}
+                        w="100%"
                       >
-                        <Text color={textColor}>
-                          {date} - {data.title}
+                        <Text color={textColor} noOfLines={1}>
+                          {data.title}
                         </Text>
                         <IconButton
                           aria-label="Delete chat"
@@ -257,7 +274,7 @@ export default function AIAssistant() {
                           size="xs"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteChat(date);
+                            handleDeleteChat(chatId);
                           }}
                         />
                       </Flex>
@@ -268,17 +285,18 @@ export default function AIAssistant() {
           )}
         </AnimatePresence>
       ) : (
-        // Desktop: Fixed sidebar
+        // Desktop sidebar
         <Flex
           direction="column"
-          w="auto"
+          w="300px"
           h="92vh"
           mt={4}
           p={6}
           border="1px solid"
           borderColor={borderColor}
           bg={sidebarBg}
-          borderRadius="12px 12px 12px 12px" // Rounded corners
+          borderRadius="12px"
+          mr={4}
         >
           <Heading size="md" color={textColor} mb={4}>
             Chat History
@@ -294,22 +312,22 @@ export default function AIAssistant() {
           </Button>
           <Box flex={1} overflowY="auto">
             {Object.entries(chatHistory)
-              .sort(([dateA], [dateB]) => (dateA > dateB ? -1 : 1))
-              .map(([date, data]) => (
+              .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+              .map(([chatId, data]) => (
                 <Flex
-                  key={date}
+                  key={chatId}
                   mb={2}
                   p={3}
-                  bg={chatItemBg}
+                  bg={currentChatId === chatId ? chatItemHoverBg : chatItemBg}
                   borderRadius="md"
                   align="center"
                   justify="space-between"
                   cursor="pointer"
                   _hover={{ bg: chatItemHoverBg }}
-                  onClick={() => handleOpenChat(date)}
+                  onClick={() => handleOpenChat(chatId)}
                 >
-                  <Text color={textColor}>
-                    {date} - {data.title}
+                  <Text color={textColor} noOfLines={1}>
+                    {data.title}
                   </Text>
                   <IconButton
                     aria-label="Delete chat"
@@ -317,7 +335,7 @@ export default function AIAssistant() {
                     size="xs"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteChat(date);
+                      handleDeleteChat(chatId);
                     }}
                   />
                 </Flex>
@@ -329,15 +347,14 @@ export default function AIAssistant() {
       {/* Main Chat Window */}
       <Flex
         direction="column"
-        w={isMobile ? "full" : "90%"}
+        flex={1}
         h="100vh"
         p={4}
         borderRadius={"20px"}
       >
-        {/* Burger Menu for Mobile */}
         {isMobile && (
           <Button
-            w={"auto"}
+            w="auto"
             aria-label="Open Sidebar"
             onClick={() => setSidebarOpen(true)}
             variant="ghost"
@@ -353,18 +370,18 @@ export default function AIAssistant() {
           flex={1}
           overflowY="auto"
           p={4}
-          borderRadius="12px" // Rounded corners
+          borderRadius="12px"
           border="1px solid"
           borderColor={borderColor}
           bg={chatBg}
         >
-          {currentChat.map((msg, index) => (
+          {currentMessages.map((msg, index) => (
             <Box
               key={index}
               mb={4}
               p={4}
               bg={chatMessageBg}
-              borderRadius="12px" // Rounded corners
+              borderRadius="12px"
             >
               <Text fontWeight="bold" color={textColor}>
                 You: {msg.query}
@@ -386,17 +403,16 @@ export default function AIAssistant() {
               </Text>
               <Text color={textColor}>
                 {currentResponse}
-                {loading && <Spinner size="sm" ml={2} />}
+                <Spinner size="sm" ml={2} />
               </Text>
             </Box>
           )}
         </Box>
 
-        {/* Chat Input at Bottom */}
         <HStack
           p={4}
           bg={useColorModeValue("gray.100", "gray.800")}
-          borderRadius="12px" // Rounded corners
+          borderRadius="12px"
           mt={4}
         >
           <Input
