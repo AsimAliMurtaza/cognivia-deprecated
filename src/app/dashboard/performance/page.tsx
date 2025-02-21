@@ -7,10 +7,10 @@ export default function PerformancePage() {
   return (
     <Card>
       <CardHeader>
-        <Heading size="md">PerformancePage</Heading>
+        <Heading size="md">Performance Page</Heading>
       </CardHeader>
       <CardBody>
-        <Text>This is the PerformancePage page.</Text>
+        <Text>This is the Performance page.</Text>
       </CardBody>
     </Card>
   );
