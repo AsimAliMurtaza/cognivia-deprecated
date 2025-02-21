@@ -110,19 +110,19 @@ export default function QuizGenerationModule() {
               icon={FileText}
               title="Text Prompt"
               description="Generate a quiz by providing a text prompt on a topic."
-              href="/generate/text"
+              href="/dashboard/quizzes/generate/text"
             />
             <FeatureCard
               icon={Upload}
               title="Document Upload"
               description="Upload study materials and let AI create a comprehensive quiz."
-              href="/generate/document"
+              href="/dashboard/quizzes/generate/document"
             />
             <FeatureCard
               icon={ImageIcon}
               title="Image Upload"
               description="Transform images or diagrams into interactive quizzes."
-              href="/generate/image"
+              href="/dashboard/quizzes/generate/image"
             />
           </SimpleGrid>
         </VStack>
