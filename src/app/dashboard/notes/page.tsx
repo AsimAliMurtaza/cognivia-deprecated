@@ -25,16 +25,17 @@ export default function SmartNotesPage() {
         Smart Notes
       </Heading>
       <Text fontSize="md" color={textColor} textAlign="center" mb={8} px={4}>
-        Streamline your learning with AI-powered note generation and easy
-        access to your saved notes.
+        Streamline your learning with AI-powered note generation and easy access
+        to your saved notes.
       </Text>
 
       {/* Cards Section */}
-      <Flex gap={6} wrap="wrap" justify="center">
+      <Flex gap={4} wrap="wrap" justify="center">
         {/* Generate Notes Card */}
         <motion.div whileHover={{ scale: 1.05 }}>
           <Card
-            w={{ base: "80%", sm: "300px" }}
+            w={{ base: "100%", sm: "350px", md: "300px", lg: "400px" }}
+
             bg={bgColor}
             _hover={{ bg: hoverBgColor }}
             minH="180px"
@@ -60,13 +61,14 @@ export default function SmartNotesPage() {
         {/* View Notes Card */}
         <motion.div whileHover={{ scale: 1.05 }}>
           <Card
-            w={{ base: "80%", sm: "300px" }}
+            w={{ base: "100%", sm: "350px", md: "300px", lg: "400px" }}
             bg={bgColor}
             _hover={{ bg: hoverBgColor }}
+            minH="180px"
             boxShadow="lg"
             borderRadius="lg"
             cursor="pointer"
-            minH="180px"
+
             onClick={() => router.push("/dashboard/notes/view")}
           >
             <CardHeader textAlign="center">

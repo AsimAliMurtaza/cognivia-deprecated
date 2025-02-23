@@ -1,9 +1,26 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Flex, useToast, useColorModeValue, Heading } from "@chakra-ui/react";
+import {
+  Flex,
+  useToast,
+  useColorModeValue,
+  Heading,
+  Button,
+  IconButton,
+  useBreakpointValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
+import { FiMenu } from "react-icons/fi";
 import ChatHistory from "@/components/ai-assistant-components/ChatHistory";
 import ChatWindow from "@/components/ai-assistant-components/ChatWindow";
+import { useDisclosure } from "@chakra-ui/react";
+
 
 // Generate a unique ID for each chat
 const generateChatId = () =>
@@ -26,14 +43,18 @@ export default function AIAssistant() {
   const [loading, setLoading] = useState<boolean>(false);
   const [currentResponse, setCurrentResponse] = useState<string>("");
   const toast = useToast();
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const textColor = useColorModeValue("gray.800", "gray.200");
+
+  // Determine if the screen is mobile
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("chatHistory");
     if (savedHistory) {
-      const parsedHistory = JSON.parse(savedHistory);
-      setChatHistory(parsedHistory);
+      setChatHistory(JSON.parse(savedHistory));
+
     }
   }, []);
 
@@ -150,6 +171,8 @@ export default function AIAssistant() {
   const handleOpenChat = (chatId: string) => {
     setCurrentChatId(chatId);
     setCurrentResponse("");
+    onClose();
+
   };
 
   const handleNewChat = () => {
@@ -164,17 +187,48 @@ export default function AIAssistant() {
   return (
     <Flex direction="column" color={textColor} maxH="100vh" p={4}>
       <Heading size="lg" fontWeight="medium" color={textColor} mb={4}>
-        Cognivia Ai
+        Cognivia AI
       </Heading>
 
       <Flex flex="1" w="full">
-        <ChatHistory
-          chatHistory={chatHistory}
-          currentChatId={currentChatId}
-          onNewChat={handleNewChat}
-          onOpenChat={handleOpenChat}
-          onDeleteChat={handleDeleteChat}
-        />
+        {/* Mobile: Show History Button Instead of Sidebar */}
+        {isMobile ? (
+          <>
+            <IconButton
+              icon={<FiMenu />}
+              aria-label="Open Chat History"
+              onClick={onOpen}
+              variant="solid"
+              mb={4}
+            />
+
+            <Modal isOpen={isOpen} onClose={onClose}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Chat History</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <ChatHistory
+                    chatHistory={chatHistory}
+                    currentChatId={currentChatId}
+                    onNewChat={handleNewChat}
+                    onOpenChat={handleOpenChat}
+                    onDeleteChat={handleDeleteChat}
+                  />
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+          </>
+        ) : (
+          <ChatHistory
+            chatHistory={chatHistory}
+            currentChatId={currentChatId}
+            onNewChat={handleNewChat}
+            onOpenChat={handleOpenChat}
+            onDeleteChat={handleDeleteChat}
+          />
+        )}
+
 
         {/* Main Chat Window */}
         <Flex flex="1" direction="column">
