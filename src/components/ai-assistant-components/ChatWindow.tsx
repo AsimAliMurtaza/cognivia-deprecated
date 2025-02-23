@@ -1,5 +1,15 @@
 import React from "react";
-import { Box, Flex, HStack, Input, Button, Text, IconButton, Spinner } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  HStack,
+  Input,
+  Button,
+  Text,
+  IconButton,
+  Spinner,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import { FaCopy, FaRobot } from "react-icons/fa";
 
@@ -22,12 +32,29 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onAskAI,
   onCopyResponse,
 }) => {
+  const bgColor = useColorModeValue("gray.100", "gray.800");
+  const inputBg = useColorModeValue("gray.100", "gray.700");
+  const messageBg = useColorModeValue("gray.50", "gray.900");
+  const textColor = useColorModeValue("gray.800", "white");
+  const borderColor = useColorModeValue("gray.300", "gray.600");
+
   return (
-    <Flex direction="column" flex={1} h="100vh" p={4}>
-      <Box flex={1} overflowY="auto" p={4} borderRadius="12px" bg="white">
+    <Flex direction="column" flex={1} minH="500px" pl={2}>
+      <Box
+        flex={1}
+        border="1px solid"
+        borderColor={borderColor}
+        borderRadius="12px"
+        bg={bgColor}
+        overflowY="auto"
+        maxH="420px"
+        minH="420px"
+      >
         {currentMessages.map((msg, index) => (
-          <Box key={index} mb={4} p={4} bg="gray.50" borderRadius="12px">
-            <Text fontWeight="bold">You: {msg.query}</Text>
+          <Box key={index} mb={4} p={6} bg={messageBg} borderRadius="12px">
+            <Text fontSize="md" fontWeight="medium" color={textColor}>
+              <strong>You:</strong> {msg.query}
+            </Text>
             <ReactMarkdown>{msg.response}</ReactMarkdown>
             <IconButton
               aria-label="Copy response"
@@ -39,25 +66,35 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </Box>
         ))}
         {loading && (
-          <Box mb={4} p={4} bg="gray.50" borderRadius="12px">
-            <Text fontWeight="bold">You: {query}</Text>
-            <Text>
+          <Box mb={4} p={4} bg={messageBg} borderRadius="12px">
+            <Text fontSize="md" fontWeight="medium" color={textColor}>
+              <strong>You:</strong> {query}
+            </Text>
+            <Text color={textColor}>
               {currentResponse}
               <Spinner size="sm" ml={2} />
             </Text>
           </Box>
         )}
       </Box>
-      <HStack p={4} bg="gray.100" borderRadius="12px" mt={4}>
+
+      <HStack p={4} bg={inputBg} borderRadius="12px" mt={2}>
         <Input
           placeholder="Ask a question..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           size="md"
           flex={1}
-          onKeyPress={(e) => e.key === "Enter" && onAskAI()}
+          bg={bgColor}
+          color={textColor}
+          onKeyDown={(e) => e.key === "Enter" && onAskAI()}
         />
-        <Button colorScheme="blue" onClick={onAskAI} isLoading={loading} leftIcon={<FaRobot />}>
+        <Button
+          colorScheme="blue"
+          onClick={onAskAI}
+          isLoading={loading}
+          leftIcon={<FaRobot />}
+        >
           Ask
         </Button>
       </HStack>
