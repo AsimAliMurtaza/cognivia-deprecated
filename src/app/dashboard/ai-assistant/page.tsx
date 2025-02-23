@@ -6,7 +6,6 @@ import {
   useToast,
   useColorModeValue,
   Heading,
-  Button,
   IconButton,
   useBreakpointValue,
   Modal,
