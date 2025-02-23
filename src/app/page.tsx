@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@chakra-ui/react";
-import { useAnimation, useScroll, useTransform } from "framer-motion";
+import { useAnimation } from "framer-motion";
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,8 +14,6 @@ export default function LandingPage() {
   const controls = useAnimation();
 
   // Scroll-based gradient animation
-  const { scrollYProgress } = useScroll();
-  const gradientY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });

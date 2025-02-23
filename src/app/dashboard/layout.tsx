@@ -31,7 +31,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 
-// Framer Motion Components
+// Framer Motion Wrapper
 const MotionBox = motion(Box);
 
 export default function DashboardLayout({
@@ -41,10 +41,11 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure(); // Removed `isOpen` since it's unused
 
   // Light & Dark Mode Colors
   const sidebarBg = useColorModeValue("gray.100", "gray.900");
+  const sidebarHoverBg = useColorModeValue("teal.500", "teal.700");
   const textColor = useColorModeValue("gray.800", "gray.100");
 
   // Responsive Behavior
@@ -89,24 +90,23 @@ export default function DashboardLayout({
   };
 
   return (
-    <Flex minH="100vh">
+    <Flex maxH="100vh">
       {/* Sidebar */}
       <AnimatePresence>
         {(!isMobile || isSidebarOpen) && (
           <MotionBox
-            w={{ base: "250px", md: isSidebarOpen ? "250px" : "70px" }}
+            as="aside"
+            w={{ base: "250px", md: isSidebarOpen ? "250px" : "80px" }}
+            initial={{ width: isSidebarOpen ? "80px" : "250px" }}
+            animate={{ width: isSidebarOpen ? "250px" : "80px" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
             bg={sidebarBg}
             p={4}
             boxShadow="lg"
-            borderRight="1px solid"
-            borderColor="gray.200"
             position={{ base: "fixed", md: "relative" }}
             h="100vh"
             zIndex={2}
-            initial={{ x: isMobile ? "-100%" : 0 }}
-            animate={{ x: 0 }}
             exit={{ x: isMobile ? "-100%" : 0 }}
-            transition={{ duration: 0.2 }}
           >
             <VStack align="start" spacing={4}>
               {/* Sidebar Toggle */}
@@ -115,7 +115,7 @@ export default function DashboardLayout({
                 justifyContent={isSidebarOpen ? "space-between" : "center"}
               >
                 {isSidebarOpen && (
-                  <Heading size="md" color="teal.400">
+                  <Heading size="lg" fontWeight="normal" color="teal.200">
                     Cognivia
                   </Heading>
                 )}
@@ -124,30 +124,39 @@ export default function DashboardLayout({
                   aria-label="Toggle Sidebar"
                   onClick={toggleSidebar}
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   color={textColor}
                 />
               </HStack>
 
               {/* Navigation Links */}
               {modules.map((module) => (
-                <Tooltip
-                  label={!isSidebarOpen ? module.name : ""}
-                  placement="right"
-                  key={module.name}
-                >
-                  <Button
-                    leftIcon={<module.icon />}
-                    variant="ghost"
-                    w="full"
-                    justifyContent={isSidebarOpen ? "flex-start" : "center"}
-                    color={textColor}
-                    _hover={{ bg: "teal.100", color: "teal.600" }}
-                    onClick={() => router.push(module.path)}
+                <HStack key={module.name} w="full">
+                  <Tooltip
+                    label={!isSidebarOpen ? module.name : ""}
+                    placement="right"
                   >
-                    {isSidebarOpen && module.name}
-                  </Button>
-                </Tooltip>
+                    <Button
+                      justifyContent={isSidebarOpen ? "flex-start" : "center"}
+                      variant="ghost"
+                      w="full"
+                      color={textColor}
+                      fontWeight="medium"
+                      fontSize="md"
+                      _hover={{ bg: sidebarHoverBg, color: "white" }}
+                      onClick={() => router.push(module.path)}
+                    >
+                      <IconButton
+                        icon={<module.icon />}
+                        aria-label={module.name}
+                        variant="ghost"
+                        size="md"
+                        _hover={{ bg: "transparent" }}
+                      />
+                      {isSidebarOpen && module.name}
+                    </Button>
+                  </Tooltip>
+                </HStack>
               ))}
 
               {/* Profile & Dark Mode Toggle */}
@@ -157,7 +166,7 @@ export default function DashboardLayout({
         )}
       </AnimatePresence>
 
-      {/* Backdrop for Mobile */}
+      {/* Mobile Backdrop */}
       {isMobile && isSidebarOpen && (
         <MotionBox
           position="fixed"
