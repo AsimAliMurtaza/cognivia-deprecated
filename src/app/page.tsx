@@ -13,6 +13,8 @@ import HeroSection from "@/components/sections/HeroSection";
 export default function LandingPage() {
   const controls = useAnimation();
 
+  // Scroll-based gradient animation
+
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);
