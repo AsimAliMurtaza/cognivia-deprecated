@@ -35,6 +35,7 @@ export default function SmartNotesPage() {
         <motion.div whileHover={{ scale: 1.05 }}>
           <Card
             w={{ base: "100%", sm: "350px", md: "300px", lg: "400px" }}
+
             bg={bgColor}
             _hover={{ bg: hoverBgColor }}
             minH="180px"
@@ -67,6 +68,7 @@ export default function SmartNotesPage() {
             boxShadow="lg"
             borderRadius="lg"
             cursor="pointer"
+
             onClick={() => router.push("/dashboard/notes/view")}
           >
             <CardHeader textAlign="center">

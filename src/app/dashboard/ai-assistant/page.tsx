@@ -21,6 +21,7 @@ import ChatHistory from "@/components/ai-assistant-components/ChatHistory";
 import ChatWindow from "@/components/ai-assistant-components/ChatWindow";
 import { useDisclosure } from "@chakra-ui/react";
 
+
 // Generate a unique ID for each chat
 const generateChatId = () =>
   `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -48,10 +49,12 @@ export default function AIAssistant() {
   // Determine if the screen is mobile
   const isMobile = useBreakpointValue({ base: true, md: false });
 
+
   useEffect(() => {
     const savedHistory = localStorage.getItem("chatHistory");
     if (savedHistory) {
       setChatHistory(JSON.parse(savedHistory));
+
     }
   }, []);
 
@@ -169,6 +172,7 @@ export default function AIAssistant() {
     setCurrentChatId(chatId);
     setCurrentResponse("");
     onClose();
+
   };
 
   const handleNewChat = () => {
@@ -224,6 +228,7 @@ export default function AIAssistant() {
             onDeleteChat={handleDeleteChat}
           />
         )}
+
 
         {/* Main Chat Window */}
         <Flex flex="1" direction="column">

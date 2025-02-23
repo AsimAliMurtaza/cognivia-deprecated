@@ -49,6 +49,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
       border="1px solid"
       borderColor={borderColor}
       borderRadius={{ base: "lg", md: "lg" }}
+
       boxShadow={{ md: "md" }}
       overflowY="auto"
       maxH="500px"
