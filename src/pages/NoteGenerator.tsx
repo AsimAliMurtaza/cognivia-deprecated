@@ -16,7 +16,9 @@ export default function SmartNotesGenerator() {
     { sourceType: string | null; content: string; date: string }[]
   >([]);
   const [loading, setLoading] = useState(false);
-  const [sourceType, setSourceType] = useState<"prompt" | "youtube" | "file" | null>(null);
+  const [sourceType, setSourceType] = useState<
+    "prompt" | "youtube" | "file" | null
+  >(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -37,13 +39,19 @@ export default function SmartNotesGenerator() {
     let notes = "";
 
     try {
-      const result = await mockAPICall(promptText || youtubeLink || file?.name || "");
+      const result = await mockAPICall(
+        promptText || youtubeLink || file?.name || ""
+      );
       notes = result;
 
       setGeneratedNotes(notes);
       setChatHistory([
         ...chatHistory,
-        { sourceType, content: notes, date: new Date().toISOString().split("T")[0] },
+        {
+          sourceType,
+          content: notes,
+          date: new Date().toISOString().split("T")[0],
+        },
       ]);
     } catch (error) {
       toast({
@@ -58,10 +66,40 @@ export default function SmartNotesGenerator() {
   };
 
   const mockAPICall = async (input: string): Promise<string> => {
-    return new Promise((resolve) => setTimeout(() => resolve(`Generated notes for: ${input}`), 2000));
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/ask?query=${encodeURIComponent(input)}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to generate notes");
+
+      // Read the response as a stream
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to read response");
+
+      let result = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += new TextDecoder().decode(value);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Failed to generate notes.";
+    }
   };
 
-  const handleChatClick = (chat: { sourceType: string | null; content: string; date: string }) => {
+  const handleChatClick = (chat: {
+    sourceType: string | null;
+    content: string;
+    date: string;
+  }) => {
     setGeneratedNotes(chat.content);
   };
 
@@ -100,9 +138,16 @@ export default function SmartNotesGenerator() {
           onChatClick={handleChatClick}
           onDeleteChat={handleDeleteChat}
         />
-        <NotesDisplay generatedNotes={generatedNotes} onCopyNotes={handleCopyNotes} />
+        <NotesDisplay
+          generatedNotes={generatedNotes}
+          onCopyNotes={handleCopyNotes}
+        />
       </Flex>
-      <SelectionModal isOpen={isOpen} onClose={onClose} onOptionSelect={handleOptionSelect} />
+      <SelectionModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onOptionSelect={handleOptionSelect}
+      />
       <InputModal
         isOpen={isInputOpen}
         onClose={closeInputModal}
