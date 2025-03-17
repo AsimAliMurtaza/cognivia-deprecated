@@ -18,6 +18,7 @@ import {
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
@@ -26,6 +27,7 @@ export default function TextQuizGeneration() {
   const [prompt, setPrompt] = useState("");
   const [generatedQuiz, setGeneratedQuiz] = useState("");
   const [isCardPressed, setIsCardPressed] = useState(false);
+  const router = useRouter();
 
   // ✅ Move useColorModeValue calls to the top
   const bgColor = useColorModeValue("gray.50", "gray.800");
@@ -168,9 +170,14 @@ export default function TextQuizGeneration() {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           flex={1}
-                        >
+                          onClick={() => {
+                            // Make sure the `type` is dynamically fetched or set
+                            const type = "text";  // or "image" based on your app logic
+                            router.push(`/dashboard/quizzes/conduction/${type}`);
+                          }}
+                          >
                           Start Quiz
-                        </MotionButton>
+                          </MotionButton>
                       </HStack>
                     </VStack>
                   </MotionBox>

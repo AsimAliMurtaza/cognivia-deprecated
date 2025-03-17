@@ -10,6 +10,9 @@ import {
   Textarea,
   Input,
   Button,
+  useColorModeValue,
+  VStack,
+  FormLabel,
 } from "@chakra-ui/react";
 
 interface InputModalProps {
@@ -39,42 +42,80 @@ const InputModal: React.FC<InputModalProps> = ({
   onGenerate,
   loading,
 }) => {
+  const modalBg = useColorModeValue("white", "gray.800");
+  const inputBg = useColorModeValue("gray.100", "gray.700");
+  const textColor = useColorModeValue("gray.800", "gray.300");
+  const borderColor = useColorModeValue("gray.300", "gray.600");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent borderRadius="lg">
-        <ModalHeader textAlign="center">Provide Your Input</ModalHeader>
+      <ModalContent borderRadius="lg" bg={modalBg} p={4}>
+        <ModalHeader textAlign="center" color={textColor} fontSize="lg">
+          Provide Your Input
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {sourceType === "prompt" && (
-            <Textarea
-              placeholder="Write your prompt here..."
-              value={promptText}
-              onChange={(e) => setPromptText(e.target.value)}
-              minHeight="150px"
-            />
-          )}
-          {sourceType === "youtube" && (
-            <Input
-              placeholder="Enter YouTube link..."
-              value={youtubeLink}
-              onChange={(e) => setYoutubeLink(e.target.value)}
-            />
-          )}
-          {sourceType === "file" && (
-            <Input
-              type="file"
-              accept="image/*,.pdf,.doc,.docx"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-          )}
+          <VStack spacing={4} align="stretch">
+            {sourceType === "prompt" && (
+              <>
+                <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
+                  Enter Your Prompt
+                </FormLabel>
+                <Textarea
+                  placeholder="Write your prompt here..."
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
+                  bg={inputBg}
+                  borderColor={borderColor}
+                  _focus={{ borderColor: "teal.400", boxShadow: "md" }}
+                  minHeight="150px"
+                />
+              </>
+            )}
+
+            {sourceType === "youtube" && (
+              <>
+                <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
+                  YouTube Video Link
+                </FormLabel>
+                <Input
+                  placeholder="Enter YouTube link..."
+                  value={youtubeLink}
+                  onChange={(e) => setYoutubeLink(e.target.value)}
+                  bg={inputBg}
+                  borderColor={borderColor}
+                  _focus={{ borderColor: "teal.400", boxShadow: "md" }}
+                />
+              </>
+            )}
+
+            {sourceType === "file" && (
+              <>
+                <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
+                  Upload a File
+                </FormLabel>
+                <Input
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  bg={inputBg}
+                  borderColor={borderColor}
+                  _focus={{ borderColor: "teal.400", boxShadow: "md" }}
+                  p={1}
+                />
+              </>
+            )}
+          </VStack>
         </ModalBody>
+
         <ModalFooter>
           <Button
             colorScheme="teal"
             onClick={onGenerate}
             isLoading={loading}
             isDisabled={!promptText && !youtubeLink && !file}
+            w="full"
           >
             Generate Notes
           </Button>

@@ -67,6 +67,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                 session?.user?.image ||
                 "https://www.shutterstock.com/image-vector/user-account-avatar-icon-pictogram-600nw-1860375778.jpg"
               }
+              alt="User Profile"
               borderRadius="full"
               border="2px solid"
               h="30px"
@@ -97,6 +98,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                   session?.user?.image ||
                   "https://www.shutterstock.com/image-vector/user-account-avatar-icon-pictogram-600nw-1860375778.jpg"
                 }
+                alt="User Profile"
                 boxSize="100px"
                 borderRadius="full"
                 boxShadow="md"
