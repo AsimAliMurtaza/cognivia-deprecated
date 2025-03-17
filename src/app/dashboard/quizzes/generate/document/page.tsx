@@ -16,6 +16,7 @@ import {
 import { ArrowLeft, Upload } from "lucide-react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
 
 const MotionBox = motion(Box)
 const MotionButton = motion(Button)
@@ -23,7 +24,7 @@ const MotionButton = motion(Button)
 export default function DocumentQuizGeneration() {
   const [file, setFile] = useState<File | null>(null)
   const [generatedQuiz, setGeneratedQuiz] = useState("")
-
+  const router = useRouter();
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files[0])
@@ -151,9 +152,15 @@ export default function DocumentQuizGeneration() {
                           size="sm"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                        >
+                          flex={1}
+                          onClick={() => {
+                            // Make sure the `type` is dynamically fetched or set
+                            const type = "document";  // or "image" based on your app logic
+                            router.push(`/dashboard/quizzes/conduction/${type}`);
+                          }}
+                          >
                           Start Quiz
-                        </MotionButton>
+                          </MotionButton>
                       </HStack>
                     </VStack>
                   </MotionBox>
