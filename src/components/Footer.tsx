@@ -2,93 +2,166 @@
 
 import {
   Box,
+  Container,
+  SimpleGrid,
+  Stack,
   Text,
-  HStack,
-  IconButton,
+  Link,
   Divider,
+  IconButton,
   useColorModeValue,
+  Flex,
+  Image,
 } from "@chakra-ui/react";
-import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaGlobe, FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 
-export default function Footer() {
-  // Dynamic Colors for Light & Dark Mode
-  const bgGradient = useColorModeValue(
-    "linear(to-r, #E0F7FA, #F3E5F5)",
-    "gray.900"
-  );
-  const textColor = useColorModeValue("gray.700", "gray.300");
-  const dividerColor = useColorModeValue("gray.300", "gray.500");
+const Footer = () => {
+  const footerBg = useColorModeValue("gray.100", "gray.800");
+  const footerColor = useColorModeValue("gray.700", "gray.300");
+  const linkHoverColor = useColorModeValue("blue.500", "blue.400");
 
   return (
-    <Box
-      textAlign="center"
-      py={6}
-      color={textColor}
-      bg={bgGradient}
-      boxShadow="md"
-    >
-      {/* Social Media Links */}
-      <HStack justify="center" spacing={4}>
-        <IconButton
-          as="a"
-          href="https://facebook.com"
-          aria-label="Facebook"
-          icon={<FaFacebook />}
-          variant="ghost"
-          size="lg"
-          color={useColorModeValue("blue.600", "blue.400")}
-          _hover={{
-            color: useColorModeValue("blue.800", "blue.500"),
-            transform: "scale(1.1)",
-          }}
-        />
-        <IconButton
-          as="a"
-          href="https://twitter.com"
-          aria-label="Twitter"
-          icon={<FaTwitter />}
-          variant="ghost"
-          size="lg"
-          color={useColorModeValue("blue.400", "blue.300")}
-          _hover={{
-            color: useColorModeValue("blue.600", "blue.500"),
-            transform: "scale(1.1)",
-          }}
-        />
-        <IconButton
-          as="a"
-          href="https://linkedin.com"
-          aria-label="LinkedIn"
-          icon={<FaLinkedin />}
-          variant="ghost"
-          size="lg"
-          color={useColorModeValue("blue.700", "blue.400")}
-          _hover={{
-            color: useColorModeValue("blue.900", "blue.500"),
-            transform: "scale(1.1)",
-          }}
-        />
-        <IconButton
-          as="a"
-          href="https://instagram.com"
-          aria-label="Instagram"
-          icon={<FaInstagram />}
-          variant="ghost"
-          size="lg"
-          color={useColorModeValue("pink.500", "pink.400")}
-          _hover={{
-            color: useColorModeValue("pink.700", "pink.500"),
-            transform: "scale(1.1)",
-          }}
-        />
-      </HStack>
+    <Box as="footer" bg={footerBg} color={footerColor} py={12}>
+      <Container maxW="container.xl">
+        {/* Footer Content */}
+        <SimpleGrid columns={{ base: 1, md: 3, lg: 4 }} spacing={10}>
+          {/* Column 1 - Logo & Company */}
+          <Stack align="flex-start">
+            <Image src="/logo.svg" alt="Cognivia Logo" h="30px" mb={4} />
+            <Text fontWeight="bold">Company</Text>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Careers
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Events
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Blogs
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Investor Relations
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Contact Us
+            </Link>
+          </Stack>
 
-      <Divider borderColor={dividerColor} maxW="80%" mx="auto" my={3} />
+          {/* Column 2 - Products */}
+          <Stack align="flex-start">
+            <Text fontWeight="bold">Products</Text>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Cognivia
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              ZenFlow
+            </Link>
+            <Link fontWeight="bold" href="#" _hover={{ color: linkHoverColor }}>
+              See all products →
+            </Link>
+          </Stack>
 
-      {/* Copyright Text */}
-      <Text fontSize="sm" fontWeight="medium">
-        &copy; {new Date().getFullYear()} <b>Cognivia</b>. All rights reserved.
-      </Text>
+          {/* Column 3 - Resources */}
+          <Stack align="flex-start">
+            <Text fontWeight="bold">Resources</Text>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Technical Support
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Purchasing & Licensing
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Cognivia Community
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Marketplace
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              My Account
+            </Link>
+            <Link fontWeight="bold" href="#" _hover={{ color: linkHoverColor }}>
+              Create support ticket →
+            </Link>
+          </Stack>
+
+          {/* Column 4 - Learn & Social */}
+          <Stack align="flex-start">
+            <Text fontWeight="bold">Learn</Text>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Partners
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Training & Certification
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Documentation
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Developer Resources
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Enterprise Services
+            </Link>
+            <Link fontWeight="bold" href="#" _hover={{ color: linkHoverColor }}>
+              See all resources →
+            </Link>
+            <Divider my={4} />
+            <Flex gap={4}>
+              <IconButton
+                aria-label="Facebook"
+                icon={<FaFacebook />}
+                variant="ghost"
+                size="lg"
+                _hover={{ color: linkHoverColor }}
+              />
+              <IconButton
+                aria-label="Twitter"
+                icon={<FaTwitter />}
+                variant="ghost"
+                size="lg"
+                _hover={{ color: linkHoverColor }}
+              />
+              <IconButton
+                aria-label="Instagram"
+                icon={<FaInstagram />}
+                variant="ghost"
+                size="lg"
+                _hover={{ color: linkHoverColor }}
+              />
+            </Flex>
+          </Stack>
+        </SimpleGrid>
+
+        {/* Divider */}
+        <Divider my={6} />
+
+        {/* Bottom Section */}
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          justify="space-between"
+          mb={-10}
+        >
+          <Text>Copyright © {new Date().getFullYear()} Cognivia Inc.</Text>
+          <Stack direction="row" spacing={6}>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Privacy Policy
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Terms
+            </Link>
+            <Link href="#" _hover={{ color: linkHoverColor }}>
+              Impressum
+            </Link>
+          </Stack>
+          <IconButton
+            aria-label="Change language"
+            icon={<FaGlobe />}
+            variant="ghost"
+            _hover={{ color: linkHoverColor }}
+          />
+        </Stack>
+      </Container>
     </Box>
   );
-}
+};
+
+export default Footer;

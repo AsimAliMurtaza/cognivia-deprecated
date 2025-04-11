@@ -9,6 +9,7 @@ import PricingSection from "@/components/sections/PricingSection";
 import ContactSection from "@/components/sections/ContactSection";
 import FeaturesSection from "@/components/sections/FeaturesSection";
 import HeroSection from "@/components/sections/HeroSection";
+import CTASection from "@/components/sections/CTASection";
 
 export default function LandingPage() {
   const controls = useAnimation();
@@ -34,6 +35,7 @@ export default function LandingPage() {
       {/* Pricing Section */}
       <PricingSection />
       {/* Contact Section */}
+      <CTASection />
       <ContactSection />
       <Footer />
     </Box>

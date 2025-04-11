@@ -3,123 +3,160 @@
 import {
   Box,
   Container,
-  VStack,
+  Grid,
+  GridItem,
+  Flex,
   Heading,
   Text,
-  HStack,
   Button,
+  Icon,
   useColorModeValue,
+  Divider,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { signIn } from "next-auth/react";
+import { FaGithub, FaGoogle } from "react-icons/fa";
+import { Typewriter } from "react-simple-typewriter";
 import { useRouter } from "next/navigation";
 
-export default function HeroSection() {
+const HeroSection = () => {
+  const primaryColor = useColorModeValue("teal.500", "blue.400");
   const router = useRouter();
 
-  // Dynamic Colors
-  const bg = useColorModeValue("linear(to-br, #E0F7FA, #F3E5F5)", "gray.900"); // Dark mode = solid bg
-  const textColor = useColorModeValue("gray.700", "gray.200");
-  const buttonBg = useColorModeValue(
-    "linear(to-r, #A5D8DD, blue.400)",
-    "blue.600"
-  );
-  const buttonHoverBg = useColorModeValue(
-    "linear(to-r, blue.400, #A5D8DD)",
-    "blue.500"
-  );
-  const outlineButtonColor = useColorModeValue("#6EC3C4", "blue.300");
-  const outlineHoverBg = useColorModeValue("#E0F7FA", "gray.700");
-
   return (
-    <>
-      <Box
-        minH="100vh"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative"
-        overflow="hidden"
-        bg={bg}
-      >
-        <Container
-          maxW="container.lg"
-          textAlign="center"
-          position="relative"
-          zIndex={1}
+    <Box
+      display="flex"
+      minH={{ base: "auto", md: "70vh" }}
+      py={20}
+      alignItems="center"
+      bg={useColorModeValue("white", "gray.800")}
+      px={6}
+    >
+      <Container maxW="container.xl">
+        <Grid
+          templateColumns={{ base: "1fr", lg: "1.5fr 1px 1fr" }}
+          gap={{ base: 8, lg: 12 }}
+          alignItems="center"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          >
-            <VStack spacing={8}>
-              {/* Title */}
+          {/* Left Column: Text Content */}
+          <GridItem>
+            <Flex direction="column" gap={6}>
               <Heading
-                size="2xl"
+                as="h1"
+                fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
                 fontWeight="bold"
-                bgGradient="linear(to-r, blue.400, #A5D8DD)"
-                bgClip="text"
-                lineHeight="1.2"
-              >
-                AI-Powered Quizzes for Smarter Learning
+                lineHeight="1.5">
+                <Box as="span" display="block" mb={2}>
+                  Enhance your learning experience with
+                </Box>
+                <Box
+                  as="span"
+                  display="inline-flex"
+                  alignItems="center"
+                  px="4"
+                  py="1"
+                  bg={primaryColor}
+                  color="white"
+                  fontWeight="bold"
+                >
+                  <Typewriter
+                    words={["Cognivia.", "AI Quizzes.", "Adaptive Learning."]}
+                    loop={true}
+                    cursor
+                    cursorStyle="|"
+                    typeSpeed={100}
+                    deleteSpeed={70}
+                    delaySpeed={2000}
+                  />
+                </Box>
               </Heading>
 
-              {/* Subtitle */}
-              <Text fontSize="xl" color={textColor} maxW="2xl">
-                Personalized, interactive, and adaptive quizzes designed just
-                for you. Upgrade your learning experience with AI-powered
-                insights.
+              <Text
+                fontSize={{ base: "lg", md: "xl" }}
+                lineHeight="tall"
+                color={useColorModeValue("gray.600", "gray.300")}
+                maxW={{ base: "100%", lg: "90%" }}
+              >
+                The AI-powered platform that adapts to your learning style,
+                helping you master topics faster with personalized quizzes and
+                real-time feedback.
               </Text>
 
-              {/* Call-to-Action Buttons */}
-              <HStack spacing={6}>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
+              <Flex gap={4} mt={4} flexWrap="wrap">
+                <Button
+                  size="lg"
+                  colorScheme={useColorModeValue("teal", "blue")}
+                  px={8}
+                  borderRadius="full"
+                  onClick={() => router.push("/signup")}
                 >
-                  <Button
-                    onClick={() => router.push("/signup")}
-                    size="lg"
-                    bgGradient={buttonBg}
-                    color="white"
-                    rounded="full"
-                    px={8}
-                    _hover={{
-                      bgGradient: buttonHoverBg,
-                      transform: "scale(1.08)",
-                      transition: "all 0.3s",
-                    }}
-                  >
-                    Get Started
-                  </Button>
-                </motion.div>
+                  Get Started Free
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  borderColor={primaryColor}
+                  color={primaryColor}
+                  px={8}
+                  borderRadius="full"
+                  _hover={{ bg: useColorModeValue("teal.50", "blue.900") }}
+                >
+                  Learn More
+                </Button>
+              </Flex>
+            </Flex>
+          </GridItem>
 
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Button
-                    onClick={() => router.push("/login")}
-                    size="lg"
-                    variant="outline"
-                    color={outlineButtonColor}
-                    borderColor={outlineButtonColor}
-                    rounded="full"
-                    px={8}
-                    _hover={{
-                      bg: outlineHoverBg,
-                      transform: "scale(1.08)",
-                      transition: "all 0.3s",
-                    }}
-                  >
-                    Login
-                  </Button>
-                </motion.div>
-              </HStack>
-            </VStack>
-          </motion.div>
-        </Container>
-      </Box>
-    </>
+          {/* Vertical Divider (Desktop only) */}
+          <GridItem display={{ base: "none", lg: "block" }}>
+            <Divider
+              orientation="vertical"
+              h="60%"
+              borderColor={useColorModeValue("gray.200", "gray.600")}
+            />
+          </GridItem>
+
+          {/* Right Column: Auth Options */}
+          <GridItem>
+            <Flex
+              direction="column"
+              gap={6}
+              p={8}
+              bg={useColorModeValue("white", "gray.800")}
+              borderRadius="xl"
+            >
+              <Heading as="h3" size="lg" textAlign="center">
+                Continue with
+              </Heading>
+
+              <Button
+                leftIcon={<Icon as={FaGoogle} />}
+                colorScheme="blue"
+                variant="outline"
+                size="lg"
+                borderRadius="full"
+                borderColor={useColorModeValue("gray.300", "gray.500")}
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              >
+                Google
+              </Button>
+
+              <Button
+                leftIcon={<Icon as={FaGithub} />}
+                colorScheme="gray"
+                variant="outline"
+                size="lg"
+                borderRadius="full"
+                borderColor={useColorModeValue("gray.300", "gray.500")}
+                onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+              >
+                GitHub
+              </Button>
+            </Flex>
+          </GridItem>
+        </Grid>
+      </Container>
+    </Box>
   );
-}
+};
+
+export default HeroSection;

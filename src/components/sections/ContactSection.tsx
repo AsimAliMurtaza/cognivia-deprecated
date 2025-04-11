@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Container,
+  Flex,
   Heading,
   Text,
   VStack,
@@ -14,8 +15,19 @@ import {
   FormLabel,
   useToast,
   useColorModeValue,
+  Divider,
+  Stack,
+  List,
+  ListItem,
+  ListIcon,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
+import {
+  FaEnvelope,
+  FaPhoneAlt,
+  FaMapMarkerAlt,
+  FaCheck,
+} from "react-icons/fa";
 
 export default function ContactSection() {
   const [name, setName] = useState("");
@@ -55,16 +67,17 @@ export default function ContactSection() {
   };
 
   // Dynamic Colors for Light & Dark Mode
-  const bgColor = useColorModeValue("gray.50", "gray.800");
+  const bgColor = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.800", "gray.100");
+  const subTextColor = useColorModeValue("gray.600", "gray.300");
   const cardBg = useColorModeValue("white", "gray.700");
-  const inputBg = useColorModeValue("gray.100", "gray.600");
-  const inputBorder = useColorModeValue("gray.300", "gray.500");
+  const primaryColor = useColorModeValue("teal.500", "blue.400");
+  const dividerColor = useColorModeValue("gray.200", "gray.600");
 
   return (
     <Box py={20} id="contact" bg={bgColor} position="relative" zIndex={1}>
       <Container maxW="container.lg">
-        <VStack spacing={8} textAlign="center">
+        <VStack spacing={8} textAlign="center" mb={12}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -72,12 +85,13 @@ export default function ContactSection() {
             viewport={{ once: true }}
           >
             <Heading
-              size="xl"
+              as="h2"
+              size="2xl"
               fontWeight="bold"
-              bgGradient="linear(to-r, teal.400, blue.400)"
-              bgClip="text"
+              color={textColor}
+              lineHeight="1.2"
             >
-              Get in Touch
+              Contact Us
             </Heading>
           </motion.div>
           <motion.div
@@ -86,83 +100,156 @@ export default function ContactSection() {
             transition={{ duration: 0.7, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Text fontSize="lg" color={textColor} maxW="2xl">
-              Have questions? Reach out to us anytime. We&apos;re here to
-              help!
+            <Text fontSize="xl" color={subTextColor} maxW="2xl">
+              Have questions about Cognivia? We&apos;d love to hear from you.
             </Text>
           </motion.div>
         </VStack>
 
-        {/* Contact Form */}
-        <VStack spacing={8} mt={10} align="center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <Box
-              bg={cardBg}
-              p={8}
-              borderRadius="lg"
-              boxShadow="lg"
-              maxW="100vw"
-              w="auto"
+        {/* Split Layout */}
+        <Flex direction={{ base: "column", lg: "row" }} gap={8} align="stretch">
+          {/* Contact Form - Left Side */}
+          <Box flex={1}>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              viewport={{ once: true }}
             >
-              <FormControl mb={4} isRequired>
-                <FormLabel color={textColor}>Name</FormLabel>
-                <Input
-                  placeholder="Your Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  focusBorderColor="blue.400"
-                  bg={inputBg}
-                  borderColor={inputBorder}
-                  color={textColor}
-                />
-              </FormControl>
-
-              <FormControl mb={4} isRequired>
-                <FormLabel color={textColor}>Email</FormLabel>
-                <Input
-                  type="email"
-                  placeholder="Your Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  focusBorderColor="blue.400"
-                  bg={inputBg}
-                  borderColor={inputBorder}
-                  color={textColor}
-                />
-              </FormControl>
-
-              <FormControl mb={4} isRequired>
-                <FormLabel color={textColor}>Message</FormLabel>
-                <Textarea
-                  placeholder="Your Message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={4}
-                  focusBorderColor="blue.400"
-                  bg={inputBg}
-                  borderColor={inputBorder}
-                  color={textColor}
-                />
-              </FormControl>
-
-              <Button
-                colorScheme="blue"
-                w="full"
-                size="lg"
-                isLoading={loading}
-                onClick={handleSubmit}
-                _hover={{ transform: "scale(1.05)" }}
+              <Box
+                bg={cardBg}
+                p={8}
+                borderRadius="xl"
+                boxShadow="md"
+                height="100%"
               >
-                Send Message
-              </Button>
-            </Box>
-          </motion.div>
-        </VStack>
+                <VStack spacing={6} align="stretch">
+                  <Heading as="h3" size="md" color={textColor}>
+                    Send us a message
+                  </Heading>
+
+                  <FormControl isRequired>
+                    <FormLabel color={textColor}>Name</FormLabel>
+                    <Input
+                      placeholder="Your Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      focusBorderColor={primaryColor}
+                      size="sm"
+                    />
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel color={textColor}>Email</FormLabel>
+                    <Input
+                      type="email"
+                      placeholder="Your Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      focusBorderColor={primaryColor}
+                      size="sm"
+                    />
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel color={textColor}>Message</FormLabel>
+                    <Textarea
+                      placeholder="Your Message"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={4}
+                      focusBorderColor={primaryColor}
+                      size="sm"
+                    />
+                  </FormControl>
+
+                  <Button
+                    color={primaryColor}
+                    size="lg"
+                    isLoading={loading}
+                    onClick={handleSubmit}
+                    mt={4}
+                    borderRadius="full"
+                    _hover={{ transform: "translateY(-2px)" }}
+                    transition="all 0.2s"
+                  >
+                    Send Message
+                  </Button>
+                </VStack>
+              </Box>
+            </motion.div>
+          </Box>
+
+          {/* Vertical Divider - Hidden on mobile */}
+          <Box display={{ base: "none", lg: "block" }}>
+            <Divider orientation="vertical" borderColor={dividerColor} />
+          </Box>
+
+          {/* Contact Info - Right Side */}
+          <Box flex={1}>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              viewport={{ once: true }}
+            >
+              <Box p={8} borderRadius="xl" height="100%">
+                <VStack spacing={8} align="flex-start">
+                  <Heading as="h3" size="lg" color={textColor}>
+                    Contact Information
+                  </Heading>
+
+                  <Stack spacing={6}>
+                    <List spacing={4}>
+                      <ListItem display="flex" alignItems="center">
+                        <ListIcon as={FaEnvelope} color={primaryColor} />
+                        <Text color={textColor}>support@cognivia.com</Text>
+                      </ListItem>
+                      <ListItem display="flex" alignItems="center">
+                        <ListIcon as={FaPhoneAlt} color={primaryColor} />
+                        <Text color={textColor}>(123) 456-7890</Text>
+                      </ListItem>
+                      <ListItem display="flex" alignItems="flex-start">
+                        <ListIcon
+                          as={FaMapMarkerAlt}
+                          color={primaryColor}
+                          mt={1}
+                        />
+                        <Text color={textColor}>
+                          123 Learning Street
+                          <br />
+                          San Francisco, CA 94107
+                        </Text>
+                      </ListItem>
+                    </List>
+
+                    <Divider borderColor={dividerColor} />
+
+                    <VStack align="flex-start" spacing={4}>
+                      <Text fontSize="lg" fontWeight="medium" color={textColor}>
+                        Why contact us?
+                      </Text>
+                      <List spacing={3}>
+                        {[
+                          "Get help with your account",
+                          "Request a demo",
+                          "Provide feedback",
+                          "Ask about enterprise plans",
+                          "Report technical issues",
+                        ].map((item, index) => (
+                          <ListItem key={index} display="flex">
+                            <ListIcon as={FaCheck} color={primaryColor} />
+                            <Text color={subTextColor}>{item}</Text>
+                          </ListItem>
+                        ))}
+                      </List>
+                    </VStack>
+                  </Stack>
+                </VStack>
+              </Box>
+            </motion.div>
+          </Box>
+        </Flex>
       </Container>
     </Box>
   );
