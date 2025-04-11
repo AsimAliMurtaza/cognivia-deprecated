@@ -1,8 +1,6 @@
-
 "use client";
 
 import { useState } from "react";
-
 import {
   Box,
   Button,
@@ -14,10 +12,12 @@ import {
   HStack,
   Icon,
   useColorModeValue,
+  Spinner,
 } from "@chakra-ui/react";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
@@ -25,9 +25,10 @@ const MotionButton = motion(Button);
 export default function TextQuizGeneration() {
   const [prompt, setPrompt] = useState("");
   const [generatedQuiz, setGeneratedQuiz] = useState("");
+  const [loading, setLoading] = useState(false);
   const [isCardPressed, setIsCardPressed] = useState(false);
+  const router = useRouter();
 
-  // ✅ Move useColorModeValue calls to the top
   const bgColor = useColorModeValue("gray.50", "gray.800");
   const boxBg = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("gray.800", "gray.100");
@@ -36,13 +37,41 @@ export default function TextQuizGeneration() {
   const outputBg = useColorModeValue("blue.50", "gray.600");
 
   const handleGenerate = async () => {
-    // Placeholder for actual quiz generation logic
-    setGeneratedQuiz(`Generated quiz based on prompt: ${prompt}`);
+    setGeneratedQuiz("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:8000/ask?query=${encodeURIComponent(prompt)}`);
+      if (!response.ok) {
+        throw new Error("Failed to generate quiz");
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let fullText = "";
+      while (true) {
+        const { value, done } = await reader!.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+      }
+
+      setGeneratedQuiz(fullText);
+      console.log(fullText);
+      setLoading(false);
+      document.getElementById("quiz-output")?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      setGeneratedQuiz("❌ Error generating quiz. Please try again.");
+      setLoading(false);
+    }
   };
+
   const handleCardPress = () => {
-    console.log(isCardPressed);
-    setIsCardPressed(true)
-  }
+    setIsCardPressed(true);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,6 +80,7 @@ export default function TextQuizGeneration() {
       transition: { duration: 0.5, staggerChildren: 0.2 },
     },
   };
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -65,19 +95,12 @@ export default function TextQuizGeneration() {
           animate="visible"
         >
           <VStack spacing={6} align="stretch">
-            {/* Back Button */}
             <Link href="/dashboard/quizzes" style={{ textDecoration: "none" }}>
-              <HStack
-                spacing={2}
-                color="teal.500"
-                _hover={{ color: "teal.700" }}
-              >
+              <HStack spacing={2} color="teal.500" _hover={{ color: "teal.700" }}>
                 <Icon as={ArrowLeft} boxSize={5} />
                 <Text fontWeight="medium">Back</Text>
               </HStack>
             </Link>
-
-            {/* Quiz Input Box */}
 
             <Box
               bg={boxBg}
@@ -87,17 +110,14 @@ export default function TextQuizGeneration() {
               border="1px solid"
               borderColor={borderColor}
             >
-
               <VStack spacing={5} align="stretch">
                 <Heading as="h1" size="md" color="teal.500">
                   Generate Quiz from Text
                 </Heading>
 
                 <Text color={textColor} fontSize="sm">
-
                   Enter your text prompt below, and our AI will generate a
                   customized quiz for you.
-
                 </Text>
 
                 <Textarea
@@ -107,18 +127,16 @@ export default function TextQuizGeneration() {
                   minH="150px"
                   size="sm"
                   borderColor="teal.200"
-                  bg={inputBg} // ✅ Use predefined variable
+                  bg={inputBg}
                   _hover={{ borderColor: "teal.300" }}
                   _focus={{
                     borderColor: "teal.500",
                     boxShadow: "0 0 0 1px teal.500",
                   }}
-
                   onClick={handleCardPress}
                   color={textColor}
                 />
 
-                {/* Generate Button */}
                 <MotionButton
                   colorScheme="teal"
                   size="md"
@@ -131,13 +149,28 @@ export default function TextQuizGeneration() {
                   Generate Quiz
                 </MotionButton>
 
-                {/* Generated Quiz Output */}
-                {generatedQuiz && (
+                {loading ? (
+                  <Box
+                    id="quiz-output"
+                    bg={outputBg}
+                    p={4}
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor={borderColor}
+                    textAlign="center"
+                  >
+                    <Spinner size="lg" color="teal.500" />
+                    <Text mt={3} fontSize="sm" color={textColor}>
+                      Generating your quiz, please wait...
+                    </Text>
+                  </Box>
+                ) : generatedQuiz && (
                   <MotionBox
+                    id="quiz-output"
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
-                    bg={outputBg} // ✅ Use predefined variable
+                    bg={outputBg}
                     p={4}
                     borderRadius="md"
                     border="1px solid"
@@ -147,7 +180,7 @@ export default function TextQuizGeneration() {
                       <Heading as="h3" size="sm" color="teal.500">
                         Generated Quiz
                       </Heading>
-                      <Text color={textColor} fontSize="sm">
+                      <Text color={textColor} fontSize="sm" whiteSpace="pre-wrap">
                         {generatedQuiz}
                       </Text>
                       <HStack spacing={3}>
@@ -168,6 +201,10 @@ export default function TextQuizGeneration() {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           flex={1}
+                          onClick={() => {
+                            const type = "text";
+                            router.push(`/dashboard/quizzes/conduction/${type}`);
+                          }}
                         >
                           Start Quiz
                         </MotionButton>
