@@ -133,7 +133,7 @@ export default function ProfileDialog({ isSidebarOpen }: ProfileDialogProps) {
                     transform: "scale(1.05)",
                   }}
                   _active={{ transform: "scale(0.95)" }}
-                  onClick={() => router.push("/profile")}
+                  onClick={() => router.push("/dasboard/profile")}
                 >
                   Edit Profile
                 </Button>
