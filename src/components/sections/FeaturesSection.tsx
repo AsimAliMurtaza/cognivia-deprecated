@@ -26,44 +26,45 @@ export default function FeaturesSection() {
     {
       title: "AI-Powered Quizzes",
       description:
-        "Automatically generated quizzes tailored to your learning needs.",
+        "Automatically generated quizzes tailored to your learning needs with our advanced algorithms.",
       icon: FaBrain,
     },
     {
       title: "Real-Time Feedback",
       description:
-        "Get instant feedback and insights to improve your learning.",
+        "Get instant feedback and actionable insights to accelerate your learning process.",
       icon: FaClock,
     },
     {
       title: "Gamified Learning",
-      description: "Earn badges, rank up, and challenge friends.",
+      description: "Earn badges, unlock achievements, and climb leaderboards.",
       icon: FaTrophy,
     },
     {
       title: "Adaptive Learning",
-      description: "Smart AI adjusts difficulty based on performance.",
+      description:
+        "Smart AI adjusts difficulty dynamically based on your performance.",
       icon: FaChartLine,
     },
     {
       title: "Personalized Insights",
-      description: "Track progress with AI-driven reports.",
+      description:
+        "Detailed analytics and reports to track your learning journey.",
       icon: FaBookOpen,
     },
     {
       title: "Mobile Friendly",
-      description: "Access quizzes anytime, anywhere from any device.",
+      description:
+        "Seamless experience across all your devices, anytime, anywhere.",
       icon: FaMobileAlt,
     },
   ];
 
-  // Dynamic Color Mode Values
-  const bgColor = useColorModeValue("gray.50", "gray.800");
-  const cardBg = useColorModeValue("white", "gray.700");
-  const textColor = useColorModeValue("gray.700", "gray.200");
-  const subTextColor = useColorModeValue("gray.600", "gray.400");
-  const iconColor = useColorModeValue("blue.400", "blue.300");
-  const cardHover = useColorModeValue("gray.100", "gray.600");
+  // Material You inspired colors
+  const bgColor = useColorModeValue("gray.50", "gray.900");
+  const textColor = useColorModeValue("gray.800", "gray.100");
+  const subTextColor = useColorModeValue("gray.600", "gray.300");
+  const primaryColor = useColorModeValue("teal.500", "blue.300");
 
   return (
     <Box
@@ -72,77 +73,90 @@ export default function FeaturesSection() {
       bg={bgColor}
       position="relative"
       zIndex={1}
-      minH="100vh"
+      display="flex"
+      alignItems="center"
     >
       <Container maxW="container.lg">
-        <VStack spacing={8} textAlign="center">
-          {/* Title */}
+        <VStack spacing={12} textAlign="center">
+          {/* Title Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}
           >
-            <Heading
-              size="xl"
-              fontWeight="bold"
-              bgGradient="linear(to-r, teal.400, blue.400)"
-              bgClip="text"
-            >
-              Why Choose Cognivia?
-            </Heading>
-          </motion.div>
-
-          {/* Subtitle */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <Text fontSize="lg" color={subTextColor} maxW="2xl">
-              Discover the features that make Cognivia the ultimate learning
-              tool.
-            </Text>
+            <VStack spacing={4}>
+              <Heading
+                as="h2"
+                size="2xl"
+                fontWeight="bold"
+                color={textColor}
+                lineHeight="1.2"
+              >
+                What we offer?
+              </Heading>
+              <Text
+                fontSize={{ base: "lg", md: "xl" }}
+                color={subTextColor}
+                maxW="2xl"
+              >
+                Discover how Cognivia transforms your learning experience with
+                AI-powered tools
+              </Text>
+            </VStack>
           </motion.div>
 
           {/* Features Grid */}
           <Grid
-            templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
-            gap={8}
-            mt={8}
+            templateColumns={{
+              base: "1fr",
+              md: "repeat(2, 1fr)",
+              lg: "repeat(3, 1fr)",
+            }}
+            gap={6}
+            width="full"
           >
             {features.map((feature, index) => (
               <GridItem key={index}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
                 >
                   <Box
-                    minH="200"
-                    p={6}
-                    bg={cardBg}
-                    borderRadius="xl"
-                    boxShadow="md"
+                    p={8}
+                    borderRadius="2xl"
+                    minHeight="250px"
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
                     textAlign="center"
-                    _hover={{
-                      transform: "scale(1.05)",
-                      bg: cardHover,
-                      transition: "0.3s",
-                    }}
+                    transition="all 0.2s ease"
                   >
-                    <Icon
-                      as={feature.icon}
-                      boxSize={12}
-                      color={iconColor}
+                    <Box
+                      p={4}
                       mb={4}
-                    />
-                    <Heading size="md" color={textColor} mb={2}>
+                      bg={`${primaryColor}20`} // 20% opacity
+                      borderRadius="full"
+                      display="inline-flex"
+                    >
+                      <Icon
+                        as={feature.icon}
+                        boxSize={12}
+                        color={primaryColor}
+                      />
+                    </Box>
+                    <Heading
+                      as="h3"
+                      size="md"
+                      color={textColor}
+                      mb={3}
+                      fontWeight="semibold"
+                    >
                       {feature.title}
                     </Heading>
-                    <Text fontSize="sm" color={subTextColor}>
+                    <Text fontSize="md" color={subTextColor} lineHeight="tall">
                       {feature.description}
                     </Text>
                   </Box>
