@@ -60,6 +60,7 @@ export default function TextQuizGeneration() {
 
       setGeneratedQuiz(fullText);
       console.log(fullText);
+      console.log(isCardPressed);
       setLoading(false);
       document.getElementById("quiz-output")?.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
