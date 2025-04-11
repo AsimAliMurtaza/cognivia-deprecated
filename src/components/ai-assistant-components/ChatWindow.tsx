@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import ReactMarkdown from "react-markdown";
 import {
   Box,
   Flex,
@@ -9,18 +12,33 @@ import {
   IconButton,
   Spinner,
   useColorModeValue,
+  Avatar,
+  Divider,
+  VStack,
+  Code,
+  useToast,
+  Heading,
+  CodeProps,
+  HeadingProps,
+  TextProps,
 } from "@chakra-ui/react";
-import ReactMarkdown from "react-markdown";
-import { FaCopy, FaRobot } from "react-icons/fa";
+import { FaCopy, FaRobot, FaUser } from "react-icons/fa";
+import { motion } from "framer-motion";
+
+const MotionBox = motion(Box);
 
 interface ChatWindowProps {
   query: string;
   setQuery: (value: string) => void;
-  currentMessages: { query: string; response: string }[];
+  currentMessages: Array<{ query: string; response: string }>;
   currentResponse: string;
   loading: boolean;
   onAskAI: () => void;
   onCopyResponse: (text: string) => void;
+}
+
+interface MarkdownComponentProps {
+  children?: React.ReactNode;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -32,68 +50,279 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onAskAI,
   onCopyResponse,
 }) => {
-  const bgColor = useColorModeValue("gray.100", "gray.800");
-  const inputBg = useColorModeValue("gray.100", "gray.700");
-  const messageBg = useColorModeValue("gray.50", "gray.900");
-  const textColor = useColorModeValue("gray.800", "white");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const inputBg = useColorModeValue("gray.50", "gray.700");
+  const textColor = useColorModeValue("gray.800", "gray.200");
+  const subTextColor = useColorModeValue("gray.600", "gray.400");
+  const primaryColor = useColorModeValue("teal.600", "blue.300");
+  const codeBg = useColorModeValue("teal.50", "blue.900");
+  const dividerColor = useColorModeValue("gray.200", "gray.600");
+  const askButtonColor = useColorModeValue("teal", "blue");
+  const toast = useToast();
+
+  const formatMarkdown = (text: string) => {
+    const components = {
+      code({ children, ...props }: MarkdownComponentProps) {
+        return (
+          <Code
+            bg={codeBg}
+            p={1}
+            borderRadius="md"
+            fontSize="0.9em"
+            {...props as CodeProps}
+          >
+            {children}
+          </Code>
+        );
+      },
+      h1({ children, ...props }: MarkdownComponentProps) {
+        return (
+          <Heading
+            as="h1"
+            size="lg"
+            color={primaryColor}
+            my={4}
+            {...props as HeadingProps}
+          >
+            {children}
+          </Heading>
+        );
+      },
+      h2({ children, ...props }: MarkdownComponentProps) {
+        return (
+          <Heading
+            as="h2"
+            size="md"
+            color={primaryColor}
+            my={3}
+            {...props as HeadingProps}
+          >
+            {children}
+          </Heading>
+        );
+      },
+      h3({ children, ...props }: MarkdownComponentProps) {
+        return (
+          <Heading
+            as="h3"
+            size="sm"
+            color={primaryColor}
+            my={2}
+            {...props as HeadingProps}
+          >
+            {children}
+          </Heading>
+        );
+      },
+      p({ children, ...props }: MarkdownComponentProps) {
+        return (
+          <Text my={2} lineHeight="tall" {...props as TextProps}>
+            {children}
+          </Text>
+        );
+      },
+    };
+
+    return (
+      <ReactMarkdown components={components}>
+        {text}
+      </ReactMarkdown>
+    );
+  };
+
+  const scrollbarStyles = {
+    "&::-webkit-scrollbar": {
+      width: "6px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: subTextColor,
+      borderRadius: "3px",
+    },
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      onAskAI();
+    }
+  };
 
   return (
-    <Flex direction="column" flex={1} minH="500px" pl={2}>
+    <Flex direction="column" h="90vh" gap={4}>
       <Box
         flex={1}
-        border="1px solid"
-        borderColor={borderColor}
-        borderRadius="12px"
-        bg={bgColor}
+        borderRadius="xl"
+        bg={surfaceColor}
+        p={4}
+        boxShadow="sm"
         overflowY="auto"
-        maxH="420px"
-        minH="420px"
+        css={scrollbarStyles}
       >
-        {currentMessages.map((msg, index) => (
-          <Box key={index} mb={4} p={6} bg={messageBg} borderRadius="12px">
-            <Text fontSize="md" fontWeight="medium" color={textColor}>
-              <strong>You:</strong> {msg.query}
-            </Text>
-            <ReactMarkdown>{msg.response}</ReactMarkdown>
-            <IconButton
-              aria-label="Copy response"
-              icon={<FaCopy />}
-              size="sm"
-              mt={2}
-              onClick={() => onCopyResponse(msg.response)}
+        {currentMessages.length === 0 && !loading ? (
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            h="full"
+            color={subTextColor}
+          >
+            <Avatar
+              icon={<FaRobot />}
+              size="xl"
+              mb={4}
+              bg={primaryColor}
+              color="white"
             />
-          </Box>
-        ))}
-        {loading && (
-          <Box mb={4} p={4} bg={messageBg} borderRadius="12px">
-            <Text fontSize="md" fontWeight="medium" color={textColor}>
-              <strong>You:</strong> {query}
+            <Text fontSize="xl" fontWeight="medium" mb={2}>
+              Welcome to Cognivia AI
             </Text>
-            <Text color={textColor}>
-              {currentResponse}
-              <Spinner size="sm" ml={2} />
+            <Text textAlign="center" maxW="md">
+              Ask me anything about your learning materials or start a new
+              conversation
             </Text>
-          </Box>
+          </Flex>
+        ) : (
+          <VStack spacing={4} align="stretch">
+            {currentMessages.map((msg, index) => (
+              <MotionBox
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <VStack align="stretch" spacing={2}>
+                  <Flex align="center" gap={3}>
+                    <Avatar
+                      icon={<FaUser />}
+                      size="sm"
+                      bg="gray.500"
+                      color="white"
+                    />
+                    <Text fontWeight="medium" color={textColor}>
+                      You
+                    </Text>
+                  </Flex>
+                  <Text color={textColor} pl={10}>
+                    {msg.query}
+                  </Text>
+
+                  <Divider borderColor={dividerColor} my={2} />
+
+                  <Flex align="center" gap={3}>
+                    <Avatar
+                      icon={<FaRobot />}
+                      size="sm"
+                      bg={primaryColor}
+                      color="white"
+                    />
+                    <Text fontWeight="medium" color={textColor}>
+                      Cognivia AI
+                    </Text>
+                    <IconButton
+                      aria-label="Copy response"
+                      icon={<FaCopy />}
+                      size="sm"
+                      variant="ghost"
+                      ml="auto"
+                      onClick={() => {
+                        onCopyResponse(msg.response);
+                        toast({
+                          title: "Copied!",
+                          status: "success",
+                          duration: 2000,
+                          isClosable: true,
+                        });
+                      }}
+                    />
+                  </Flex>
+                  <Box pl={10}>{formatMarkdown(msg.response)}</Box>
+                </VStack>
+              </MotionBox>
+            ))}
+
+            {loading && (
+              <MotionBox
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <VStack align="stretch" spacing={2}>
+                  <Flex align="center" gap={3}>
+                    <Avatar
+                      icon={<FaUser />}
+                      size="sm"
+                      bg="gray.500"
+                      color="white"
+                    />
+                    <Text fontWeight="medium" color={textColor}>
+                      You
+                    </Text>
+                  </Flex>
+                  <Text color={textColor} pl={10}>
+                    {query}
+                  </Text>
+
+                  <Divider borderColor={dividerColor} my={2} />
+
+                  <Flex align="center" gap={3}>
+                    <Avatar
+                      icon={<FaRobot />}
+                      size="sm"
+                      bg={primaryColor}
+                      color="white"
+                    />
+                    <Text fontWeight="medium" color={textColor}>
+                      Cognivia AI
+                    </Text>
+                    <Spinner size="sm" ml="auto" />
+                  </Flex>
+                  <Text color={textColor} pl={10}>
+                    {currentResponse}
+                  </Text>
+                </VStack>
+              </MotionBox>
+            )}
+          </VStack>
         )}
       </Box>
 
-      <HStack p={4} bg={inputBg} borderRadius="12px" mt={2}>
+      <HStack
+        p={2}
+        bg={inputBg}
+        borderRadius="xl"
+        boxShadow="sm"
+        _focusWithin={{
+          boxShadow: `0 0 0 2px ${primaryColor}`,
+        }}
+      >
         <Input
           placeholder="Ask a question..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          size="md"
+          size="lg"
           flex={1}
-          bg={bgColor}
+          bg={surfaceColor}
           color={textColor}
-          onKeyDown={(e) => e.key === "Enter" && onAskAI()}
+          onKeyDown={handleKeyDown}
+          borderRadius="lg"
+          borderColor={dividerColor}
+          _focus={{
+            borderColor: primaryColor,
+            boxShadow: "none",
+          }}
         />
         <Button
-          colorScheme="blue"
+          colorScheme={askButtonColor}
           onClick={onAskAI}
           isLoading={loading}
           leftIcon={<FaRobot />}
+          size="lg"
+          borderRadius="full"
+          px={6}
+          _hover={{
+            transform: "translateY(-2px)",
+            boxShadow: "md",
+          }}
+          transition="all 0.2s"
         >
           Ask
         </Button>
