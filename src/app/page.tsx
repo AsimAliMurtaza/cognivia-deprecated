@@ -25,7 +25,6 @@ export default function LandingPage() {
       bg="white"
       position="relative"
       overflow="hidden"
-      bgGradient="linear(to-br, #E0F7FA, #F3E5F5)"
     >
       <Header />
       {/* Hero Section */}

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Modal,
@@ -12,8 +14,13 @@ import {
   Button,
   useColorModeValue,
   VStack,
-  FormLabel,
+  FormControl,
+  Box,
+  Flex,
+  Avatar,
+  Text,
 } from "@chakra-ui/react";
+import { FiUpload, FiLink, FiEdit2 } from "react-icons/fi";
 
 interface InputModalProps {
   isOpen: boolean;
@@ -42,80 +49,156 @@ const InputModal: React.FC<InputModalProps> = ({
   onGenerate,
   loading,
 }) => {
-  const modalBg = useColorModeValue("white", "gray.800");
-  const inputBg = useColorModeValue("gray.100", "gray.700");
-  const textColor = useColorModeValue("gray.800", "gray.300");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const inputBg = useColorModeValue("gray.50", "gray.700");
+  const textColor = useColorModeValue("gray.800", "gray.200");
+  const subTextColor = useColorModeValue("gray.600", "gray.400");
+  const primaryColor = useColorModeValue("teal.600", "blue.300");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+
+  const getModalTitle = () => {
+    switch (sourceType) {
+      case "prompt":
+        return "Write Your Prompt";
+      case "youtube":
+        return "Enter YouTube Link";
+      case "file":
+        return "Upload Your File";
+      default:
+        return "Provide Input";
+    }
+  };
+
+  const getIcon = () => {
+    switch (sourceType) {
+      case "prompt":
+        return <FiEdit2 size={24} />;
+      case "youtube":
+        return <FiLink size={24} />;
+      case "file":
+        return <FiUpload size={24} />;
+      default:
+        return <FiEdit2 size={24} />;
+    }
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
       <ModalOverlay />
-      <ModalContent borderRadius="lg" bg={modalBg} p={4}>
-        <ModalHeader textAlign="center" color={textColor} fontSize="lg">
-          Provide Your Input
+      <ModalContent borderRadius="2xl" bg={surfaceColor}>
+        <ModalHeader>
+          <Flex align="center" gap={3}>
+            <Avatar icon={getIcon()} bg={primaryColor} color="white" />
+            <Box>
+              <Text fontSize="xl" fontWeight="semibold" color={textColor}>
+                {getModalTitle()}
+              </Text>
+              <Text fontSize="sm" color={subTextColor}>
+                {sourceType === "prompt"
+                  ? "Describe what you need"
+                  : sourceType === "youtube"
+                  ? "Paste a YouTube video URL"
+                  : "Upload a document or image"}
+              </Text>
+            </Box>
+          </Flex>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody>
-          <VStack spacing={4} align="stretch">
+        <ModalBody pb={6}>
+          <VStack spacing={4}>
             {sourceType === "prompt" && (
-              <>
-                <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                  Enter Your Prompt
-                </FormLabel>
+              <FormControl>
                 <Textarea
-                  placeholder="Write your prompt here..."
+                  placeholder="Example: Summarize the key points about machine learning..."
                   value={promptText}
                   onChange={(e) => setPromptText(e.target.value)}
                   bg={inputBg}
                   borderColor={borderColor}
-                  _focus={{ borderColor: "teal.400", boxShadow: "md" }}
-                  minHeight="150px"
+                  borderRadius="lg"
+                  minH="200px"
+                  _focus={{
+                    borderColor: primaryColor,
+                    boxShadow: `0 0 0 1px ${primaryColor}`,
+                  }}
                 />
-              </>
+              </FormControl>
             )}
 
             {sourceType === "youtube" && (
-              <>
-                <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                  YouTube Video Link
-                </FormLabel>
+              <FormControl>
                 <Input
-                  placeholder="Enter YouTube link..."
+                  placeholder="https://www.youtube.com/watch?v=..."
                   value={youtubeLink}
                   onChange={(e) => setYoutubeLink(e.target.value)}
                   bg={inputBg}
                   borderColor={borderColor}
-                  _focus={{ borderColor: "teal.400", boxShadow: "md" }}
+                  borderRadius="lg"
+                  _focus={{
+                    borderColor: primaryColor,
+                    boxShadow: `0 0 0 1px ${primaryColor}`,
+                  }}
                 />
-              </>
+              </FormControl>
             )}
 
             {sourceType === "file" && (
-              <>
-                <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                  Upload a File
-                </FormLabel>
-                <Input
-                  type="file"
-                  accept="image/*,.pdf,.doc,.docx"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  bg={inputBg}
+              <FormControl>
+                <Box
+                  border="2px dashed"
                   borderColor={borderColor}
-                  _focus={{ borderColor: "teal.400", boxShadow: "md" }}
-                  p={1}
-                />
-              </>
+                  borderRadius="lg"
+                  p={6}
+                  textAlign="center"
+                  bg={inputBg}
+                  _hover={{ borderColor: primaryColor }}
+                >
+                  <Input
+                    type="file"
+                    accept="image/*,.pdf,.doc,.docx,.txt"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    position="absolute"
+                    opacity={0}
+                    width="100%"
+                    height="100%"
+                    top={0}
+                    left={0}
+                    cursor="pointer"
+                  />
+                  <VStack spacing={2}>
+                    <FiUpload size={32} />
+                    <Text fontWeight="medium" color={textColor}>
+                      {file ? file.name : "Click to upload or drag and drop"}
+                    </Text>
+                    <Text fontSize="sm" color={subTextColor}>
+                      Supports PDF, DOC, TXT, and images
+                    </Text>
+                  </VStack>
+                </Box>
+              </FormControl>
             )}
           </VStack>
         </ModalBody>
 
         <ModalFooter>
           <Button
-            colorScheme="teal"
+            variant="outline"
+            mr={3}
+            onClick={onClose}
+            borderRadius="full"
+          >
+            Cancel
+          </Button>
+          <Button
+            colorScheme="blue"
             onClick={onGenerate}
             isLoading={loading}
-            isDisabled={!promptText && !youtubeLink && !file}
-            w="full"
+            isDisabled={
+              (sourceType === "prompt" && !promptText) ||
+              (sourceType === "youtube" && !youtubeLink) ||
+              (sourceType === "file" && !file)
+            }
+            borderRadius="full"
+            px={6}
           >
             Generate Notes
           </Button>

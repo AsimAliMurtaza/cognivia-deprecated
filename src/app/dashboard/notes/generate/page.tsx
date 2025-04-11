@@ -9,6 +9,7 @@ import {
   useToast,
   Button,
   useColorModeValue,
+  Divider,
 } from "@chakra-ui/react";
 import HistoryList from "@/components/notes-generation-components/HistoryList";
 import NotesDisplay from "@/components/notes-generation-components/NotesDisplay";
@@ -35,6 +36,10 @@ export default function SmartNotesGenerator() {
     onClose: closeInputModal,
   } = useDisclosure();
   const toast = useToast();
+
+  // Color Mode Values
+  const primaryColor = useColorModeValue("teal.500", "blue.400");
+  const buttonColor = useColorModeValue("teal", "blue");
 
   const handleOptionSelect = (type: "prompt" | "youtube" | "file") => {
     setSourceType(type);
@@ -79,39 +84,31 @@ export default function SmartNotesGenerator() {
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/ask?query=${encodeURIComponent(input)}`,
-
         {
           method: "GET",
-
           headers: { "Content-Type": "application/json" },
         }
       );
 
       if (!response.ok) throw new Error("Failed to generate notes");
 
-      // Read the response as a stream
-
       const reader = response.body?.getReader();
-
       if (!reader) throw new Error("Failed to read response");
 
       let result = "";
-
       while (true) {
         const { done, value } = await reader.read();
-
         if (done) break;
-
         result += new TextDecoder().decode(value);
       }
 
       return result;
     } catch (error) {
       console.error("Error:", error);
-
       return "Failed to generate notes.";
     }
   };
+
   const handleChatClick = (chat: {
     sourceType: string | null;
     content: string;
@@ -139,41 +136,36 @@ export default function SmartNotesGenerator() {
     });
   };
 
-  // Color Mode Support
-  const headerColor = useColorModeValue("teal.600", "teal.300");
-  const buttonColor = useColorModeValue("teal.400", "teal.200");
-
   return (
-    <Box
-      p={{ base: 4, md: 6 }}
-      maxW="1200px"
-      mx="auto"
-      maxH="100vh"
-    >
+    <Box maxW="1400px" mx="auto" minH="calc(100vh - 80px)">
       <Flex
         justifyContent="space-between"
         alignItems="center"
         mb={6}
         wrap="wrap"
+        gap={4}
       >
-        <Heading size="lg" fontWeight="medium" color={headerColor}>
-          Smart Notes Generator
+        <Heading size="xl" fontWeight="semibold" color={primaryColor}>
+          Smart Notes
         </Heading>
         <Button
-          color={buttonColor}
-          fontSize="sm"
-          fontWeight="medium"
-          variant="ghost"
+          colorScheme={buttonColor}
+          size="lg"
+          borderRadius="full"
           onClick={onOpen}
+          _hover={{
+            transform: "translateY(-2px)",
+            boxShadow: "md",
+          }}
+          transition="all 0.2s"
         >
-          Start Generating Notes
+          Create
         </Button>
       </Flex>
-      <Flex
-        direction={{ base: "column", md: "row" }}
-        gap={6}
-        h={{ base: "auto", md: "60vh" }}
-      >
+
+      <Divider mb={4} borderColor={useColorModeValue("gray.200", "gray.600")} />
+
+      <Flex direction={{ base: "column", lg: "row" }} gap={6} minH="70vh">
         <HistoryList
           chatHistory={chatHistory}
           onChatClick={handleChatClick}
@@ -184,6 +176,7 @@ export default function SmartNotesGenerator() {
           onCopyNotes={handleCopyNotes}
         />
       </Flex>
+
       <SelectionModal
         isOpen={isOpen}
         onClose={onClose}

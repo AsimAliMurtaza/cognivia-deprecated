@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Button,
@@ -7,8 +9,15 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  Box,
+  Avatar,
+  Divider,
+  Badge,
 } from "@chakra-ui/react";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { motion } from "framer-motion";
+
+const MotionBox = motion(Box);
 
 interface ChatHistoryProps {
   chatHistory: Record<
@@ -33,88 +42,100 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
   onOpenChat,
   onDeleteChat,
 }) => {
-  const bg = useColorModeValue("gray.100", "gray.800");
-  const hoverBg = useColorModeValue("gray.200", "gray.700");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const hoverBg = useColorModeValue("gray.100", "gray.700");
+  const activeBg = useColorModeValue("teal.50", "blue.900");
   const textColor = useColorModeValue("gray.800", "gray.200");
-  const buttonBg = useColorModeValue("blue.500", "blue.300");
-  const buttonHoverBg = useColorModeValue("blue.600", "blue.400");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
+  const subTextColor = useColorModeValue("gray.600", "gray.400");
+  const primaryColor = useColorModeValue("teal.600", "blue.300");
+  const dividerColor = useColorModeValue("gray.200", "gray.600");
+  const askButtonColor = useColorModeValue("teal", "blue");
 
   return (
-    <Flex
-      direction="column"
-      w={{ base: "full", md: "280px" }}
-      p={4}
-      bg={bg}
-      border="1px solid"
-      borderColor={borderColor}
-      borderRadius={{ base: "lg", md: "lg" }}
+    <VStack spacing={4} p={4} h="90vh" bg={surfaceColor} align="stretch">
+      <Flex justify="space-between" align="center">
+        <Heading size="md" fontWeight="semibold" color={textColor}>
+          Conversations
+        </Heading>
+        <Badge colorScheme="blue" variant="subtle">
+          {Object.keys(chatHistory).length}
+        </Badge>
+      </Flex>
 
-      boxShadow={{ md: "md" }}
-      overflowY="auto"
-      maxH="500px"
-    >
-      <Heading
-        size="sm"
-        fontWeight="thin"
-        mb={4}
-        textAlign="center"
-        color={textColor}
-      >
-        Chat History
-      </Heading>
+      <Divider borderColor={dividerColor} />
+
       <Button
-        bg={buttonBg}
-        color="white"
-        _hover={{ bg: buttonHoverBg }}
+        colorScheme={askButtonColor}
         onClick={onNewChat}
-        mb={4}
         leftIcon={<FaPlus />}
-        w="full"
+        size="lg"
+        borderRadius="full"
+        _hover={{
+          transform: "translateY(-2px)",
+          boxShadow: "md",
+        }}
+        transition="all 0.2s"
       >
         New Chat
       </Button>
+
       <VStack spacing={2} align="stretch" overflowY="auto">
         {Object.entries(chatHistory)
           .sort(([, a], [, b]) => b.timestamp - a.timestamp)
           .map(([chatId, data]) => (
-            <Flex
+            <MotionBox
               key={chatId}
-              p={4}
-              bg={currentChatId === chatId ? hoverBg : bg}
-              borderRadius="md"
-              align="center"
-              justify="space-between"
-              cursor="pointer"
-              _hover={{ bg: hoverBg }}
-              transition="background 0.2s ease-in-out"
-              border="1px solid"
-              borderColor={borderColor}
-              onClick={() => onOpenChat(chatId)}
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
-              <Text
-                fontSize="sm"
-                fontWeight="medium"
-                color={textColor}
-                noOfLines={1}
+              <Flex
+                p={3}
+                borderRadius="lg"
+                align="center"
+                justify="space-between"
+                cursor="pointer"
+                bg={currentChatId === chatId ? activeBg : "transparent"}
+                _hover={{ bg: hoverBg }}
+                transition="background 0.2s ease"
+                onClick={() => onOpenChat(chatId)}
               >
-                {data.title}
-              </Text>
-              <IconButton
-                aria-label="Delete chat"
-                icon={<FaTrash />}
-                size="xs"
-                colorScheme="red"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteChat(chatId);
-                }}
-              />
-            </Flex>
+                <Flex align="center" gap={3} overflow="hidden">
+                  <Avatar
+                    size="sm"
+                    name={data.title}
+                    bg={primaryColor}
+                    color="white"
+                  />
+                  <Box overflow="hidden">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color={textColor}
+                      noOfLines={1}
+                    >
+                      {data.title}
+                    </Text>
+                    <Text fontSize="xs" color={subTextColor} noOfLines={1}>
+                      {new Date(data.timestamp).toLocaleString()}
+                    </Text>
+                  </Box>
+                </Flex>
+                <IconButton
+                  aria-label="Delete chat"
+                  icon={<FaTrash />}
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="red"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteChat(chatId);
+                  }}
+                />
+              </Flex>
+            </MotionBox>
           ))}
       </VStack>
-    </Flex>
+    </VStack>
   );
 };
 
