@@ -1,78 +1,120 @@
 "use client";
 
-import { Button, Heading, Text, VStack, Flex, useColorModeValue } from "@chakra-ui/react";
+import {
+  Button,
+  Heading,
+  Text,
+  VStack,
+  Flex,
+  useColorModeValue,
+  Box,
+  Icon,
+  BoxProps,
+} from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { FaExclamationTriangle, FaArrowLeft, FaHome } from "react-icons/fa";
+
+const MotionBox = motion(Box);
 
 export default function SignInErrorPage() {
   const router = useRouter();
 
-  // Soft pastel colors
-  const cardBg = useColorModeValue("white", "white");
-  const buttonBg = useColorModeValue("#6EC3C4", "#5AA8A9"); // Soft teal
-  const buttonHoverBg = useColorModeValue("#5AA8A9", "#4A8C8D"); // Darker teal
+  // Material You inspired colors with teal/blue theming
+  const cardBg = useColorModeValue("white", "gray.800");
   const errorColor = useColorModeValue("red.500", "red.300");
+  const textColor = useColorModeValue("gray.700", "gray.200");
+  const secondaryText = useColorModeValue("gray.600", "gray.400");
+  const outlineButtonHoverBg = useColorModeValue("gray.100", "gray.700");
+  const errorIconBg = useColorModeValue("red.50", "red.900");
+  const buttonColorScheme = useColorModeValue("teal", "blue");
+  const flexColor = useColorModeValue("gray.50", "gray.900");
+
+  const handleLoginRedirect = () => router.push("/login");
+  const handleHomeRedirect = () => router.push("/");
+
+  const buttonHoverStyles: BoxProps["_hover"] = {
+    transform: "translateY(-2px)",
+    boxShadow: "md",
+  };
 
   return (
-    <Flex
-      minH="100vh"
-      bgGradient="linear(to-br, #E0F7FA, #F3E5F5)" // Soft pastel gradient
-      justify="center"
-      align="center"
-      p={4}
-    >
-      <motion.div
+    <Flex minH="100vh" bg={flexColor} justify="center" align="center" p={4}>
+      <MotionBox
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <VStack
-          spacing={6}
+        <Box
+          as="article"
           p={8}
           borderRadius="2xl"
-          boxShadow="2xl"
+          boxShadow="lg"
           bg={cardBg}
           textAlign="center"
-          maxW="400px"
+          maxW="md"
           w="full"
         >
-          <Heading size="xl" color={errorColor} fontWeight="bold">
-            Sign-In Error
-          </Heading>
-          <Text fontSize="md" color="gray.600">
-            Oops! Something went wrong with your sign-in. Please check your
-            credentials and try again.
-          </Text>
+          <VStack spacing={6}>
+            <Box
+              p={4}
+              borderRadius="full"
+              bg={errorIconBg}
+              display="inline-flex"
+            >
+              <Icon
+                as={FaExclamationTriangle}
+                boxSize={8}
+                color={errorColor}
+                aria-hidden="true"
+              />
+            </Box>
 
-          <VStack spacing={4} w="full">
-            <Button
-              onClick={() => router.push("/login")}
-              bg={buttonBg}
-              color="white"
-              _hover={{ bg: buttonHoverBg, transform: "scale(1.05)" }}
-              _active={{ bg: "#4A8C8D" }}
-              w="full"
-              size="lg"
-              transition="all 0.2s"
-            >
-              Back to Login
-            </Button>
-            <Button
-              onClick={() => router.push("/")}
-              variant="outline"
-              color={buttonBg}
-              borderColor={buttonBg}
-              _hover={{ bg: "#E0F7FA", transform: "scale(1.05)" }}
-              _active={{ bg: "#D1E8E8" }}
-              w="full"
-              size="lg"
-              transition="all 0.2s"
-            >
-              Go to Home
-            </Button>
+            <Heading as="h1" size="xl" color={textColor} fontWeight="semibold">
+              Sign-In Error
+            </Heading>
+
+            <Text fontSize="md" color={secondaryText} lineHeight="tall">
+              Oops! We couldn&apos;t sign you in. Please check your credentials and
+              try again.
+            </Text>
+
+            <VStack spacing={4} w="full" pt={4}>
+              <Button
+                onClick={handleLoginRedirect}
+                colorScheme={buttonColorScheme}
+                leftIcon={<FaArrowLeft />}
+                w="full"
+                size="lg"
+                borderRadius="full"
+                _hover={buttonHoverStyles}
+                transition="all 0.2s"
+                aria-label="Return to login page"
+              >
+                Back to Login
+              </Button>
+
+              <Button
+                onClick={handleHomeRedirect}
+                variant="outline"
+                colorScheme={buttonColorScheme}
+                leftIcon={<FaHome />}
+                w="full"
+                size="lg"
+                borderRadius="full"
+                _hover={{
+                  ...buttonHoverStyles,
+                  bg: outlineButtonHoverBg,
+                }}
+                transition="all 0.2s"
+                aria-label="Go to home page"
+              >
+                Go to Home
+              </Button>
+            </VStack>
           </VStack>
-        </VStack>
-      </motion.div>
+        </Box>
+      </MotionBox>
     </Flex>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Box,
@@ -9,9 +11,13 @@ import {
   Tooltip,
   Text,
   useColorModeValue,
+  Avatar,
+  Flex,
+  Divider,
 } from "@chakra-ui/react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { motion } from "framer-motion";
+import { FiFileText, FiYoutube, FiImage } from "react-icons/fi";
 
 const MotionCard = motion(Card);
 
@@ -34,88 +40,117 @@ const HistoryList: React.FC<HistoryListProps> = ({
   onChatClick,
   onDeleteChat,
 }) => {
-  const bg = useColorModeValue("gray.100", "gray.800");
-  const cardBg = useColorModeValue("white", "gray.700");
-  const textColor = useColorModeValue("teal.700", "teal.300");
-  const dateColor = useColorModeValue("gray.600", "gray.400");
-  const hoverBg = useColorModeValue("gray.200", "gray.600");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const primaryColor = useColorModeValue("teal.600", "blue.300");
+  const secondaryColor = useColorModeValue("teal.500", "blue.400");
+  const textColor = useColorModeValue("gray.800", "gray.200");
+  const subTextColor = useColorModeValue("gray.600", "gray.400");
+  const hoverBg = useColorModeValue("gray.100", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+
+  const getIcon = (sourceType: string | null) => {
+    switch (sourceType) {
+      case "prompt":
+        return <FiFileText />;
+      case "youtube":
+        return <FiYoutube />;
+      case "file":
+        return <FiImage />;
+      default:
+        return <FiFileText />;
+    }
+  };
 
   return (
     <Box
       flex="1"
-      maxW={{ base: "100%", md: "300px" }}
+      maxW={{ base: "100%", lg: "350px" }}
       borderRadius="2xl"
       border="1px solid"
       borderColor={borderColor}
       p={4}
       overflowY="auto"
       boxShadow="lg"
-      bg={bg}
-      minH="450px"
-      h="350px" // Fixed height
+      bg={surfaceColor}
+      minH="500px"
     >
       <Heading
-        size="md"
-        fontWeight="thin"
+        size="lg"
+        fontWeight="semibold"
         mb={4}
-        color={textColor}
+        color={primaryColor}
         textAlign="center"
       >
         Notes History
       </Heading>
-      <VStack spacing={4} align="stretch">
+
+      <Divider mb={4} borderColor={borderColor} />
+
+      <VStack spacing={3} align="stretch">
         {chatHistory.length > 0 ? (
           chatHistory.map((chat, index) => (
             <MotionCard
               key={index}
-              borderRadius="lg"
-              boxShadow="md"
-              whileHover={{ scale: 1.02 }}
+              borderRadius="xl"
+              boxShadow="sm"
+              whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300 }}
               cursor="pointer"
-              bg={cardBg}
+              bg="transparent"
+              border="1px solid"
+              borderColor={borderColor}
               _hover={{ bg: hoverBg }}
+              onClick={() => onChatClick(chat)}
             >
               <CardHeader
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-                onClick={() => onChatClick(chat)}
                 p={3}
               >
-                <Box>
-                  <Heading size="xs" color={dateColor}>
-                    {chat.date}
-                  </Heading>
-                  <Text
-                    fontSize="sm"
-                    fontWeight="medium"
-                    color={textColor}
-                    noOfLines={1}
-                  >
-                    {chat.content}
-                  </Text>
-                </Box>
-                <Tooltip label="Delete Chat">
+                <Flex align="center" gap={3}>
+                  <Avatar
+                    size="sm"
+                    icon={getIcon(chat.sourceType)}
+                    bg={secondaryColor}
+                    color="white"
+                  />
+                  <Box>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color={textColor}
+                      noOfLines={1}
+                    >
+                      {chat.content.substring(0, 40)}...
+                    </Text>
+                    <Text fontSize="xs" color={subTextColor}>
+                      {chat.date}
+                    </Text>
+                  </Box>
+                </Flex>
+                <Tooltip label="Delete Note" hasArrow>
                   <IconButton
                     icon={<AiOutlineDelete />}
                     size="sm"
+                    variant="ghost"
                     colorScheme="red"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDeleteChat(index);
                     }}
-                    aria-label="Delete Chat"
+                    aria-label="Delete Note"
                   />
                 </Tooltip>
               </CardHeader>
             </MotionCard>
           ))
         ) : (
-          <Text textAlign="center" fontSize="sm" color={dateColor} mt={4}>
-            No chat history available.
-          </Text>
+          <Box textAlign="center" py={8}>
+            <Text fontSize="md" color={subTextColor}>
+              No notes history available
+            </Text>
+          </Box>
         )}
       </VStack>
     </Box>
