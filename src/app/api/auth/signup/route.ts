@@ -1,7 +1,11 @@
+// app/api/auth/signup/route.ts
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import crypto from "crypto";
+import {sendVerificationEmail} from "@/lib/mailer";
+
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -16,10 +20,26 @@ export async function POST(req: Request) {
       );
     }
 
-    const newUser = new User({ email, password: hashedPassword });
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      verified: false,
+      verificationToken,
+    });
+
     await newUser.save();
 
-    return NextResponse.json({ message: "User created" }, { status: 201 });
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const verifyLink = `${baseUrl}/verify-email?token=${verificationToken}`;
+
+    await sendVerificationEmail(email, verifyLink);
+
+    return NextResponse.json(
+      { message: "User created. Verification email sent." },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Signup Error:", error);
     return NextResponse.json(

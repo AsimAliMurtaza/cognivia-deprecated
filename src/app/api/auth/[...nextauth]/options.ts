@@ -6,7 +6,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
-// Extend session and token types to avoid `any`
+// Extend session and token types
 interface ExtendedSession extends NextAuthSession {
   user: {
     id: string;
@@ -39,11 +39,15 @@ export const authOptions: NextAuthOptions = {
         }
 
         await dbConnect();
-
         const user = await User.findOne({ email: credentials.email });
 
         if (!user) {
           throw new Error("User not found");
+        }
+
+        // ✅ Check if the user is verified
+        if (!user.verified) {
+          throw new Error("Please verify your email before logging in.");
         }
 
         const isValidPassword = await bcrypt.compare(
@@ -75,7 +79,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id; // Store user ID in the token
+        token.id = user.id;
       }
       return token;
     },
@@ -84,7 +88,7 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
-          id: token.id as string, // Ensure `id` is typed properly
+          id: token.id as string,
         },
       };
     },
