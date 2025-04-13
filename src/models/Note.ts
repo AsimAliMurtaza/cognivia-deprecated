@@ -1,18 +1,20 @@
-import mongoose, { Schema, Document, models, model } from "mongoose";
+import { Schema, Document, models, model } from "mongoose";
 
-// Define the TypeScript interface
 export interface INote extends Document {
+  _id: string;
   userID: string;
-  noteID: string;
-  content: string;
+  prompt: string;
+  generated_quiz: string;
+  createdAt: Date;
 }
 
-// Define the schema
 const NoteSchema = new Schema<INote>(
   {
+    _id: { type: String, required: true },
     userID: { type: String, required: true },
-    noteID: { type: String, required: true, unique: true },
-    content: { type: String, required: true },
+    prompt: { type: String, required: true },
+    generated_quiz: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

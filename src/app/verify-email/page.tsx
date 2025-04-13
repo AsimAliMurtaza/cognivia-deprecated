@@ -1,4 +1,3 @@
-// app/verify-email/page.tsx
 'use client';
 
 import {
@@ -11,12 +10,13 @@ import {
   Icon,
 } from '@chakra-ui/react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 type StatusType = 'verifying' | 'success' | 'error';
 
-export default function VerifyEmail() {
+function VerifyEmailContent() {
   const token = useSearchParams().get('token');
   const router = useRouter();
   const [status, setStatus] = useState<StatusType>('verifying');
@@ -78,5 +78,20 @@ export default function VerifyEmail() {
         </VStack>
       </Box>
     </Center>
+  );
+}
+
+export default function VerifyEmail() {
+  return (
+    <Suspense fallback={
+      <Center minH="100vh" bg="gray.100">
+        <Box p={10} rounded="2xl" bg="white" shadow="lg" textAlign="center" maxW="sm">
+          <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+          <Text mt={4}>Loading verification...</Text>
+        </Box>
+      </Center>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

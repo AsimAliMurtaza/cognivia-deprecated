@@ -75,7 +75,7 @@ export default function AIAssistant() {
 
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/ask?query=${encodeURIComponent(query)}`
+        `http://127.0.0.1:8000/ollama?query=${encodeURIComponent(query)}`
       );
 
       if (!res.body) throw new Error("No response body");

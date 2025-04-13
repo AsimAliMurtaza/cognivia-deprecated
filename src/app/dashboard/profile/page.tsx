@@ -35,7 +35,6 @@ import {
   CardHeader,
   CardBody,
   CircularProgress,
-  CircularProgressLabel,
   Heading,
   Select,
   Spinner,
@@ -73,7 +72,7 @@ export default function EditProfilePage() {
 
   // State for form fields
   const [name, setName] = useState(session?.user?.name);
-  const [email, setEmail] = useState(session?.user?.email || "");
+  const [email] = useState(session?.user?.email || "");
   const [image, setImage] = useState(session?.user?.image || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -85,7 +84,7 @@ export default function EditProfilePage() {
   const [gender, setGender] = useState(session?.user?.gender);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-   const [toggling, setToggling] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   // Color scheme
   const cardBg = useColorModeValue("white", "gray.800");
@@ -97,6 +96,7 @@ export default function EditProfilePage() {
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const colorSchemeColor = useColorModeValue("teal", "blue");
   const redColorScheme = useColorModeValue("red.50", "red.900");
+  const inputColor = useColorModeValue("gray.100", "gray.600");
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -144,6 +144,7 @@ export default function EditProfilePage() {
         isClosable: true,
       });
     } catch (err) {
+      console.log(err);
       toast({
         title: "Error updating 2FA setting",
         status: "error",
@@ -437,7 +438,7 @@ export default function EditProfilePage() {
                     </FormLabel>
                     <Input
                       type="text"
-                      value={name}
+                      value={name || ""}
                       onChange={(e) => setName(e.target.value)}
                       bg={inputBg}
                       borderColor={borderColor}
@@ -466,14 +467,14 @@ export default function EditProfilePage() {
                       _disabled={{
                         opacity: 1,
                         cursor: "not-allowed",
-                        bg: useColorModeValue("gray.100", "gray.600"),
+                        bg: inputColor,
                       }}
                     />
                   </FormControl>
                   <FormControl>
                     <FormLabel color={textColor}>Gender</FormLabel>
                     <Select
-                      value={gender}
+                      value={gender || ""}
                       onChange={(e) => setGender(e.target.value)}
                       bg={inputBg}
                       borderColor={borderColor}
@@ -526,7 +527,7 @@ export default function EditProfilePage() {
                     <Text fontSize="md" fontWeight="sm" color={textColor}>
                       Two-Factor Authentication (2FA)
                     </Text>
-                    
+
                     {loading ? (
                       <Spinner size="sm" />
                     ) : (

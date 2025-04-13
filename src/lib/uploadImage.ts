@@ -23,6 +23,7 @@ export const uploadImage = async (
 
     // Return the download URL
     return downloadURL;
+    onProgress?.(0); // Initialize progress to 0
   } catch (error) {
     console.error("Error uploading image:", error);
 

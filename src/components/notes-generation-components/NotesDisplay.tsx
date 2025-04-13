@@ -17,8 +17,6 @@ import {
   OrderedList,
   ListItem,
   BoxProps,
-  Button,
-  Spinner,
 } from "@chakra-ui/react";
 import { AiOutlineCopy } from "react-icons/ai";
 import { motion } from "framer-motion";
@@ -28,8 +26,6 @@ const MotionBox = motion(Box);
 interface NotesDisplayProps {
   generatedNotes: string;
   onCopyNotes: (text: string) => void;
-  onFetchNotes: () => void;
-  isLoading: boolean;
 }
 
 type MarkdownComponentProps = {
@@ -40,8 +36,6 @@ type MarkdownComponentProps = {
 const NotesDisplay: React.FC<NotesDisplayProps> = ({
   generatedNotes,
   onCopyNotes,
-  onFetchNotes,
-  isLoading,
 }) => {
   const surfaceColor = useColorModeValue("white", "gray.800");
   const primaryColor = useColorModeValue("teal.600", "blue.300");
@@ -106,8 +100,21 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
           {children}
         </Code>
       ) : (
-        <Box as="pre" p={3} borderRadius="md" bg={codeBg} overflowX="auto" my={4} {...props}>
-          <Code display="block" whiteSpace="pre" color={textColor} fontSize="0.9em">
+        <Box
+          as="pre"
+          p={3}
+          borderRadius="md"
+          bg={codeBg}
+          overflowX="auto"
+          my={4}
+          {...props}
+        >
+          <Code
+            display="block"
+            whiteSpace="pre"
+            color={textColor}
+            fontSize="0.9em"
+          >
             {children}
           </Code>
         </Box>
@@ -154,15 +161,6 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
           {generatedNotes ? "Generated Notes" : "Notes Preview"}
         </Heading>
         <Flex gap={3} align="center">
-          <Button
-            size="sm"
-            variant="outline"
-            colorScheme="teal"
-            onClick={onFetchNotes}
-            isLoading={isLoading}
-          >
-            View All Notes
-          </Button>
           {generatedNotes && (
             <Tooltip label="Copy to clipboard" hasArrow>
               <IconButton
@@ -180,32 +178,17 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
 
       <Divider mb={4} borderColor={borderColor} />
 
-      {isLoading ? (
-        <Flex height="400px" justify="center" align="center">
-          <Spinner color={primaryColor} size="lg" />
-        </Flex>
-      ) : generatedNotes ? (
-        <MotionBox
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          overflowY="auto"
-          maxH="400px"
-          pr={2}
-          css={scrollbarStyles}
-        >
-          <ReactMarkdown components={components}>{generatedNotes}</ReactMarkdown>
-        </MotionBox>
-      ) : (
-        <Flex direction="column" align="center" justify="center" height="400px" color={subTextColor}>
-          <Text fontSize="lg" mb={4}>
-            No notes generated yet
-          </Text>
-          <Text textAlign="center" maxW="md">
-            Create or view saved notes from database
-          </Text>
-        </Flex>
-      )}
+      <MotionBox
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        overflowY="auto"
+        maxH="400px"
+        pr={2}
+        css={scrollbarStyles}
+      >
+        <ReactMarkdown components={components}>{generatedNotes}</ReactMarkdown>
+      </MotionBox>
     </Box>
   );
 };
