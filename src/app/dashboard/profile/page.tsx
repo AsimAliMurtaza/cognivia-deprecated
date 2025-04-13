@@ -38,6 +38,7 @@ import {
   CircularProgressLabel,
   Heading,
   Select,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   FiCamera,
@@ -78,12 +79,13 @@ export default function EditProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(65);
   const [gender, setGender] = useState(session?.user?.gender);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+   const [toggling, setToggling] = useState(false);
 
   // Color scheme
   const cardBg = useColorModeValue("white", "gray.800");
@@ -122,6 +124,36 @@ export default function EditProfilePage() {
     router.push("/login");
     return null;
   }
+
+  const toggle2FA = async () => {
+    try {
+      setToggling(true);
+      const res = await fetch("/api/settings/2fa", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is2FAEnabled: !is2FAEnabled }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update 2FA setting");
+
+      setIs2FAEnabled(!is2FAEnabled);
+      toast({
+        title: `2FA ${!is2FAEnabled ? "enabled" : "disabled"} successfully`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: "Error updating 2FA setting",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setToggling(false);
+    }
+  };
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -300,28 +332,18 @@ export default function EditProfilePage() {
   };
 
   return (
-    <Container maxW="container.XL" >
+    <Container maxW="container.XL">
       <MotionBox
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <VStack spacing={8} align="stretch">
+        <VStack spacing={4} align="stretch">
           {/* Profile Header */}
           <HStack justify="space-between" align="center">
-            <Heading size="xl" fontWeight="semibold" color={textColor}>
+            <Heading size="lg" fontWeight="semibold" color={textColor}>
               Profile Settings
             </Heading>
-            <CircularProgress
-              value={profileCompletion}
-              color={primaryColor}
-              size="60px"
-              thickness="8px"
-            >
-              <CircularProgressLabel>
-                {profileCompletion}%
-              </CircularProgressLabel>
-            </CircularProgress>
           </HStack>
 
           <Grid templateColumns={{ base: "1fr", md: "1fr 2fr" }} gap={8}>
@@ -498,21 +520,26 @@ export default function EditProfilePage() {
             </CardHeader>
             <CardBody>
               <VStack spacing={6} align="stretch">
-                <HStack justify="space-between">
-                  <Box>
-                    <Text fontWeight="medium" color={textColor}>
-                      Two-Factor Authentication
+                {/* 2FA Toggle */}
+                <Box textAlign="left" w="full">
+                  <HStack justify="space-between">
+                    <Text fontSize="md" fontWeight="sm" color={textColor}>
+                      Two-Factor Authentication (2FA)
                     </Text>
-                    <Text fontSize="sm" color={secondaryText}>
-                      Add an extra layer of security to your account
-                    </Text>
-                  </Box>
-                  <Switch
-                    colorScheme={colorSchemeColor}
-                    isChecked={twoFactorEnabled}
-                    onChange={() => setTwoFactorEnabled(!twoFactorEnabled)}
-                  />
-                </HStack>
+                    
+                    {loading ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <Switch
+                        size="lg"
+                        colorScheme="teal"
+                        isChecked={is2FAEnabled}
+                        onChange={toggle2FA}
+                        isDisabled={toggling}
+                      />
+                    )}
+                  </HStack>
+                </Box>
 
                 <Divider borderColor={borderColor} />
 

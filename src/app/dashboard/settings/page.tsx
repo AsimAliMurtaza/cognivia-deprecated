@@ -13,22 +13,33 @@ import {
   useColorModeValue,
   HStack,
   Select,
-  Badge,
   IconButton,
   useToast,
   Spinner,
+  VStack,
+  FormControl,
+  FormLabel,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Heading,
 } from "@chakra-ui/react";
-import { FiArrowLeft, FiSun, FiMoon } from "react-icons/fi";
+import { FiArrowLeft, FiSun, FiMoon, FiBell, FiMail } from "react-icons/fi";
 
-export default function SettingsPage() {
+export default function AppSettingsPage() {
   const router = useRouter();
   const { colorMode, toggleColorMode } = useColorMode();
-  const [language, setLanguage] = useState("English");
-  const [subscription, setSubscription] = useState("Basic");
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [toggling, setToggling] = useState(false);
   const toast = useToast();
+
+  // App settings state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [emailAlertsEnabled, setEmailAlertsEnabled] = useState(true);
+  const [fontSize, setFontSize] = useState(16);
+  const [appLanguage, setAppLanguage] = useState("English");
+  const [autoSave, setAutoSave] = useState(true);
+  const [saveInterval, setSaveInterval] = useState(5);
 
   const bg = useColorModeValue("gray.50", "gray.800");
   const textColor = useColorModeValue("gray.700", "gray.200");
@@ -36,16 +47,22 @@ export default function SettingsPage() {
   const primaryColor = "#6EC3C4";
   const hoverBg = useColorModeValue("#E0F7FA", "gray.700");
 
-  // Fetch current 2FA setting
+  // Fetch initial settings
   useEffect(() => {
-    const fetch2FAStatus = async () => {
+    const fetchSettings = async () => {
       try {
-        const res = await fetch("/api/settings/2fa");
-        const data = await res.json();
-        setIs2FAEnabled(data.is2FAEnabled);
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Set initial values from API response
+        setNotificationsEnabled(true);
+        setEmailAlertsEnabled(true);
+        setFontSize(16);
+        setAppLanguage("English");
+        setAutoSave(true);
+        setSaveInterval(5);
       } catch (err) {
         toast({
-          title: "Error loading 2FA setting",
+          title: "Error loading settings",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -54,45 +71,37 @@ export default function SettingsPage() {
         setLoading(false);
       }
     };
-    fetch2FAStatus();
+    fetchSettings();
   }, [toast]);
 
-  const toggle2FA = async () => {
+  const saveSettings = async () => {
     try {
-      setToggling(true);
-      const res = await fetch("/api/settings/2fa", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is2FAEnabled: !is2FAEnabled }),
-      });
+      setLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (!res.ok) throw new Error("Failed to update 2FA setting");
-
-      setIs2FAEnabled(!is2FAEnabled);
       toast({
-        title: `2FA ${!is2FAEnabled ? "enabled" : "disabled"} successfully`,
+        title: "Settings saved successfully",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
     } catch (err) {
       toast({
-        title: "Error updating 2FA setting",
+        title: "Error saving settings",
         status: "error",
         duration: 3000,
         isClosable: true,
       });
     } finally {
-      setToggling(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Container maxW="container.2xl" py={10}>
+    <Container maxW="container.xl" py={6}>
       <Box
         p={6}
-        borderRadius="2xl"
-        boxShadow="2xl"
         bg={bg}
         w="100%"
         textAlign="center"
@@ -107,22 +116,25 @@ export default function SettingsPage() {
             color={textColor}
             _hover={{ bg: hoverBg }}
           />
-          <IconButton
-            aria-label="Toggle Theme"
-            icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
-            onClick={toggleColorMode}
-            variant="ghost"
-            color={textColor}
-            _hover={{ bg: hoverBg }}
-          />
         </HStack>
 
-        {/* Dark Mode Toggle */}
-        <Box textAlign="left" w="full">
+        {/* Appearance Section */}
+        <VStack align="stretch" spacing={4} mb={6}>
+          <Text
+            fontSize="lg"
+            fontWeight="bold"
+            textAlign="left"
+            color={textColor}
+          >
+            Appearance
+          </Text>
+
+          {/* Dark Mode Toggle */}
           <HStack justify="space-between">
-            <Text fontSize="lg" fontWeight="medium" color={textColor}>
-              Dark Mode
-            </Text>
+            <HStack>
+              <FiMoon />
+              <Text>Dark Mode</Text>
+            </HStack>
             <Switch
               size="lg"
               colorScheme="teal"
@@ -130,87 +142,53 @@ export default function SettingsPage() {
               onChange={toggleColorMode}
             />
           </HStack>
-        </Box>
+        </VStack>
 
         <Divider my={4} borderColor={borderColor} />
 
-        {/* 2FA Toggle */}
-        <Box textAlign="left" w="full">
-          <HStack justify="space-between">
-            <Text fontSize="lg" fontWeight="medium" color={textColor}>
-              Two-Factor Authentication (2FA)
-            </Text>
-            {loading ? (
-              <Spinner size="sm" />
-            ) : (
-              <Switch
-                size="lg"
-                colorScheme="teal"
-                isChecked={is2FAEnabled}
-                onChange={toggle2FA}
-                isDisabled={toggling}
-              />
-            )}
-          </HStack>
-        </Box>
-
-        <Divider my={4} borderColor={borderColor} />
-
-        {/* Subscription Plan */}
-        <Box textAlign="left" w="full">
-          <Text fontSize="lg" fontWeight="medium" color={textColor}>
-            Subscription Plan
-          </Text>
-          <HStack justify="space-between" mt={2}>
-            <Badge
-              colorScheme={subscription === "Pro" ? "green" : "blue"}
-              fontSize="md"
-              px={3}
-              py={1}
-              borderRadius="full"
-            >
-              {subscription} Plan
-            </Badge>
-            <Button
-              size="sm"
-              bg={primaryColor}
-              color="white"
-              _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
-              onClick={() => setSubscription("Pro")}
-              transition="all 0.2s"
-            >
-              Upgrade to Pro
-            </Button>
-          </HStack>
-        </Box>
-
-        <Divider my={4} borderColor={borderColor} />
-
-        {/* Language */}
-        <Box textAlign="left" w="full">
-          <Text fontSize="lg" fontWeight="medium" color={textColor}>
-            Language
-          </Text>
-          <Select
-            mt={2}
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            bg={useColorModeValue("white", "gray.700")}
-            borderColor={borderColor}
-            _hover={{ borderColor: primaryColor }}
-            _focus={{
-              borderColor: primaryColor,
-              boxShadow: `0 0 0 1px ${primaryColor}`,
-            }}
+        {/* Notifications Section */}
+        <VStack align="stretch" spacing={4} mb={6}>
+          <Text
+            fontSize="lg"
+            fontWeight="bold"
+            textAlign="left"
+            color={textColor}
           >
-            <option value="English">English</option>
-            <option value="French">French</option>
-            <option value="Spanish">Spanish</option>
-          </Select>
-        </Box>
+            Notifications
+          </Text>
+
+          {/* In-App Notifications */}
+          <HStack justify="space-between">
+            <HStack>
+              <FiBell />
+              <Text>In-App Notifications</Text>
+            </HStack>
+            <Switch
+              size="lg"
+              colorScheme="teal"
+              isChecked={notificationsEnabled}
+              onChange={() => setNotificationsEnabled(!notificationsEnabled)}
+            />
+          </HStack>
+
+          {/* Email Alerts */}
+          <HStack justify="space-between">
+            <HStack>
+              <FiMail />
+              <Text>Email Alerts</Text>
+            </HStack>
+            <Switch
+              size="lg"
+              colorScheme="teal"
+              isChecked={emailAlertsEnabled}
+              onChange={() => setEmailAlertsEnabled(!emailAlertsEnabled)}
+            />
+          </HStack>
+        </VStack>
 
         <Divider my={4} borderColor={borderColor} />
 
+        {/* Save Button */}
         <Button
           bg={primaryColor}
           color="white"
@@ -218,8 +196,11 @@ export default function SettingsPage() {
           mt={4}
           _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
           transition="all 0.2s"
+          onClick={saveSettings}
+          isLoading={loading}
+          loadingText="Saving..."
         >
-          Save Changes
+          Save Settings
         </Button>
       </Box>
     </Container>
