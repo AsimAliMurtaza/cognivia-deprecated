@@ -1,4 +1,4 @@
-import type { NextAuthOptions, Session as NextAuthSession } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -7,16 +7,16 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/mailer";
 
-interface ExtendedSession extends NextAuthSession {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    gender?: string | null;
-    is2FAEnabled?: boolean;
-    is2FAVerified?: boolean; // Add this
-  };
+// Extend the User interface to include custom fields
+interface ExtendedUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  gender?: string | null;
+  is2FAEnabled?: boolean;
+  is2FAVerified?: boolean;
+  requires2FA?: boolean;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -46,17 +46,31 @@ export const authOptions: NextAuthOptions = {
         if (!user) return null;
         if (!user.verified) throw new Error("Please verify your email first");
 
-        // If OTP is provided, this is the second step (after 2FA verification)
+        // Second step - OTP verification
         if (otp) {
-          // Verify the user exists and has 2FA enabled
           if (!user.is2FAEnabled) return null;
 
-          // Check if the OTP matches (already verified by your API endpoint)
-          // We trust this step since it passed the /api/auth/2fa/verify endpoint
+          // Verify OTP
+          if (
+            !user.twoFactorOtp ||
+            !user.twoFactorOtpExpiry ||
+            user.twoFactorOtp !== otp ||
+            new Date() > user.twoFactorOtpExpiry
+          ) {
+            return null;
+          }
+
+          // Clear OTP after successful verification
+          user.twoFactorOtp = null;
+          user.twoFactorOtpExpiry = null;
+          await user.save();
+
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
+            image: user.image,
+            gender: user.gender,
             is2FAEnabled: true,
             is2FAVerified: true,
           };
@@ -66,7 +80,7 @@ export const authOptions: NextAuthOptions = {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) return null;
 
-        // If 2FA is enabled, require OTP
+        // If 2FA enabled, generate and send OTP
         if (user.is2FAEnabled) {
           const otpCode = Math.floor(
             100000 + Math.random() * 900000
@@ -84,7 +98,6 @@ export const authOptions: NextAuthOptions = {
             text: `Your verification code is: ${otpCode}`,
           });
 
-          // Return special object to trigger 2FA flow
           return {
             id: user._id.toString(),
             email: user.email,
@@ -98,6 +111,8 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          image: user.image,
+          gender: user.gender,
           is2FAEnabled: false,
         };
       },
@@ -115,26 +130,34 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.is2FAEnabled = (user as any).is2FAEnabled;
-        token.is2FAVerified = (user as any)?.is2FAVerified || false; // Add this
+        token.name = user.name;
+        token.email = user.email;
+        token.image = user.image;
+        token.gender = (user as ExtendedUser).gender as string;
+        token.is2FAEnabled = (user as ExtendedUser).is2FAEnabled || false;
+        token.is2FAVerified = (user as ExtendedUser).is2FAVerified || false;
       }
       return token;
     },
-    async session({ session, token }): Promise<ExtendedSession> {
+    async session({ session, token }) {
       return {
         ...session,
         user: {
           ...session.user,
           id: token.id as string,
+          name: token.name,
+          email: token.email,
+          image: token.image as string,
+          gender: token.gender as string | null,
           is2FAEnabled: token.is2FAEnabled as boolean,
-          is2FAVerified: token.is2FAVerified as boolean, // Add this
+          is2FAVerified: token.is2FAVerified as boolean,
         },
       };
     },
     async signIn({ user, account }) {
       if (account?.provider !== "credentials") return true;
 
-      if ((user as any)?.requires2FA) {
+      if ((user as ExtendedUser)?.requires2FA) {
         const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
         return `${baseUrl}/login/2fa-verification?email=${encodeURIComponent(
           user.email ?? ""

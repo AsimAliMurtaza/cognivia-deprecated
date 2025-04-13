@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Avatar,
@@ -37,6 +37,7 @@ import {
   CircularProgress,
   CircularProgressLabel,
   Heading,
+  Select,
 } from "@chakra-ui/react";
 import {
   FiCamera,
@@ -44,12 +45,12 @@ import {
   FiLock,
   FiTrash2,
   FiMail,
-  FiPhone,
   FiUser,
   FiEye,
   FiEyeOff,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { uploadImage } from "@/lib/uploadImage";
 
 const MotionBox = motion(Box);
 const MotionCard = motion(Card);
@@ -70,7 +71,7 @@ export default function EditProfilePage() {
   } = useDisclosure();
 
   // State for form fields
-  const [name, setName] = useState(session?.user?.name || "");
+  const [name, setName] = useState(session?.user?.name);
   const [email, setEmail] = useState(session?.user?.email || "");
   const [image, setImage] = useState(session?.user?.image || "");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -80,6 +81,9 @@ export default function EditProfilePage() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(65);
+  const [gender, setGender] = useState(session?.user?.gender);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Color scheme
   const cardBg = useColorModeValue("white", "gray.800");
@@ -92,10 +96,24 @@ export default function EditProfilePage() {
   const colorSchemeColor = useColorModeValue("teal", "blue");
   const redColorScheme = useColorModeValue("red.50", "red.900");
 
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (image && image.startsWith("blob:")) {
+        URL.revokeObjectURL(image);
+      }
+    };
+  }, [image]);
+
   // Redirect to login if not authenticated
   if (status === "loading") {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minH="100vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minH="100vh"
+      >
         <CircularProgress isIndeterminate color={primaryColor} />
       </Box>
     );
@@ -105,36 +123,92 @@ export default function EditProfilePage() {
     return null;
   }
 
-  // Handle profile picture upload
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 2MB",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImage(reader.result as string);
-        setProfileCompletion(Math.min(profileCompletion + 5, 100));
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!event.target.files || !event.target.files[0]) return;
+
+    const file = event.target.files[0];
+
+    // Validate file size (2MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 2MB",
+        status: "error",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        status: "error",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setUploadProgress(0);
+
+      // 1. Show preview while uploading
+      const previewUrl = URL.createObjectURL(file);
+      setImage(previewUrl);
+      setImageFile(file);
+
+      // 2. Upload to Firebase with progress tracking
+      const firebaseUrl = await uploadImage(file, (progress) => {
+        setUploadProgress(Math.round(progress * 100));
+      });
+
+      // 3. Update state with Firebase URL
+      setImage(firebaseUrl);
+
+      toast({
+        title: "Image uploaded successfully",
+        status: "success",
+      });
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast({
+        title: "Upload failed",
+        description: "Could not upload image",
+        status: "error",
+      });
+      setImage(session?.user?.image || ""); // Reset to previous image
+    } finally {
+      setLoading(false);
+      setUploadProgress(0);
     }
   };
 
-  // Handle form submission
   const handleSaveChanges = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await update({ name, email, image });
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, image, gender }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update profile");
+      }
+
+      // Update the session with new data
+      await update({
+        name: data.name,
+        image: data.image,
+        gender: data.gender,
+      });
+
       setProfileCompletion(Math.min(profileCompletion + 10, 100));
       toast({
         title: "Profile Updated",
@@ -144,10 +218,12 @@ export default function EditProfilePage() {
         isClosable: true,
       });
     } catch (error) {
-      console.log(error);
       toast({
         title: "Update Failed",
-        description: "There was an error updating your profile.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "There was an error updating your profile.",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -224,7 +300,7 @@ export default function EditProfilePage() {
   };
 
   return (
-    <Container maxW="container.lg" py={8}>
+    <Container maxW="container.XL" >
       <MotionBox
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -267,11 +343,23 @@ export default function EditProfilePage() {
                   <Box position="relative">
                     <Avatar
                       size="2xl"
-                      name={name}
-                      src={image}
+                      name={name || ""}
+                      src={imageFile ? URL.createObjectURL(imageFile) : image}
                       border="3px solid"
                       borderColor={primaryColor}
                     />
+                    {/* Add progress indicator */}
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                      <CircularProgress
+                        value={uploadProgress}
+                        color="green.400"
+                        size="6"
+                        thickness="12px"
+                        position="absolute"
+                        bottom={2}
+                        right={2}
+                      />
+                    )}
                     <FormLabel
                       htmlFor="file-upload"
                       position="absolute"
@@ -317,7 +405,11 @@ export default function EditProfilePage() {
               <CardBody>
                 <VStack spacing={6}>
                   <FormControl>
-                    <FormLabel color={textColor} display="flex" alignItems="center">
+                    <FormLabel
+                      color={textColor}
+                      display="flex"
+                      alignItems="center"
+                    >
                       <FiUser style={{ marginRight: "8px" }} />
                       Full Name
                     </FormLabel>
@@ -335,34 +427,32 @@ export default function EditProfilePage() {
                     />
                   </FormControl>
 
-                  <FormControl>
-                    <FormLabel color={textColor} display="flex" alignItems="center">
+                  <FormControl isDisabled>
+                    <FormLabel
+                      color={textColor}
+                      display="flex"
+                      alignItems="center"
+                    >
                       <FiMail style={{ marginRight: "8px" }} />
                       Email Address
                     </FormLabel>
                     <Input
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       bg={inputBg}
                       borderColor={borderColor}
-                      _hover={{ borderColor: primaryColor }}
-                      _focus={{
-                        borderColor: primaryColor,
-                        boxShadow: `0 0 0 1px ${primaryColor}`,
+                      _disabled={{
+                        opacity: 1,
+                        cursor: "not-allowed",
+                        bg: useColorModeValue("gray.100", "gray.600"),
                       }}
                     />
                   </FormControl>
-
                   <FormControl>
-                    <FormLabel color={textColor} display="flex" alignItems="center">
-                      <FiPhone style={{ marginRight: "8px" }} />
-                      Phone Number
-                    </FormLabel>
-                    {/* <Input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                    <FormLabel color={textColor}>Gender</FormLabel>
+                    <Select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
                       bg={inputBg}
                       borderColor={borderColor}
                       _hover={{ borderColor: primaryColor }}
@@ -370,9 +460,13 @@ export default function EditProfilePage() {
                         borderColor: primaryColor,
                         boxShadow: `0 0 0 1px ${primaryColor}`,
                       }}
-                    /> */}
+                    >
+                      <option value="">Prefer not to say</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </Select>
                   </FormControl>
-
                   <Button
                     leftIcon={<FiSave />}
                     colorScheme={colorSchemeColor}
@@ -452,10 +546,7 @@ export default function EditProfilePage() {
                       2 devices currently logged in
                     </Text>
                   </Box>
-                  <Button
-                    variant="outline"
-                    colorScheme={colorSchemeColor}
-                  >
+                  <Button variant="outline" colorScheme={colorSchemeColor}>
                     View Sessions
                   </Button>
                 </HStack>
@@ -485,7 +576,8 @@ export default function EditProfilePage() {
                   <Box>
                     <AlertTitle>Delete Account</AlertTitle>
                     <AlertDescription>
-                      This action is permanent and cannot be undone. All your data will be erased.
+                      This action is permanent and cannot be undone. All your
+                      data will be erased.
                     </AlertDescription>
                   </Box>
                   <Button
