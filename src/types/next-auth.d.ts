@@ -1,27 +1,41 @@
-// types/next-auth.d.ts
-import "next-auth";
+// next-auth.d.ts
+import { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
-  interface User {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-    gender?: string;
+  /**
+   * Extended User type that includes your custom fields
+   */
+  interface User extends DefaultUser {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    gender?: string | null;
     is2FAEnabled?: boolean;
     is2FAVerified?: boolean;
+    requires2FA?: boolean;
   }
 
-  interface Session {
-    user: User;
+  /**
+   * Extended Session type that includes your custom user fields
+   */
+  interface Session extends DefaultSession {
+    user?: User;
   }
 }
 
 declare module "next-auth/jwt" {
+  /** 
+   * Extended JWT type that includes your custom fields 
+   */
   interface JWT {
-    id?: string;
-    gender?: string;
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    gender?: string | null;
     is2FAEnabled?: boolean;
     is2FAVerified?: boolean;
+    requires2FA?: boolean;
   }
 }

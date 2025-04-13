@@ -65,7 +65,7 @@ export default function TextQuizGeneration() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/ask?query=${encodeURIComponent(prompt)}`
+        `http://localhost:8000/ollama?query=${encodeURIComponent(prompt)}`
       );
       if (!response.ok) {
         throw new Error("Failed to generate quiz");

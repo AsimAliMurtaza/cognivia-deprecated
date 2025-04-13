@@ -4,15 +4,6 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
-// Helper to validate base64 images
-const isValidBase64Image = (str: string) => {
-  if (!str.startsWith("data:image")) return false;
-  try {
-    return Buffer.from(str.split(",")[1], "base64").length > 0;
-  } catch (e) {
-    return false;
-  }
-};
 
 export async function GET() {
   await dbConnect();

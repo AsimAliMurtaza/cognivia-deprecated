@@ -12,20 +12,12 @@ import {
   useColorMode,
   useColorModeValue,
   HStack,
-  Select,
   IconButton,
   useToast,
-  Spinner,
   VStack,
-  FormControl,
-  FormLabel,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  Heading,
+
 } from "@chakra-ui/react";
-import { FiArrowLeft, FiSun, FiMoon, FiBell, FiMail } from "react-icons/fi";
+import { FiArrowLeft, FiMoon, FiBell, FiMail } from "react-icons/fi";
 
 export default function AppSettingsPage() {
   const router = useRouter();
@@ -36,10 +28,6 @@ export default function AppSettingsPage() {
   // App settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailAlertsEnabled, setEmailAlertsEnabled] = useState(true);
-  const [fontSize, setFontSize] = useState(16);
-  const [appLanguage, setAppLanguage] = useState("English");
-  const [autoSave, setAutoSave] = useState(true);
-  const [saveInterval, setSaveInterval] = useState(5);
 
   const bg = useColorModeValue("gray.50", "gray.800");
   const textColor = useColorModeValue("gray.700", "gray.200");
@@ -56,11 +44,8 @@ export default function AppSettingsPage() {
         // Set initial values from API response
         setNotificationsEnabled(true);
         setEmailAlertsEnabled(true);
-        setFontSize(16);
-        setAppLanguage("English");
-        setAutoSave(true);
-        setSaveInterval(5);
       } catch (err) {
+        console.error("Error fetching settings:", err);
         toast({
           title: "Error loading settings",
           status: "error",
@@ -87,6 +72,7 @@ export default function AppSettingsPage() {
         isClosable: true,
       });
     } catch (err) {
+      console.error("Error saving settings:", err);
       toast({
         title: "Error saving settings",
         status: "error",

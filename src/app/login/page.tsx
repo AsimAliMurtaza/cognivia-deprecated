@@ -32,7 +32,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [otp, setOtp] = useState<string>("");
-  const [is2FARequired, setIs2FARequired] = useState<boolean>(false);
+  const [is2FARequired] = useState<boolean>(false);
   const router = useRouter();
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
