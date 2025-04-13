@@ -43,10 +43,6 @@ export default function SmartNotesGenerator() {
   const primaryColor = useColorModeValue("teal.500", "blue.400");
   const buttonColor = useColorModeValue("teal", "blue");
 
-  // Color Mode Values
-  const primaryColor = useColorModeValue("teal.500", "blue.400");
-  const buttonColor = useColorModeValue("teal", "blue");
-
   const handleOptionSelect = (type: "prompt" | "youtube" | "file") => {
     setSourceType(type);
     onClose();
