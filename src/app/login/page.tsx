@@ -31,6 +31,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [otp, setOtp] = useState<string>("");
+  const [is2FARequired, setIs2FARequired] = useState<boolean>(false);
   const router = useRouter();
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
@@ -57,33 +59,46 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: true,
-      callbackUrl: "/dashboard",
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setLoading(false);
+      if (result?.error) {
+        // This shouldn't happen with our new flow
+        throw new Error(result.error);
+      }
 
-    if (res?.error) {
-      setError("Invalid email or password. Please try again.");
+      if (result?.ok) {
+        // Check if we got redirected back (which means 2FA is required)
+        if (result.url?.includes("2fa-verification")) {
+          router.push(result.url);
+          return;
+        }
+
+        // Regular successful login
+        router.push("/dashboard");
+        toast({
+          title: "Login successful",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Login failed");
       toast({
-        title: "Login Failed",
-        description: "Invalid email or password.",
+        title: "Login failed",
+        description:
+          error instanceof Error ? error.message : "Invalid credentials",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
-    } else if (res?.ok) {
-      router.push("/dashboard");
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -192,10 +207,33 @@ export default function LoginPage() {
                   />
                 </FormControl>
 
+                {/* OTP input when 2FA is required */}
+                {is2FARequired && (
+                  <FormControl id="signIn-otp" isRequired>
+                    <FormLabel fontSize="sm" color={textColor}>
+                      2FA Code
+                    </FormLabel>
+                    <Input
+                      type="text"
+                      maxLength={6}
+                      placeholder="Enter 6-digit code"
+                      bg={inputBgColor}
+                      color={textColor}
+                      border="1px solid #ccc"
+                      borderRadius="full"
+                      onChange={(e) => setOtp(e.target.value)}
+                      value={otp}
+                      _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
+                    />
+                  </FormControl>
+                )}
+
                 {error && (
-                  <FormHelperText color="red.500" textAlign="center">
-                    {error}
-                  </FormHelperText>
+                  <FormControl>
+                    <FormHelperText color="red.500" textAlign="center">
+                      {error}
+                    </FormHelperText>
+                  </FormControl>
                 )}
 
                 <Button

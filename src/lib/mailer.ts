@@ -9,10 +9,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendVerificationEmail(
-  email: string,
-  link: string
-) {
+export async function sendVerificationEmail(email: string, link: string) {
   const mailOptions = {
     from: '"Cognivia" <no-reply@cognivia.com>',
     to: email,
@@ -25,3 +22,22 @@ export async function sendVerificationEmail(
 
   await transporter.sendMail(mailOptions);
 }
+
+export const sendEmail = async ({
+  from,
+  to,
+  subject,
+  text,
+}: {
+  from: string;
+  to: string;
+  subject: string;
+  text: string;
+}) => {
+  await transporter.sendMail({
+    from: `"Cognivia" <${from}>`,
+    to,
+    subject,
+    text,
+  });
+};
