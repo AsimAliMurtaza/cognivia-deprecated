@@ -9,6 +9,9 @@ export interface IUser extends Document {
   gender?: string;
   verified: boolean;
   verificationToken?: string;
+  is2FAEnabled?: boolean;
+  twoFactorOtp?: string;
+  twoFactorOtpExpiry?: Date;
 }
 
 const UserSchema: Schema = new Schema({
@@ -41,6 +44,10 @@ const UserSchema: Schema = new Schema({
     type: String,
     default: null,
   },
+  is2FAEnabled: { type: Boolean, default: false },
+  twoFactorOtp: { type: String, default: "" },
+  twoFactorOtpExpiry: { type: Date, default: null },
+
 });
 
 const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
