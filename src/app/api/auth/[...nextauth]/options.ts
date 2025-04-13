@@ -7,6 +7,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/mailer";
 
+// Extend session and token types
 interface ExtendedSession extends NextAuthSession {
   user: {
     id: string;
@@ -51,6 +52,7 @@ export const authOptions: NextAuthOptions = {
           // Verify the user exists and has 2FA enabled
           if (!user.is2FAEnabled) return null;
 
+
           // Check if the OTP matches (already verified by your API endpoint)
           // We trust this step since it passed the /api/auth/2fa/verify endpoint
           return {
@@ -83,6 +85,7 @@ export const authOptions: NextAuthOptions = {
             subject: "Your 2FA Verification Code",
             text: `Your verification code is: ${otpCode}`,
           });
+
 
           // Return special object to trigger 2FA flow
           return {
@@ -117,6 +120,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.is2FAEnabled = (user as any).is2FAEnabled;
         token.is2FAVerified = (user as any)?.is2FAVerified || false; // Add this
+
       }
       return token;
     },
@@ -128,6 +132,7 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
           is2FAEnabled: token.is2FAEnabled as boolean,
           is2FAVerified: token.is2FAVerified as boolean, // Add this
+
         },
       };
     },

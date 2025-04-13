@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendVerificationEmail(email: string, link: string) {
+
   const mailOptions = {
     from: '"Cognivia" <no-reply@cognivia.com>',
     to: email,
