@@ -44,6 +44,7 @@ const UserSchema: Schema = new Schema({
   is2FAEnabled: { type: Boolean, default: false },
   twoFactorOtp: { type: String, default: "" },
   twoFactorOtpExpiry: { type: Date, default: null },
+
 });
 
 const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
