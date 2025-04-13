@@ -1,11 +1,17 @@
+// models/User.ts
 import mongoose, { Schema, Document } from "mongoose";
 
-interface IUser extends Document {
+export interface IUser extends Document {
   email: string;
   password: string;
   name?: string;
   image?: string;
   gender?: string;
+  verified: boolean;
+  verificationToken?: string;
+  is2FAEnabled?: boolean;
+  twoFactorOtp?: string;
+  twoFactorOtpExpiry?: Date;
 }
 
 const UserSchema: Schema = new Schema({
@@ -26,11 +32,19 @@ const UserSchema: Schema = new Schema({
     type: String,
     default: "",
   },
-
-  gender: {
-    type: String,
-    default: "",
+  gender: { type: String, enum: ["male", "female", "other", ""], default: "" },
+  verified: {
+    type: Boolean,
+    default: false,
   },
+  verificationToken: {
+    type: String,
+    default: null,
+  },
+  is2FAEnabled: { type: Boolean, default: false },
+  twoFactorOtp: { type: String, default: "" },
+  twoFactorOtpExpiry: { type: Date, default: null },
+
 });
 
 const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

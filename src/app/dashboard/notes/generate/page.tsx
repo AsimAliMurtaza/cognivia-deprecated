@@ -15,6 +15,7 @@ import HistoryList from "@/components/notes-generation-components/HistoryList";
 import NotesDisplay from "@/components/notes-generation-components/NotesDisplay";
 import SelectionModal from "@/components/notes-generation-components/SelectionModal";
 import InputModal from "@/components/notes-generation-components/InputModal";
+import { useSession } from "next-auth/react";
 
 export default function SmartNotesGenerator() {
   const [promptText, setPromptText] = useState("");
@@ -36,6 +37,11 @@ export default function SmartNotesGenerator() {
     onClose: closeInputModal,
   } = useDisclosure();
   const toast = useToast();
+  const { data: session } = useSession();
+
+  // Color Mode Values
+  const primaryColor = useColorModeValue("teal.500", "blue.400");
+  const buttonColor = useColorModeValue("teal", "blue");
 
   // Color Mode Values
   const primaryColor = useColorModeValue("teal.500", "blue.400");
@@ -86,7 +92,11 @@ export default function SmartNotesGenerator() {
         `http://127.0.0.1:8000/ask?query=${encodeURIComponent(input)}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.id}`, // 🔥 send user ID as bearer token
+          },
+
         }
       );
 

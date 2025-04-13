@@ -1,109 +1,486 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
-  Text,
-  VStack,
-  Spinner,
   Heading,
+  Text,
+  Spinner,
+  useToast,
+  Container,
   useColorModeValue,
-  Divider,
+  Input,
+  IconButton,
+  HStack,
+  Textarea,
+  Button,
+  SimpleGrid,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Card,
+  CardBody,
+  VStack,
+  Flex,
+  Badge,
 } from "@chakra-ui/react";
+import {
+  DeleteIcon,
+  EditIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DownloadIcon,
+  CheckIcon,
+  CloseIcon,
+} from "@chakra-ui/icons";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeHighlight from "rehype-highlight";
+import { useSession } from "next-auth/react";
+
 
 interface Note {
+  _id: string;
   userID: string;
-  noteID: string;
-  content: string;
+  prompt: string;
+  generated_quiz: string;
+  createdAt: string;
 }
-
-export default function NoteViewer() {
+export default function ViewNotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [totalNotes, setTotalNotes] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState("");
+  const [page, setPage] = useState(0);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
-  const bg = useColorModeValue("gray.100", "gray.800");
-  const textColor = useColorModeValue("gray.800", "gray.200");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
-  const noteBg = useColorModeValue("gray.50", "gray.700");
-  const noteTextColor = useColorModeValue("gray.700", "gray.300");
+  const { data: session } = useSession();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const limit = 6;
+  const toast = useToast();
+
+  // Material You inspired colors
+  const primaryColor = useColorModeValue("teal.500", "teal.200");
+  const primaryContainer = useColorModeValue("teal.100", "teal.900");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const surfaceVariant = useColorModeValue("gray.50", "gray.700");
+  const onSurfaceColor = useColorModeValue("gray.800", "gray.100");
+  const outlineColor = useColorModeValue("gray.200", "gray.600");
+
+  const userID = session?.user?.id || "defaultUserId";
+
+  const fetchNotes = useCallback(async () => {
+    if (!userID) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:8000/notes?user_id=${encodeURIComponent(
+          userID
+        )}&skip=${page * limit}&limit=${limit}`
+      );
+      const data = await res.json();
+
+      if (Array.isArray(data.notes)) {
+        setNotes(data.notes);
+        setTotalNotes(data.total);
+      } else {
+        throw new Error("Invalid notes data structure");
+      }
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      toast({
+        title: "Fetch Error",
+        description: "Could not load notes. Please try again later.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [userID, page, limit, toast]);
 
   useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const res = await fetch("/api/notes");
-        const data = await res.json();
-        setNotes(data);
-      } catch (error) {
-        console.error("Error fetching notes:", error);
-      } finally {
-        setLoading(false);
+    if (session?.user?.id) {
+      fetchNotes();
+    }
+  }, [session, fetchNotes]);
+
+  const formatDate = (iso: string) => {
+    const date = new Date(iso);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  };
+
+  const exportToPDF = async (note: Note) => {
+    try {
+      // Dynamically import html2pdf when needed
+      const html2pdf = (await import("html2pdf.js")).default;
+
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <style>
+          body { font-family: 'Roboto', sans-serif; padding: 24px; line-height: 1.6; }
+          .header { margin-bottom: 24px; }
+          .title { color: #6750A4; font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+          .meta { font-size: 14px; color: #49454F; margin-bottom: 16px; }
+          .content { font-size: 16px; line-height: 1.8; }
+          strong { color: #6750A4; }
+          ul { padding-left: 24px; }
+          li { margin-bottom: 8px; }
+        </style>
+        <div class="header">
+          <h1 class="title">${note.prompt}</h1>
+          <div class="meta">Created on ${formatDate(note.createdAt)}</div>
+        </div>
+        <div class="content">${note.generated_quiz
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/^- (.*)$/gm, "<ul><li>$1</li></ul>")
+          .replace(/\n{2,}/g, "<br/><br/>")
+          .replace(/\n/g, "<br/>")}</div>`;
+
+      html2pdf()
+        .from(wrapper)
+        .set({
+          margin: [0.5, 0.5],
+          filename: `${note.prompt
+            .substring(0, 30)
+            .replace(/\s+/g, "_")}_notes.pdf`,
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        })
+        .save();
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      toast({
+        title: "Export failed",
+        description: "Could not generate PDF",
+        status: "error",
+      });
+    }
+  };
+
+  const deleteNote = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:8000/notes/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        toast({
+          title: "Note deleted",
+          status: "success",
+          variant: "subtle",
+          position: "top",
+        });
+        onClose();
+        fetchNotes();
       }
-    };
-    fetchNotes();
-  }, []);
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      toast({
+        title: "Delete failed",
+        status: "error",
+        variant: "subtle",
+        position: "top",
+      });
+    }
+  };
+
+  const updateNote = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:8000/notes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updatedContent: editedContent }),
+      });
+      if (res.ok) {
+        toast({
+          title: "Note updated",
+          status: "success",
+          variant: "subtle",
+          position: "top",
+        });
+
+        setNotes((prevNotes) =>
+          prevNotes.map((n) =>
+            n._id === id ? { ...n, generated_quiz: editedContent } : n
+          )
+        );
+
+        setSelectedNote((prevNote) =>
+          prevNote && prevNote._id === id
+            ? { ...prevNote, generated_quiz: editedContent }
+            : prevNote
+        );
+
+        setEditingNoteId(null);
+      }
+    } catch (error) {
+      console.error("Error updating note:", error);
+      toast({
+        title: "Update failed",
+        status: "error",
+        variant: "subtle",
+        position: "top",
+      });
+    }
+  };
 
   return (
-    <Box
-      minW={{ base: "90%", md: "600px" }}
-      mx="auto"
-      mt={10}
-      p={6}
-      borderRadius="lg"
-      boxShadow="lg"
-      bg={bg}
-      border="1px solid"
-      borderColor={borderColor}
-      maxH="100vh"
-      overflowY="auto"
-    >
-      <Heading
-        size="lg"
-        color={useColorModeValue("teal.600", "teal.300")}
-        mb={4}
-        textAlign="center"
-        fontWeight="bold"
-      >
-        Your Notes
-      </Heading>
+    <Container maxW="7xl" py={8}>
+      <VStack spacing={6} align="stretch">
+        <Flex justify="space-between" align="center">
+          <Heading
+            size="xl"
+            color={primaryColor}
+            fontWeight="medium"
+            letterSpacing="tight"
+          >
+            My Notes
+          </Heading>
+          <Badge
+            colorScheme="purple"
+            variant="subtle"
+            px={3}
+            py={1}
+            borderRadius="full"
+            fontSize="sm"
+          >
+            {totalNotes} total
+          </Badge>
+        </Flex>
 
-      {loading ? (
-        <VStack spacing={4}>
-          <Spinner size="lg" color="teal.400" />
-          <Text fontSize="md" color={textColor}>
-            Loading notes...
-          </Text>
-        </VStack>
-      ) : (
-        <VStack spacing={4} align="stretch">
-          {notes.length > 0 ? (
-            notes.map((note) => (
-              <Box
-                key={note.noteID}
-                p={4}
-                bg={noteBg}
-                borderRadius="md"
-                boxShadow="md"
-                border="1px solid"
-                borderColor={borderColor}
-                transition="all 0.2s ease-in-out"
-                _hover={{ transform: "scale(1.02)", shadow: "xl" }}
-              >
-                <Text fontSize="sm" color="teal.400" fontWeight="bold">
-                  Note ID: {note.noteID}
-                </Text>
-                <Divider my={2} />
-                <Text fontSize="md" color={noteTextColor} whiteSpace="pre-wrap">
-                  {note.content}
-                </Text>
-              </Box>
-            ))
-          ) : (
-            <Text fontSize="md" color="gray.500" textAlign="center">
-              No notes available.
+        <Input
+          placeholder="Search notes..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          variant="filled"
+          size="lg"
+          borderRadius="full"
+          bg={surfaceVariant}
+          borderColor="transparent"
+          _hover={{ bg: surfaceVariant }}
+          _focus={{
+            bg: surfaceVariant,
+            borderColor: primaryColor,
+            boxShadow: `0 0 0 1px ${primaryColor}`,
+          }}
+          px={6}
+        />
+
+        {loading ? (
+          <Flex justify="center" py={12}>
+            <Spinner size="xl" color={primaryColor} thickness="3px" />
+          </Flex>
+        ) : (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={5}>
+            {notes
+              .filter((note) =>
+                note.prompt.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((note) => (
+                <Card
+                  key={note._id}
+                  bg={surfaceColor}
+                  borderRadius="xl"
+                  boxShadow="sm"
+                  border="1px solid"
+                  borderColor={outlineColor}
+                  transition="all 0.2s"
+                  _hover={{
+                    transform: "translateY(-2px)",
+                    boxShadow: "md",
+                  }}
+                  cursor="pointer"
+                  onClick={() => {
+                    setSelectedNote(note);
+                    setEditedContent(note.generated_quiz);
+                    onOpen();
+                  }}
+                >
+                  <CardBody p={6}>
+                    <VStack spacing={3} align="stretch">
+                      <Text
+                        fontSize="lg"
+                        fontWeight="medium"
+                        color={onSurfaceColor}
+                        noOfLines={2}
+                      >
+                        {note.prompt}
+                      </Text>
+                      <Text fontSize="sm" color="gray.500" fontFamily="mono">
+                        {formatDate(note.createdAt)}
+                      </Text>
+                    </VStack>
+                  </CardBody>
+                </Card>
+              ))}
+          </SimpleGrid>
+        )}
+
+        <Flex justify="center" mt={8}>
+          <HStack spacing={4}>
+            <Button
+              leftIcon={<ChevronLeftIcon />}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              isDisabled={page === 0}
+              variant="outline"
+              borderRadius="full"
+              px={6}
+            >
+              Previous
+            </Button>
+            <Text fontSize="sm" color="gray.500">
+              Page {page + 1} of {Math.ceil(totalNotes / limit)}
             </Text>
-          )}
-        </VStack>
-      )}
-    </Box>
+            <Button
+              rightIcon={<ChevronRightIcon />}
+              onClick={() => setPage((p) => p + 1)}
+              isDisabled={(page + 1) * limit >= totalNotes}
+              variant="outline"
+              borderRadius="full"
+              px={6}
+            >
+              Next
+            </Button>
+          </HStack>
+        </Flex>
+      </VStack>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="4xl">
+        <ModalOverlay bg="blackAlpha.600" />
+        <ModalContent bg={surfaceColor} borderRadius="2xl" overflow="hidden">
+          <ModalHeader
+            bg={primaryContainer}
+            color={primaryColor}
+            py={4}
+            borderBottom="1px solid"
+            borderColor={outlineColor}
+          >
+            <Text fontWeight="medium" fontSize="xl">
+              {selectedNote?.prompt}
+            </Text>
+            <Text fontSize="sm" color={onSurfaceColor} mt={1}>
+              Created on {selectedNote && formatDate(selectedNote.createdAt)}
+            </Text>
+          </ModalHeader>
+          <ModalCloseButton top={4} right={4} color={onSurfaceColor} />
+          <ModalBody p={0}>
+            <Card variant="unstyled" borderRadius={0} bg={surfaceVariant}>
+              <CardBody p={6}>
+                {editingNoteId === selectedNote?._id ? (
+                  <Textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    rows={12}
+                    color={onSurfaceColor}
+                    bg={surfaceColor}
+                    borderRadius="lg"
+                    borderColor={outlineColor}
+                    _focus={{
+                      borderColor: primaryColor,
+                      boxShadow: `0 0 0 1px ${primaryColor}`,
+                    }}
+                    p={4}
+                    fontFamily="mono"
+                    fontSize="sm"
+                  />
+                ) : (
+                  <Box
+                    color={onSurfaceColor}
+                    fontSize="md"
+                    lineHeight="1.8"
+                    fontFamily="body"
+                  >
+                    <ReactMarkdown
+                      rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                      remarkPlugins={[remarkGfm]}
+                    >
+                      {selectedNote?.generated_quiz || ""}
+                    </ReactMarkdown>
+                  </Box>
+                )}
+              </CardBody>
+            </Card>
+          </ModalBody>
+          <ModalFooter
+            bg={surfaceColor}
+            borderTop="1px solid"
+            borderColor={outlineColor}
+            py={4}
+          >
+            <HStack spacing={3}>
+              {editingNoteId === selectedNote?._id ? (
+                <>
+                  <Button
+                    colorScheme="purple"
+                    leftIcon={<CheckIcon />}
+                    onClick={() => updateNote(selectedNote._id)}
+                    borderRadius="full"
+                    px={6}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftIcon={<CloseIcon />}
+                    onClick={() => setEditingNoteId(null)}
+                    borderRadius="full"
+                    px={6}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <IconButton
+                    icon={<EditIcon />}
+                    aria-label="Edit"
+                    onClick={() =>
+                      selectedNote && setEditingNoteId(selectedNote._id)
+                    }
+                    colorScheme="purple"
+                    variant="outline"
+                    borderRadius="full"
+                  />
+                  <IconButton
+                    icon={<DownloadIcon />}
+                    aria-label="Download"
+                    onClick={() => {
+                      if (selectedNote) {
+                        exportToPDF(selectedNote).catch(console.error);
+                      }
+                    }}
+                    colorScheme="teal"
+                    variant="outline"
+                    borderRadius="full"
+                  />
+                  <IconButton
+                    icon={<DeleteIcon />}
+                    aria-label="Delete"
+                    onClick={() => selectedNote && deleteNote(selectedNote._id)}
+                    colorScheme="red"
+                    variant="outline"
+                    borderRadius="full"
+                  />
+                </>
+              )}
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Container>
   );
 }

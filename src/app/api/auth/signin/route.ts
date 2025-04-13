@@ -35,6 +35,7 @@ export async function POST(req: Request) {
 
     const token = signJwtToken({ id: user._id, email: user.email });
 
+
     return NextResponse.json(
       {
         message: "Login successful",
