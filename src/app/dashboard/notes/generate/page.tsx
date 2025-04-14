@@ -153,6 +153,7 @@ export default function SmartNotesGenerator() {
     }
   };
 
+
   // const handleChatClick = (chat: {
   //   sourceType: string | null;
   //   content: string;

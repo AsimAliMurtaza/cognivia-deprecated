@@ -75,6 +75,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const hoverBg = useColorModeValue("gray.100", "gray.700");
   const textColor = useColorModeValue("gray.800", "gray.100");
   const primaryColor = useColorModeValue("teal.600", "blue.300");
+
   const dividerColor = useColorModeValue("gray.200", "gray.600");
   const surfaceColor = useColorModeValue("gray.50", "gray.900");
 
