@@ -7,6 +7,7 @@ export interface INote extends Document {
   prompt: string;
   generated_quiz: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const NoteSchema = new Schema<INote>(
@@ -16,8 +17,9 @@ const NoteSchema = new Schema<INote>(
     prompt: { type: String, required: true },
     generated_quiz: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
   },
-  { timestamps: true, collection: 'generated_notes' } // Specify the collection name here
+  { timestamps: true, collection: "generated_notes" } // Specify the collection name here
 );
 
 // Use models cache to avoid recompilation on hot reload
