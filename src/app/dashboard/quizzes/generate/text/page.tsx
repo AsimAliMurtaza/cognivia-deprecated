@@ -24,6 +24,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
@@ -35,8 +36,10 @@ export default function TextQuizGeneration() {
   const [prompt, setPrompt] = useState("");
   const [generatedQuiz, setGeneratedQuiz] = useState("");
   const [loading, setLoading] = useState(false);
+
   const toast = useToast();
   const router = useRouter();
+  const { data: session } = useSession();
 
   // Material You inspired colors with teal/blue theming
   const bgColor = useColorModeValue("gray.50", "gray.900");
@@ -64,34 +67,49 @@ export default function TextQuizGeneration() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/ollama?query=${encodeURIComponent(prompt)}`
-      );
+      const response = await fetch("/api/generate-quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt, userID: session?.user?.id }),
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to generate quiz");
+        const errorData = await response.json();
+        throw new Error(errorData?.error || "Failed to generate quiz");
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder("utf-8");
+      const data = await response.json();
+      if (data.questions && data.options && data.answers) {
+        setGeneratedQuiz(
+          data.questions
+            .map((question: string, index: number) => {
+              interface QuizData {
+                questions: string[];
+                options: string[][];
+                answers: string[];
+              }
 
-      let fullText = "";
-      while (true) {
-        const { value, done } = await reader!.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        fullText += chunk;
-        // Update state progressively for streaming effect
-        setGeneratedQuiz((prev) => prev + chunk);
-        console.log(fullText);
+              const optionsText = (data as QuizData).options[index]
+                ? (data as QuizData).options[index]
+                    .map(
+                      (option: string, optionIndex: number) =>
+                        `${String.fromCharCode(65 + optionIndex)} ${option} \n`
+                    )
+                    .join("  ") // Display options horizontally with spacing
+                : "No options available.";
+              return `${index + 1}. ${question}\n ${optionsText}`;
+            })
+            .join("\n\n")
+        );
       }
-
       setLoading(false);
     } catch (error) {
       console.error("Error generating quiz:", error);
       toast({
         title: "Error generating quiz",
-        description: "Please try again later",
+        description: (error as Error).message || "Please try again later",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -117,11 +135,6 @@ export default function TextQuizGeneration() {
       transition: { type: "spring", stiffness: 100 },
     },
   };
-
-  // const cardVariants = {
-  //   hover: { y: -2, boxShadow: "lg" },
-  //   tap: { y: 1 },
-  // };
 
   const gridTransition = {
     type: "spring",
@@ -168,7 +181,7 @@ export default function TextQuizGeneration() {
                 colSpan={1}
                 initial={{ x: 0 }}
                 animate={{
-                  x: (generatedQuiz || loading) ? 0 : 0,
+                  x: generatedQuiz || loading ? 0 : 0,
                 }}
                 transition={gridTransition}
               >
@@ -194,7 +207,8 @@ export default function TextQuizGeneration() {
                       Generate Quiz from Text
                     </Heading>
                     <Text color={secondaryText} fontSize="sm" mt={2}>
-                      Enter your text below and our AI will create a customized quiz
+                      Enter your text below and our AI will create a customized
+                      quiz
                     </Text>
                   </CardHeader>
 
@@ -266,7 +280,9 @@ export default function TextQuizGeneration() {
                           fontWeight="semibold"
                           color={accentColor}
                         >
-                          {loading ? "Generating Quiz..." : "Your Generated Quiz"}
+                          {loading
+                            ? "Generating Quiz..."
+                            : "Your Generated Quiz"}
                         </Heading>
                       </CardHeader>
                       <Divider borderColor={borderColor} />
@@ -279,7 +295,7 @@ export default function TextQuizGeneration() {
                               thickness="3px"
                             />
                             <Text color={secondaryText}>
-                              AI is creating your quiz...
+                              creating your quiz...
                             </Text>
                           </VStack>
                         ) : (
@@ -291,15 +307,14 @@ export default function TextQuizGeneration() {
                               borderWidth="1px"
                               borderColor={borderColor}
                               minH="200px"
+                              whiteSpace="pre-wrap"
+                              fontSize="md"
+                              lineHeight="tall"
+                              overflowY="auto"
+                              maxH="300px"
+                              color={textColor}
                             >
-                              <Text
-                                color={textColor}
-                                whiteSpace="pre-wrap"
-                                fontSize="md"
-                                lineHeight="tall"
-                              >
-                                {generatedQuiz}
-                              </Text>
+                              {generatedQuiz}
                             </Box>
 
                             <HStack spacing={3} mt={4}>

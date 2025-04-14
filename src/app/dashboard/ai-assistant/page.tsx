@@ -74,25 +74,17 @@ export default function AIAssistant() {
     setCurrentResponse("");
 
     try {
-      const res = await fetch(
-        `http://127.0.0.1:8000/ollama?query=${encodeURIComponent(query)}`
-      );
+      const responseData = await fetch("/api/gemini", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: query }),
+      }).then((res) => res.json());
 
-      if (!res.body) throw new Error("No response body");
+      setCurrentResponse(responseData?.response || "No response.");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        fullResponse += chunk;
-        setCurrentResponse((prev) => prev + chunk);
-      }
-
-      const newMessage = { query, response: fullResponse };
+      const newMessage = { query, response: responseData?.response || "No response." };
 
       if (!currentChatId) {
         const newChatId = generateChatId();
@@ -118,7 +110,8 @@ export default function AIAssistant() {
           },
         }));
       }
-    } catch {
+    } catch (error) {
+      console.error("Gemini API Error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again later.",
@@ -182,8 +175,6 @@ export default function AIAssistant() {
   return (
     <Flex direction="column" minH="90vh">
       <Flex align="center">
-  
-
         {isMobile && (
           <IconButton
             icon={<FiMenu />}
