@@ -157,8 +157,8 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
       position="relative"
     >
       <Flex justify="space-between" align="center" mb={4}>
-        <Heading size="lg" fontWeight="semibold" color={primaryColor}>
-          {generatedNotes ? "Generated Notes" : "Notes Preview"}
+        <Heading size="md" fontWeight="semibold" color={primaryColor}>
+          {generatedNotes ? "Generated Notes" : "No Notes Generated"}
         </Heading>
         <Flex gap={3} align="center">
           {generatedNotes && (
