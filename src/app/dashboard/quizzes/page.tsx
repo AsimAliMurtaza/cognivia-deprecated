@@ -9,8 +9,9 @@ import {
   VStack,
   useColorModeValue,
   Flex,
+  Divider,
 } from "@chakra-ui/react";
-import { FileText, Upload, Image as ImageIcon } from "lucide-react";
+import { FileText, Upload, Image as ImageIcon, ListChecks } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -132,9 +133,7 @@ export default function QuizGenerationModule() {
               py={2}
               borderRadius="full"
               display="inline-flex"
-            >
-
-            </Box>
+            ></Box>
             <Heading
               as="h1"
               size="2xl"
@@ -176,6 +175,17 @@ export default function QuizGenerationModule() {
               title="Image Upload"
               description="Extract text from images or diagrams to create quizzes"
               href="/dashboard/quizzes/generate/image"
+            />
+          </SimpleGrid>
+
+          <Divider my={8} /> {/* Horizontal separator */}
+
+          <SimpleGrid columns={{ base: 1, md: 1 }} spacing={{ base: 6, md: 8 }} w="full">
+            <FeatureCard
+              icon={ListChecks}
+              title="Manage Quizzes"
+              description="View, edit, and organize your created quizzes"
+              href="/dashboard/quizzes/manage"
             />
           </SimpleGrid>
         </VStack>

@@ -44,7 +44,6 @@ import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import { useSession } from "next-auth/react";
 
-
 interface Note {
   _id: string;
   userID: string;
@@ -52,6 +51,7 @@ interface Note {
   generated_quiz: string;
   createdAt: string;
 }
+
 export default function ViewNotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [totalNotes, setTotalNotes] = useState(0);
@@ -75,18 +75,25 @@ export default function ViewNotesPage() {
   const onSurfaceColor = useColorModeValue("gray.800", "gray.100");
   const outlineColor = useColorModeValue("gray.200", "gray.600");
 
-  const userID = session?.user?.id || "defaultUserId";
+  const userID = session?.user?.id || null; // Get user ID from session
 
   const fetchNotes = useCallback(async () => {
-    if (!userID) return;
+    if (!userID) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/notes?user_id=${encodeURIComponent(
-          userID
-        )}&skip=${page * limit}&limit=${limit}`
+        `/api/notes?userId=${encodeURIComponent(userID)}&skip=${
+          page * limit
+        }&limit=${limit}`
       );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData?.error || "Failed to fetch notes");
+      }
       const data = await res.json();
 
       if (Array.isArray(data.notes)) {
@@ -99,7 +106,7 @@ export default function ViewNotesPage() {
       console.error("Error fetching notes:", error);
       toast({
         title: "Fetch Error",
-        description: "Could not load notes. Please try again later.",
+        description: (error as Error).message,
         status: "error",
         duration: 4000,
         isClosable: true,
@@ -174,7 +181,7 @@ export default function ViewNotesPage() {
 
   const deleteNote = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/notes/${id}`, {
+      const res = await fetch(`/api/notes/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -186,11 +193,15 @@ export default function ViewNotesPage() {
         });
         onClose();
         fetchNotes();
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData?.error || "Failed to delete note");
       }
     } catch (error) {
       console.error("Error deleting note:", error);
       toast({
         title: "Delete failed",
+        description: (error as Error).message,
         status: "error",
         variant: "subtle",
         position: "top",
@@ -200,7 +211,7 @@ export default function ViewNotesPage() {
 
   const updateNote = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/notes/${id}`, {
+      const res = await fetch(`/api/notes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ updatedContent: editedContent }),
@@ -226,11 +237,15 @@ export default function ViewNotesPage() {
         );
 
         setEditingNoteId(null);
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData?.error || "Failed to update note");
       }
     } catch (error) {
       console.error("Error updating note:", error);
       toast({
         title: "Update failed",
+        description: (error as Error).message,
         status: "error",
         variant: "subtle",
         position: "top",
