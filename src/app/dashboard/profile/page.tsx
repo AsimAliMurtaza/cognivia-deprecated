@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+
 import {
   Box,
   Avatar,
@@ -38,6 +39,7 @@ import {
   Heading,
   Select,
   Spinner,
+
 } from "@chakra-ui/react";
 import {
   FiCamera,
@@ -51,6 +53,7 @@ import {
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { uploadImage } from "@/lib/uploadImage";
+
 
 const MotionBox = motion(Box);
 const MotionCard = motion(Card);
@@ -116,6 +119,7 @@ export default function EditProfilePage() {
         alignItems="center"
         minH="100vh"
       >
+
         <CircularProgress isIndeterminate color={primaryColor} />
       </Box>
     );
@@ -242,6 +246,7 @@ export default function EditProfilePage() {
         gender: data.gender,
       });
 
+
       setProfileCompletion(Math.min(profileCompletion + 10, 100));
       toast({
         title: "Profile Updated",
@@ -257,6 +262,7 @@ export default function EditProfilePage() {
           error instanceof Error
             ? error.message
             : "There was an error updating your profile.",
+
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -334,6 +340,7 @@ export default function EditProfilePage() {
 
   return (
     <Container maxW="container.XL">
+
       <MotionBox
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -345,6 +352,7 @@ export default function EditProfilePage() {
             <Heading size="lg" fontWeight="semibold" color={textColor}>
               Profile Settings
             </Heading>
+
           </HStack>
 
           <Grid templateColumns={{ base: "1fr", md: "1fr 2fr" }} gap={8}>
@@ -383,6 +391,7 @@ export default function EditProfilePage() {
                         right={2}
                       />
                     )}
+
                     <FormLabel
                       htmlFor="file-upload"
                       position="absolute"
@@ -433,6 +442,7 @@ export default function EditProfilePage() {
                       display="flex"
                       alignItems="center"
                     >
+
                       <FiUser style={{ marginRight: "8px" }} />
                       Full Name
                     </FormLabel>
@@ -449,13 +459,13 @@ export default function EditProfilePage() {
                       }}
                     />
                   </FormControl>
-
                   <FormControl isDisabled>
                     <FormLabel
                       color={textColor}
                       display="flex"
                       alignItems="center"
                     >
+
                       <FiMail style={{ marginRight: "8px" }} />
                       Email Address
                     </FormLabel>
