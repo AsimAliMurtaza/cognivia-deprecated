@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useQuizStore } from "@/hooks/useQuizStore";
 
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
@@ -93,16 +94,26 @@ export default function TextQuizGeneration() {
 
               const optionsText = (data as QuizData).options[index]
                 ? (data as QuizData).options[index]
-                    .map(
-                      (option: string, optionIndex: number) =>
-                        `${String.fromCharCode(65 + optionIndex)} ${option} \n`
-                    )
-                    .join("  ") // Display options horizontally with spacing
+                  .map(
+                    (option: string, optionIndex: number) =>
+                      `${String.fromCharCode(65 + optionIndex)} ${option} \n`
+                  )
+                  .join("  ") // Display options horizontally with spacing
                 : "No options available.";
               return `${index + 1}. ${question}\n ${optionsText}`;
             })
             .join("\n\n")
         );
+        useQuizStore.setState({
+          quizData: {
+            _id: data._id,
+            topic: prompt,
+            questions: data.questions,
+            options: data.options,
+            answers: data.answers,
+            userID: session?.user?.id as string,
+          },
+        });
       }
       setLoading(false);
     } catch (error) {
