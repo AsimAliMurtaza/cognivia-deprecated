@@ -9,8 +9,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <ChakraProvider theme={theme}>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        {children}
+          <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+          {children}
       </ChakraProvider>
     </SessionProvider>
   );

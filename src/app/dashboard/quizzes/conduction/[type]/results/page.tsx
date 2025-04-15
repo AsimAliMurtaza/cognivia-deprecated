@@ -5,16 +5,17 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 export default function ResultPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [score, setScore] = useState(0);
-  const [percentage, setPercentage] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [percentage, setPercentage] = useState(0);
 
   // 🎨 Color mode compatible styles
   const bgGradient = useColorModeValue("linear(to-br, teal.50, teal.100)", "linear(to-br, gray.800, gray.700)");
@@ -25,42 +26,27 @@ export default function ResultPage() {
   const headingColor = useColorModeValue("teal.600", "teal.300");
 
   useEffect(() => {
-    const selectedAnswers = JSON.parse(localStorage.getItem("selectedAnswers") || "[]");
-    const quizData = JSON.parse(localStorage.getItem("quizData") || "[]");
+    const scoreParam = parseInt(searchParams.get("score") || "0");
+    const totalParam = parseInt(searchParams.get("totalQuestions") || "0");
 
-    let correctCount = 0;
-    quizData.forEach((question: any, index: number) => {
-      if (selectedAnswers[index] === question.correctAnswer) {
-        correctCount++;
-      }
-    });
+    const calcPercentage = totalParam > 0 ? (scoreParam / totalParam) * 100 : 0;
 
-    const total = quizData.length;
-    const calculatedPercentage = (correctCount / total) * 100;
+    setScore(scoreParam);
+    setTotalQuestions(totalParam);
+    setPercentage(calcPercentage);
 
-    setCorrectAnswers(correctCount);
-    setTotalQuestions(total);
-    setPercentage(calculatedPercentage);
-    setScore(correctCount);
-
-    // ✅ Send result to API
+    // ✅ Optionally send to your API
     fetch('/api/results', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username: 'demo_user',
-        score: correctCount,
-        total,
-        percentage: calculatedPercentage,
+        score: scoreParam,
+        total: totalParam,
+        percentage: calcPercentage,
       }),
-    }).then(res => {
-      if (!res.ok) {
-        console.error("Failed to submit result");
-      }
     }).catch(err => console.error("API error:", err));
-  }, []);
+  }, [searchParams]);
 
   return (
     <Flex
@@ -101,7 +87,7 @@ export default function ResultPage() {
           </CircularProgress>
 
           <Text fontSize="lg" color={textColor}>
-            You answered <strong>{correctAnswers}</strong> out of <strong>{totalQuestions}</strong> questions correctly.
+            You answered <strong>{score}</strong> out of <strong>{totalQuestions}</strong> questions correctly.
           </Text>
 
           {percentage >= 70 ? (
