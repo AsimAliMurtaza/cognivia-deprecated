@@ -5,7 +5,6 @@ import {
   Flex,
   useToast,
   useColorModeValue,
-  Heading,
   IconButton,
   useBreakpointValue,
   Modal,
@@ -14,14 +13,13 @@ import {
   ModalHeader,
   ModalBody,
   ModalCloseButton,
+  Box,
 } from "@chakra-ui/react";
 import { FiMenu } from "react-icons/fi";
 import ChatHistory from "@/components/ai-assistant-components/ChatHistory";
 import ChatWindow from "@/components/ai-assistant-components/ChatWindow";
 import { useDisclosure } from "@chakra-ui/react";
 
-
-// Generate a unique ID for each chat
 const generateChatId = () =>
   `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -43,17 +41,16 @@ export default function AIAssistant() {
   const [currentResponse, setCurrentResponse] = useState<string>("");
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const textColor = useColorModeValue("gray.800", "gray.200");
-
-  // Determine if the screen is mobile
   const isMobile = useBreakpointValue({ base: true, md: false });
 
+  // Material You colors
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const dividerColor = useColorModeValue("gray.200", "gray.600");
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("chatHistory");
     if (savedHistory) {
       setChatHistory(JSON.parse(savedHistory));
-
     }
   }, []);
 
@@ -77,25 +74,17 @@ export default function AIAssistant() {
     setCurrentResponse("");
 
     try {
-      const res = await fetch(
-        `http://127.0.0.1:8000/ask?query=${encodeURIComponent(query)}`
-      );
+      const responseData = await fetch("/api/gemini", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: query }),
+      }).then((res) => res.json());
 
-      if (!res.body) throw new Error("No response body");
+      setCurrentResponse(responseData?.response || "No response.");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        fullResponse += chunk;
-        setCurrentResponse((prev) => prev + chunk);
-      }
-
-      const newMessage = { query, response: fullResponse };
+      const newMessage = { query, response: responseData?.response || "No response." };
 
       if (!currentChatId) {
         const newChatId = generateChatId();
@@ -121,7 +110,8 @@ export default function AIAssistant() {
           },
         }));
       }
-    } catch {
+    } catch (error) {
+      console.error("Gemini API Error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again later.",
@@ -171,7 +161,6 @@ export default function AIAssistant() {
     setCurrentChatId(chatId);
     setCurrentResponse("");
     onClose();
-
   };
 
   const handleNewChat = () => {
@@ -184,53 +173,62 @@ export default function AIAssistant() {
     : [];
 
   return (
-    <Flex direction="column" color={textColor} maxH="100vh" p={4}>
-      <Heading size="lg" fontWeight="medium" color={textColor} mb={4}>
-        Cognivia AI
-      </Heading>
-
-      <Flex flex="1" w="full">
-        {/* Mobile: Show History Button Instead of Sidebar */}
-        {isMobile ? (
-          <>
-            <IconButton
-              icon={<FiMenu />}
-              aria-label="Open Chat History"
-              onClick={onOpen}
-              variant="solid"
-              mb={4}
-            />
-
-            <Modal isOpen={isOpen} onClose={onClose}>
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Chat History</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                  <ChatHistory
-                    chatHistory={chatHistory}
-                    currentChatId={currentChatId}
-                    onNewChat={handleNewChat}
-                    onOpenChat={handleOpenChat}
-                    onDeleteChat={handleDeleteChat}
-                  />
-                </ModalBody>
-              </ModalContent>
-            </Modal>
-          </>
-        ) : (
-          <ChatHistory
-            chatHistory={chatHistory}
-            currentChatId={currentChatId}
-            onNewChat={handleNewChat}
-            onOpenChat={handleOpenChat}
-            onDeleteChat={handleDeleteChat}
+    <Flex direction="column" minH="90vh">
+      <Flex align="center">
+        {isMobile && (
+          <IconButton
+            icon={<FiMenu />}
+            aria-label="Open Chat History"
+            onClick={onOpen}
+            variant="ghost"
+            ml="auto"
           />
         )}
+      </Flex>
 
+      <Flex flex={1} overflow="hidden">
+        {/* Mobile Drawer */}
+        {isMobile && (
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent bg={surfaceColor}>
+              <ModalHeader>
+                <Flex align="center" gap={3}></Flex>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody p={0}>
+                <ChatHistory
+                  chatHistory={chatHistory}
+                  currentChatId={currentChatId}
+                  onNewChat={handleNewChat}
+                  onOpenChat={handleOpenChat}
+                  onDeleteChat={handleDeleteChat}
+                />
+              </ModalBody>
+            </ModalContent>
+          </Modal>
+        )}
 
-        {/* Main Chat Window */}
-        <Flex flex="1" direction="column">
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <Box
+            w="300px"
+            borderRadius={"xl"}
+            borderColor={dividerColor}
+            overflowY="auto"
+          >
+            <ChatHistory
+              chatHistory={chatHistory}
+              currentChatId={currentChatId}
+              onNewChat={handleNewChat}
+              onOpenChat={handleOpenChat}
+              onDeleteChat={handleDeleteChat}
+            />
+          </Box>
+        )}
+
+        {/* Main Chat Area */}
+        <Box flex={1} overflowY="auto" px={2}>
           <ChatWindow
             query={query}
             setQuery={setQuery}
@@ -240,7 +238,7 @@ export default function AIAssistant() {
             onAskAI={handleAskAI}
             onCopyResponse={handleCopyResponse}
           />
-        </Flex>
+        </Box>
       </Flex>
     </Flex>
   );

@@ -9,11 +9,12 @@ import {
   useToast,
   Button,
   useColorModeValue,
+  Divider,
 } from "@chakra-ui/react";
-import HistoryList from "@/components/notes-generation-components/HistoryList";
 import NotesDisplay from "@/components/notes-generation-components/NotesDisplay";
 import SelectionModal from "@/components/notes-generation-components/SelectionModal";
 import InputModal from "@/components/notes-generation-components/InputModal";
+import { useSession } from "next-auth/react";
 
 export default function SmartNotesGenerator() {
   const [promptText, setPromptText] = useState("");
@@ -35,6 +36,11 @@ export default function SmartNotesGenerator() {
     onClose: closeInputModal,
   } = useDisclosure();
   const toast = useToast();
+  const { data: session } = useSession();
+
+  // Color Mode Values
+  const primaryColor = useColorModeValue("teal.500", "blue.400");
+  const buttonColor = useColorModeValue("teal", "blue");
 
   const handleOptionSelect = (type: "prompt" | "youtube" | "file") => {
     setSourceType(type);
@@ -45,13 +51,42 @@ export default function SmartNotesGenerator() {
   const handleGenerateNotes = async () => {
     setLoading(true);
     let notes = "";
+    let finalPrompt = "";
+
+    switch (sourceType) {
+      case "prompt":
+        finalPrompt = `Generate Detailed Notes on the following topic: ${promptText}`;
+        break;
+      case "youtube":
+        finalPrompt = `Generate Detailed Notes on the following topic: based on the content of this YouTube link: ${youtubeLink}`;
+        break;
+      case "file":
+        finalPrompt = `Generate Detailed Notes on the following topic: based on the content of this file: ${file?.name}`;
+        // In a real application, you'd likely need to upload and process the file content on the server.
+        break;
+      default:
+        toast({
+          title: "Error",
+          description: "Invalid source type.",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+        });
+        setLoading(false);
+        closeInputModal();
+        return;
+    }
 
     try {
-      const result = await generateNotes(
-        promptText || youtubeLink || file?.name || ""
-      );
-      notes = result;
+      const responseData = await fetch("/api/gemini", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: finalPrompt }),
+      }).then((res) => res.json());
 
+      notes = responseData?.response || "No notes generated.";
       setGeneratedNotes(notes);
       setChatHistory([
         ...chatHistory,
@@ -61,7 +96,50 @@ export default function SmartNotesGenerator() {
           date: new Date().toISOString().split("T")[0],
         },
       ]);
-    } catch {
+      // In your SmartNotesGenerator.tsx, within the handleGenerateNotes function:
+
+      if (session?.user?.id) {
+        const saveResponse = await fetch("/api/save-notes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: session.user.id,
+            prompt: finalPrompt, // Send the prompt for saving
+            content: notes, // Send the generated notes (which will be 'generated_quiz' in your schema)
+          }),
+        });
+
+        if (saveResponse.ok) {
+          toast({
+            title: "Notes Saved",
+            description: "The generated notes have been saved.",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+          });
+        } else {
+          const errorData = await saveResponse.json();
+          toast({
+            title: "Error Saving Notes",
+            description: errorData?.error || "Failed to save notes.",
+            status: "error",
+            duration: 2000,
+            isClosable: true,
+          });
+        }
+      } else {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to save notes.",
+          status: "warning",
+          duration: 2000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error("Gemini API Error:", error);
       toast({
         title: "Error",
         description: "Failed to generate notes.",
@@ -75,58 +153,22 @@ export default function SmartNotesGenerator() {
     }
   };
 
-  const generateNotes = async (input: string): Promise<string> => {
-    try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/ask?query=${encodeURIComponent(input)}`,
 
-        {
-          method: "GET",
+  // const handleChatClick = (chat: {
+  //   sourceType: string | null;
+  //   content: string;
+  //   date: string;
+  // }) => {
+  //   setGeneratedNotes(chat.content);
+  // };
 
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to generate notes");
-
-      // Read the response as a stream
-
-      const reader = response.body?.getReader();
-
-      if (!reader) throw new Error("Failed to read response");
-
-      let result = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) break;
-
-        result += new TextDecoder().decode(value);
-      }
-
-      return result;
-    } catch (error) {
-      console.error("Error:", error);
-
-      return "Failed to generate notes.";
-    }
-  };
-  const handleChatClick = (chat: {
-    sourceType: string | null;
-    content: string;
-    date: string;
-  }) => {
-    setGeneratedNotes(chat.content);
-  };
-
-  const handleDeleteChat = (index: number) => {
-    const updatedHistory = chatHistory.filter((_, i) => i !== index);
-    setChatHistory(updatedHistory);
-    if (generatedNotes === chatHistory[index].content) {
-      setGeneratedNotes("");
-    }
-  };
+  // const handleDeleteChat = (index: number) => {
+  //   const updatedHistory = chatHistory.filter((_, i) => i !== index);
+  //   setChatHistory(updatedHistory);
+  //   if (generatedNotes === chatHistory[index].content) {
+  //     setGeneratedNotes("");
+  //   }
+  // };
 
   const handleCopyNotes = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -139,51 +181,42 @@ export default function SmartNotesGenerator() {
     });
   };
 
-  // Color Mode Support
-  const headerColor = useColorModeValue("teal.600", "teal.300");
-  const buttonColor = useColorModeValue("teal.400", "teal.200");
-
   return (
-    <Box
-      p={{ base: 4, md: 6 }}
-      maxW="1200px"
-      mx="auto"
-      maxH="100vh"
-    >
+    <Box maxW="1400px" mx="auto" minH="calc(100vh - 80px)">
       <Flex
         justifyContent="space-between"
         alignItems="center"
         mb={6}
         wrap="wrap"
+        gap={4}
       >
-        <Heading size="lg" fontWeight="medium" color={headerColor}>
-          Smart Notes Generator
+        <Heading size="xl" fontWeight="semibold" color={primaryColor}>
+          Smart Notes
         </Heading>
         <Button
-          color={buttonColor}
-          fontSize="sm"
-          fontWeight="medium"
-          variant="ghost"
+          colorScheme={buttonColor}
+          size="lg"
+          borderRadius="full"
           onClick={onOpen}
+          _hover={{
+            transform: "translateY(-2px)",
+            boxShadow: "md",
+          }}
+          transition="all 0.2s"
         >
-          Start Generating Notes
+          Create
         </Button>
       </Flex>
-      <Flex
-        direction={{ base: "column", md: "row" }}
-        gap={6}
-        h={{ base: "auto", md: "60vh" }}
-      >
-        <HistoryList
-          chatHistory={chatHistory}
-          onChatClick={handleChatClick}
-          onDeleteChat={handleDeleteChat}
-        />
+
+      <Divider mb={4} borderColor={useColorModeValue("gray.200", "gray.600")} />
+
+      <Flex direction={{ base: "column", lg: "row" }} gap={6} minH="70vh">
         <NotesDisplay
           generatedNotes={generatedNotes}
           onCopyNotes={handleCopyNotes}
         />
       </Flex>
+
       <SelectionModal
         isOpen={isOpen}
         onClose={onClose}

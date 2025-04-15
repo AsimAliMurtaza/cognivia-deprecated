@@ -31,17 +31,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [otp, setOtp] = useState<string>("");
+  const [is2FARequired] = useState<boolean>(false);
   const router = useRouter();
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
 
   // 🔥 Color Mode Responsive Styling
-  const bgColor = useColorModeValue("linear(to-br, #E0F7FA, #F3E5F5)", "gray.900");
+  const bgColor = useColorModeValue(
+    "linear(to-br, #E0F7FA, #F3E5F5)",
+    "gray.900"
+  );
   const cardBgColor = useColorModeValue("white", "gray.900");
   const textColor = useColorModeValue("gray.700", "gray.200");
   const inputBgColor = useColorModeValue("white", "gray.700");
-  const buttonBgColor = useColorModeValue("blue.500", "blue.400");
-  const buttonHoverColor = useColorModeValue("blue.600", "blue.300");
+  const buttonBgColor = useColorModeValue("teal.500", "blue.400");
+  const buttonHoverColor = useColorModeValue("teal.600", "blue.300");
   const githubColor = useColorModeValue("gray.900", "white");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,40 +59,57 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: true,
-      callbackUrl: "/dashboard",
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setLoading(false);
+      if (result?.error) {
+        // This shouldn't happen with our new flow
+        throw new Error(result.error);
+      }
 
-    if (res?.error) {
-      setError("Invalid email or password. Please try again.");
+      if (result?.ok) {
+        // Check if we got redirected back (which means 2FA is required)
+        if (result.url?.includes("2fa-verification")) {
+          router.push(result.url);
+          return;
+        }
+
+        // Regular successful login
+        router.push("/dashboard");
+        toast({
+          title: "Login successful",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Login failed");
       toast({
-        title: "Login Failed",
-        description: "Invalid email or password.",
+        title: "Login failed",
+        description:
+          error instanceof Error ? error.message : "Invalid credentials",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
-    } else if (res?.ok) {
-      router.push("/dashboard");
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Flex justify="center" align="center" minH="100vh" bgGradient={bgColor}>
       <Container maxW="2xl">
-        <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <Flex
             bg={cardBgColor}
             boxShadow="lg"
@@ -129,8 +151,19 @@ export default function LoginPage() {
                 Cognivia
               </Heading>
               <Text fontSize="md">Sign in to continue or...</Text>
-              <Button color="blue.500" _hover={{ color: "blue.900" }} onClick={() => router.push("/")}>
-                <FiArrowLeft style={{ marginRight: "8px", marginBottom: "2px", fontSize: "2em" }} />
+              <Button
+                color={textColor}
+                _hover={{ color: "blue.900" }}
+                variant="link"
+                onClick={() => router.push("/")}
+              >
+                <FiArrowLeft
+                  style={{
+                    marginRight: "8px",
+                    marginBottom: "2px",
+                    fontSize: "2em",
+                  }}
+                />
               </Button>
             </Box>
 
@@ -150,6 +183,7 @@ export default function LoginPage() {
                     bg={inputBgColor}
                     color={textColor}
                     border="1px solid #ccc"
+                    borderRadius="full"
                     onChange={handleInputChange}
                     name="email"
                     _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
@@ -166,19 +200,63 @@ export default function LoginPage() {
                     bg={inputBgColor}
                     color={textColor}
                     border="1px solid #ccc"
+                    borderRadius="full"
                     onChange={handleInputChange}
                     name="password"
                     _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                   />
                 </FormControl>
 
-                {error && <FormHelperText color="red.500" textAlign="center">{error}</FormHelperText>}
+                {/* OTP input when 2FA is required */}
+                {is2FARequired && (
+                  <FormControl id="signIn-otp" isRequired>
+                    <FormLabel fontSize="sm" color={textColor}>
+                      2FA Code
+                    </FormLabel>
+                    <Input
+                      type="text"
+                      maxLength={6}
+                      placeholder="Enter 6-digit code"
+                      bg={inputBgColor}
+                      color={textColor}
+                      border="1px solid #ccc"
+                      borderRadius="full"
+                      onChange={(e) => setOtp(e.target.value)}
+                      value={otp}
+                      _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
+                    />
+                  </FormControl>
+                )}
 
-                <Button onClick={handleLogin} bg={buttonBgColor} _hover={{ bg: buttonHoverColor }} isLoading={loading} w="full" size="md">
+                {error && (
+                  <FormControl>
+                    <FormHelperText color="red.500" textAlign="center">
+                      {error}
+                    </FormHelperText>
+                  </FormControl>
+
+                )}
+
+                <Button
+                  borderRadius="full"
+                  onClick={handleLogin}
+                  bg={buttonBgColor}
+                  color={"white"}
+                  _hover={{ bg: buttonHoverColor }}
+                  isLoading={loading}
+                  w="full"
+                  size="md"
+                >
                   Login
                 </Button>
 
-                <Text fontSize="sm" color="blue.500" cursor="pointer" textAlign="center" _hover={{ textDecoration: "underline" }}>
+                <Text
+                  fontSize="sm"
+                  color="blue.500"
+                  cursor="pointer"
+                  textAlign="center"
+                  _hover={{ textDecoration: "underline" }}
+                >
                   Forgot password?
                 </Text>
 
@@ -191,8 +269,11 @@ export default function LoginPage() {
                     w="full"
                     border="1px solid"
                     leftIcon={<FcGoogle />}
+                    borderRadius="full"
                     _hover={{ bg: "gray.50", _dark: { bg: "gray.700" } }}
-                    onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                    onClick={() =>
+                      signIn("google", { callbackUrl: "/dashboard" })
+                    }
                   >
                     Continue with Google
                   </Button>
@@ -200,10 +281,13 @@ export default function LoginPage() {
                     variant="outline"
                     w="full"
                     color={githubColor}
+                    borderRadius="full"
                     leftIcon={<FaGithub />}
                     _hover={{ bg: "gray.50", _dark: { bg: "gray.700" } }}
                     border="1px solid"
-                    onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+                    onClick={() =>
+                      signIn("github", { callbackUrl: "/dashboard" })
+                    }
                   >
                     Continue with GitHub
                   </Button>
@@ -211,7 +295,12 @@ export default function LoginPage() {
 
                 <Text fontSize="sm" mt={6} textAlign="center" color={textColor}>
                   Don&apos;t have an account?{" "}
-                  <Button variant="link" color="blue.500" _hover={{ textDecoration: "underline" }} onClick={() => router.push("/signup")}>
+                  <Button
+                    variant="link"
+                    color="blue.500"
+                    _hover={{ textDecoration: "underline" }}
+                    onClick={() => router.push("/signup")}
+                  >
                     Create one
                   </Button>
                 </Text>

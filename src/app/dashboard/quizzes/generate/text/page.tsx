@@ -10,210 +10,351 @@ import {
   Textarea,
   VStack,
   HStack,
-  Icon,
   useColorModeValue,
   Spinner,
+  useToast,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react";
 import { ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
+const MotionCard = motion(Card);
+const MotionGrid = motion(Grid);
+const MotionGridItem = motion(GridItem);
 
 export default function TextQuizGeneration() {
   const [prompt, setPrompt] = useState("");
   const [generatedQuiz, setGeneratedQuiz] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isCardPressed, setIsCardPressed] = useState(false);
-  const router = useRouter();
 
-  const bgColor = useColorModeValue("gray.50", "gray.800");
-  const boxBg = useColorModeValue("white", "gray.700");
+  const toast = useToast();
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  // Material You inspired colors with teal/blue theming
+  const bgColor = useColorModeValue("gray.50", "gray.900");
+  const cardBg = useColorModeValue("white", "gray.800");
+  const primaryColor = useColorModeValue("teal", "blue");
   const textColor = useColorModeValue("gray.800", "gray.100");
-  const borderColor = useColorModeValue("teal.300", "teal.500");
-  const inputBg = useColorModeValue("gray.100", "gray.600");
-  const outputBg = useColorModeValue("blue.50", "gray.600");
+  const secondaryText = useColorModeValue("gray.600", "gray.300");
+  const inputBg = useColorModeValue("gray.50", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const accentColor = useColorModeValue("teal.500", "blue.400");
 
   const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Prompt required",
+        description: "Please enter some text to generate a quiz",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setGeneratedQuiz("");
     setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:8000/ask?query=${encodeURIComponent(prompt)}`);
+      const response = await fetch("/api/generate-quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt, userID: session?.user?.id }),
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to generate quiz");
+        const errorData = await response.json();
+        throw new Error(errorData?.error || "Failed to generate quiz");
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder("utf-8");
+      const data = await response.json();
+      if (data.questions && data.options && data.answers) {
+        setGeneratedQuiz(
+          data.questions
+            .map((question: string, index: number) => {
+              interface QuizData {
+                questions: string[];
+                options: string[][];
+                answers: string[];
+              }
 
-      let fullText = "";
-      while (true) {
-        const { value, done } = await reader!.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        fullText += chunk;
+              const optionsText = (data as QuizData).options[index]
+                ? (data as QuizData).options[index]
+                    .map(
+                      (option: string, optionIndex: number) =>
+                        `${String.fromCharCode(65 + optionIndex)} ${option} \n`
+                    )
+                    .join("  ") // Display options horizontally with spacing
+                : "No options available.";
+              return `${index + 1}. ${question}\n ${optionsText}`;
+            })
+            .join("\n\n")
+        );
       }
-
-      setGeneratedQuiz(fullText);
-      console.log(fullText);
       setLoading(false);
-      document.getElementById("quiz-output")?.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
       console.error("Error generating quiz:", error);
-      setGeneratedQuiz("❌ Error generating quiz. Please try again.");
+      toast({
+        title: "Error generating quiz",
+        description: (error as Error).message || "Please try again later",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setGeneratedQuiz("");
       setLoading(false);
     }
-  };
-
-  const handleCardPress = () => {
-    setIsCardPressed(true);
   };
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.5, staggerChildren: 0.2 },
+      transition: { duration: 0.5, staggerChildren: 0.1 },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+
+  const gridTransition = {
+    type: "spring",
+    stiffness: 100,
+    damping: 20,
   };
 
   return (
-    <Box minH="100vh" bg={bgColor} py={12} borderRadius={30}>
-      <Container maxW={{ base: "90%", md: "2xl" }}>
+    <Box minH="100vh" bg={bgColor} py={8}>
+      <Container maxW={{ base: "95%", md: "4xl", lg: "6xl" }}>
         <MotionBox
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <VStack spacing={6} align="stretch">
-            <Link href="/dashboard/quizzes" style={{ textDecoration: "none" }}>
-              <HStack spacing={2} color="teal.500" _hover={{ color: "teal.700" }}>
-                <Icon as={ArrowLeft} boxSize={5} />
-                <Text fontWeight="medium">Back</Text>
-              </HStack>
-            </Link>
+            <MotionBox variants={itemVariants}>
+              <Button
+                as={Link}
+                href="/dashboard/quizzes"
+                leftIcon={<ArrowLeft size={20} />}
+                variant="ghost"
+                colorScheme={primaryColor}
+                size="sm"
+                px={2}
+                _hover={{ bg: "transparent", textDecoration: "underline" }}
+              >
+                Back to quizzes
+              </Button>
+            </MotionBox>
 
-            <Box
-              bg={boxBg}
-              p={6}
-              borderRadius="lg"
-              boxShadow="md"
-              border="1px solid"
-              borderColor={borderColor}
+            <MotionGrid
+              templateColumns={{
+                base: "1fr",
+                md: generatedQuiz || loading ? "1fr 1fr" : "1fr",
+              }}
+              gap={6}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={gridTransition}
             >
-              <VStack spacing={5} align="stretch">
-                <Heading as="h1" size="md" color="teal.500">
-                  Generate Quiz from Text
-                </Heading>
-
-                <Text color={textColor} fontSize="sm">
-                  Enter your text prompt below, and our AI will generate a
-                  customized quiz for you.
-                </Text>
-
-                <Textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Type your prompt here..."
-                  minH="150px"
-                  size="sm"
-                  borderColor="teal.200"
-                  bg={inputBg}
-                  _hover={{ borderColor: "teal.300" }}
-                  _focus={{
-                    borderColor: "teal.500",
-                    boxShadow: "0 0 0 1px teal.500",
-                  }}
-                  onClick={handleCardPress}
-                  color={textColor}
-                />
-
-                <MotionButton
-                  colorScheme="teal"
-                  size="md"
-                  isDisabled={!prompt.trim()}
-                  onClick={handleGenerate}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  w="full"
+              {/* Input Card - Always shown */}
+              <MotionGridItem
+                colSpan={1}
+                initial={{ x: 0 }}
+                animate={{
+                  x: generatedQuiz || loading ? 0 : 0,
+                }}
+                transition={gridTransition}
+              >
+                <MotionCard
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover="hover"
+                  whileTap="tap"
+                  bg={cardBg}
+                  borderRadius="xl"
+                  overflow="hidden"
+                  boxShadow="sm"
+                  h="full"
                 >
-                  Generate Quiz
-                </MotionButton>
-
-                {loading ? (
-                  <Box
-                    id="quiz-output"
-                    bg={outputBg}
-                    p={4}
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor={borderColor}
-                    textAlign="center"
-                  >
-                    <Spinner size="lg" color="teal.500" />
-                    <Text mt={3} fontSize="sm" color={textColor}>
-                      Generating your quiz, please wait...
+                  <CardHeader pb={0}>
+                    <Heading
+                      as="h1"
+                      size="lg"
+                      fontWeight="semibold"
+                      color={accentColor}
+                    >
+                      Generate Quiz from Text
+                    </Heading>
+                    <Text color={secondaryText} fontSize="sm" mt={2}>
+                      Enter your text below and our AI will create a customized
+                      quiz
                     </Text>
-                  </Box>
-                ) : generatedQuiz && (
-                  <MotionBox
-                    id="quiz-output"
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    bg={outputBg}
-                    p={4}
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor={borderColor}
-                  >
-                    <VStack align="stretch" spacing={3}>
-                      <Heading as="h3" size="sm" color="teal.500">
-                        Generated Quiz
-                      </Heading>
-                      <Text color={textColor} fontSize="sm" whiteSpace="pre-wrap">
-                        {generatedQuiz}
-                      </Text>
-                      <HStack spacing={3}>
-                        <MotionButton
-                          variant="outline"
-                          colorScheme="teal"
-                          size="sm"
-                          onClick={handleGenerate}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          flex={1}
-                        >
-                          Regenerate
-                        </MotionButton>
-                        <MotionButton
-                          colorScheme="teal"
-                          size="sm"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          flex={1}
-                          onClick={() => {
-                            const type = "text";
-                            router.push(`/dashboard/quizzes/conduction/${type}`);
+                  </CardHeader>
+
+                  <CardBody>
+                    <VStack spacing={5} align="stretch">
+                      <MotionBox variants={itemVariants}>
+                        <Textarea
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          placeholder="Example: Create a 5-question quiz about React hooks..."
+                          minH="180px"
+                          size="md"
+                          borderColor={borderColor}
+                          bg={inputBg}
+                          _hover={{ borderColor: accentColor }}
+                          _focus={{
+                            borderColor: accentColor,
+                            boxShadow: `0 0 0 1px ${accentColor}`,
                           }}
+                          color={textColor}
+                          borderRadius="lg"
+                          fontSize="md"
+                        />
+                      </MotionBox>
+
+                      <MotionBox variants={itemVariants}>
+                        <MotionButton
+                          colorScheme={primaryColor}
+                          size="md"
+                          onClick={handleGenerate}
+                          isDisabled={!prompt.trim() || loading}
+                          isLoading={loading}
+                          loadingText="Generating..."
+                          width="full"
+                          py={6}
+                          borderRadius="lg"
+                          fontWeight="medium"
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
                         >
-                          Start Quiz
+                          Generate Quiz
                         </MotionButton>
-                      </HStack>
+                      </MotionBox>
                     </VStack>
-                  </MotionBox>
+                  </CardBody>
+                </MotionCard>
+              </MotionGridItem>
+
+              {/* Output Card - Only shown when generating or has content */}
+              <AnimatePresence>
+                {(generatedQuiz || loading) && (
+                  <MotionGridItem
+                    colSpan={1}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={gridTransition}
+                  >
+                    <MotionCard
+                      bg={cardBg}
+                      borderRadius="xl"
+                      boxShadow="sm"
+                      h="full"
+                    >
+                      <CardHeader>
+                        <Heading
+                          as="h2"
+                          size="md"
+                          fontWeight="semibold"
+                          color={accentColor}
+                        >
+                          {loading
+                            ? "Generating Quiz..."
+                            : "Your Generated Quiz"}
+                        </Heading>
+                      </CardHeader>
+                      <Divider borderColor={borderColor} />
+                      <CardBody>
+                        {loading ? (
+                          <VStack spacing={4} py={8} minH="200px">
+                            <Spinner
+                              size="xl"
+                              color={accentColor}
+                              thickness="3px"
+                            />
+                            <Text color={secondaryText}>
+                              creating your quiz...
+                            </Text>
+                          </VStack>
+                        ) : (
+                          <VStack align="stretch" spacing={4}>
+                            <Box
+                              bg={inputBg}
+                              p={4}
+                              borderRadius="lg"
+                              borderWidth="1px"
+                              borderColor={borderColor}
+                              minH="200px"
+                              whiteSpace="pre-wrap"
+                              fontSize="md"
+                              lineHeight="tall"
+                              overflowY="auto"
+                              maxH="300px"
+                              color={textColor}
+                            >
+                              {generatedQuiz}
+                            </Box>
+
+                            <HStack spacing={3} mt={4}>
+                              <MotionButton
+                                variant="outline"
+                                colorScheme={primaryColor}
+                                size="md"
+                                onClick={handleGenerate}
+                                flex={1}
+                                borderRadius="lg"
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.99 }}
+                              >
+                                Regenerate
+                              </MotionButton>
+                              <MotionButton
+                                colorScheme={primaryColor}
+                                size="md"
+                                flex={1}
+                                borderRadius="lg"
+                                onClick={() => {
+                                  const type = "text";
+                                  router.push(
+                                    `/dashboard/quizzes/conduction/${type}`
+                                  );
+                                }}
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.99 }}
+                              >
+                                Start Quiz
+                              </MotionButton>
+                            </HStack>
+                          </VStack>
+                        )}
+                      </CardBody>
+                    </MotionCard>
+                  </MotionGridItem>
                 )}
-              </VStack>
-            </Box>
+              </AnimatePresence>
+            </MotionGrid>
           </VStack>
         </MotionBox>
       </Container>

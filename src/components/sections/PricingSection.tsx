@@ -13,6 +13,7 @@ import {
   CardBody,
   CardFooter,
   useColorModeValue,
+  GridItem,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,8 @@ const pricingPlans = [
   },
   {
     name: "Pro",
-    price: "$9.99/month",
+    price: "$9.99",
+    period: "per month",
     features: [
       "Unlimited AI Assistance",
       "Unlimited Quizzes",
@@ -40,6 +42,7 @@ const pricingPlans = [
     ],
     buttonLabel: "Upgrade to Pro",
     colorScheme: "blue",
+    popular: true,
   },
   {
     name: "Enterprise",
@@ -58,110 +61,142 @@ const pricingPlans = [
 export default function PricingSection() {
   const router = useRouter();
 
-  // Dynamic Colors for Light & Dark Mode
+  // Material You inspired colors
   const bgColor = useColorModeValue("white", "gray.900");
-  const textColor = useColorModeValue("gray.600", "gray.300");
-  const headingGradient = useColorModeValue(
-    "linear(to-r, #6EC3C4, blue.500)",
-    "linear(to-r, cyan.300, blue.400)"
-  );
-  const cardBg = useColorModeValue("white", "gray.800");
-  const cardTextColor = useColorModeValue("gray.800", "gray.200");
+  const textColor = useColorModeValue("gray.700", "gray.200");
+  const subTextColor = useColorModeValue("gray.600", "gray.400");
+  const planColorScheme = useColorModeValue("teal.500", "blue.400");
+  const anotherPlanColorScheme = useColorModeValue("gray.500", "gray.300");
 
   return (
     <Box
-      minH="100vh"
       py={20}
       id="pricing"
       bg={bgColor}
       position="relative"
       zIndex={1}
+      display="flex"
+      alignItems="center"
     >
-      <Container maxW="container.lg" textAlign="center">
-        <VStack spacing={8}>
+      <Container maxW="container.lg">
+        <VStack spacing={12} textAlign="center">
+          {/* Title Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}
           >
-            <Heading
-              size="xl"
-              fontWeight="bold"
-              bgGradient={headingGradient}
-              bgClip="text"
-            >
-              Affordable Plans for Everyone
-            </Heading>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <Text fontSize="lg" color={textColor} maxW="2xl">
-              Choose a plan that fits your needs and start learning smarter
-              today.
-            </Text>
-          </motion.div>
-        </VStack>
-
-        {/* Pricing Cards */}
-        <Grid
-          templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
-          gap={6}
-          mt={12}
-        >
-          {pricingPlans.map((plan, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: index * 0.2 }}
-              viewport={{ once: true }}
-            >
-              <Card
-                bg={cardBg}
-                p={6}
-                borderRadius="lg"
-                boxShadow="lg"
-                textAlign="center"
-                transition="all 0.3s ease-in-out"
-                _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+            <VStack spacing={4}>
+              <Heading
+                as="h2"
+                size="2xl"
+                fontWeight="bold"
+                color={textColor}
+                lineHeight="1.2"
               >
-                <CardHeader>
-                  <Heading size="lg" color={`${plan.colorScheme}.400`}>
-                    {plan.name}
-                  </Heading>
-                  <Text fontSize="2xl" fontWeight="bold" color={cardTextColor}>
-                    {plan.price}
-                  </Text>
-                </CardHeader>
-                <CardBody>
-                  <VStack spacing={3}>
-                    {plan.features.map((feature, idx) => (
-                      <Text key={idx} color={textColor}>
-                        ✅ {feature}
-                      </Text>
-                    ))}
-                  </VStack>
-                </CardBody>
-                <CardFooter>
-                  <Button
-                    colorScheme={plan.colorScheme}
-                    size="md"
-                    w="full"
-                    rounded="full"
-                    onClick={() => router.push("/pricing")}
+                Simple, transparent pricing
+              </Heading>
+              <Text
+                fontSize={{ base: "lg", md: "xl" }}
+                color={subTextColor}
+                maxW="2xl"
+              >
+                Choose the perfect plan for your learning journey
+              </Text>
+            </VStack>
+          </motion.div>
+
+          {/* Pricing Cards */}
+          <Grid
+            templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
+            gap={6}
+            width="full"
+          >
+            {pricingPlans.map((plan, index) => (
+              <GridItem key={index}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                >
+                  <Card
+                    borderRadius="2xl"
+                    height="100%"
+                    position="relative"
+                    overflow="hidden"
                   >
-                    {plan.buttonLabel}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </motion.div>
-          ))}
-        </Grid>
+                    <CardHeader pb={0}>
+                      <VStack spacing={1}>
+                        <Heading
+                          as="h3"
+                          size="lg"
+                          color={planColorScheme}
+                        >
+                          {plan.name}
+                        </Heading>
+                        <Box>
+                          <Text
+                            fontSize="xl"
+                            fontWeight="normal"
+                            color={textColor}
+                          >
+                            {plan.price}
+                          </Text>
+                          {plan.period && (
+                            <Text fontSize="sm" color={subTextColor}>
+                              {plan.period}
+                            </Text>
+                          )}
+                        </Box>
+                      </VStack>
+                    </CardHeader>
+
+                    <CardBody>
+                      <VStack spacing={3} align="flex-start">
+                        {plan.features.map((feature, idx) => (
+                          <Text
+                            key={idx}
+                            color={subTextColor}
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                          >
+                            <Box
+                              as="span"
+                              color={anotherPlanColorScheme}
+                            >
+                              ✓
+                            </Box>
+                            {feature}
+                          </Text>
+                        ))}
+                      </VStack>
+                    </CardBody>
+
+                    <CardFooter pt={0}>
+                      <Button
+                        colorScheme={plan.colorScheme}
+                        size="lg"
+                        w="full"
+                        borderRadius="full"
+                        onClick={() => router.push("/pricing")}
+                        _hover={{
+                          transform: "translateY(-2px)",
+                          boxShadow: "md",
+                        }}
+                        transition="all 0.2s"
+                      >
+                        {plan.buttonLabel}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              </GridItem>
+            ))}
+          </Grid>
+        </VStack>
       </Container>
     </Box>
   );

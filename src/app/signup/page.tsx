@@ -37,8 +37,9 @@ export default function SignUpPage() {
   );
   const boxColor = useColorModeValue("white", "gray.900");
   const textColor = useColorModeValue("gray.700", "gray.200");
-  const buttonHoverColor = useColorModeValue("blue.900", "blue.300");
   const inputBgColor = useColorModeValue("white", "gray.700");
+  const buttonBgColor = useColorModeValue("teal.500", "blue.400");
+  const buttonHoverColor = useColorModeValue("teal.600", "blue.300");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -118,6 +119,8 @@ export default function SignUpPage() {
               </Text>
               <Button
                 color="blue.500"
+                variant="link"
+                fontSize="sm"
                 _hover={{ color: buttonHoverColor }}
                 onClick={() => router.push("/")}
               >
@@ -137,6 +140,7 @@ export default function SignUpPage() {
                 {/* Color Mode Toggle Button */}
                 <IconButton
                   aria-label="Toggle dark mode"
+                  borderRadius="full"
                   icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
                   onClick={toggleColorMode}
                   alignSelf="flex-end"
@@ -161,6 +165,7 @@ export default function SignUpPage() {
                     type="email"
                     placeholder="Enter your email"
                     bg={inputBgColor}
+                    borderRadius="full"
                     color="black"
                     border="1px solid #ccc"
                     onChange={handleInputChange}
@@ -178,6 +183,7 @@ export default function SignUpPage() {
                     placeholder="Enter your password"
                     bg={inputBgColor}
                     color="black"
+                    borderRadius="full"
                     border="1px solid #ccc"
                     onChange={handleInputChange}
                     name="password"
@@ -187,9 +193,10 @@ export default function SignUpPage() {
 
                 <Button
                   onClick={handleSignup}
-                  bg="blue.500"
+                  bg={buttonBgColor}
                   color="white"
-                  _hover={{ bg: "blue.600" }}
+                  _hover={{ bg: buttonHoverColor }}
+                  borderRadius="full"
                   isLoading={loading}
                   w="full"
                 >

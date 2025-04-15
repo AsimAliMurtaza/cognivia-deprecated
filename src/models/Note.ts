@@ -1,19 +1,28 @@
-import mongoose, { Schema, Document } from "mongoose";
+// models/Note.ts
+import { Schema, Document, models, model } from "mongoose";
 
 export interface INote extends Document {
+  _id: string;
   userID: string;
-  noteID: string;
-  content: string;
+  prompt: string;
+  generated_quiz: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const NoteSchema = new Schema<INote>(
   {
+    _id: { type: String, required: true },
     userID: { type: String, required: true },
-    noteID: { type: String, required: true, unique: true },
-    content: { type: String, required: true },
+    prompt: { type: String, required: true },
+    generated_quiz: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  { timestamps: true, collection: "generated_notes" } // Specify the collection name here
 );
 
-const Note = mongoose.models.Note || mongoose.model<INote>("Note", NoteSchema);
+// Use models cache to avoid recompilation on hot reload
+const Note = models.GeneratedNote || model<INote>("GeneratedNote", NoteSchema);
+
 export default Note;

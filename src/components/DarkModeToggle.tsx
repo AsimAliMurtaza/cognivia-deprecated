@@ -12,6 +12,8 @@ export default function DarkModeToggle() {
       icon={colorMode === "dark" ? <FiSun /> : <FiMoon />}
       onClick={toggleColorMode}
       variant="ghost"
+      borderRadius="full"
+      size="lg"
     />
   );
 }

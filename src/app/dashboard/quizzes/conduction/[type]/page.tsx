@@ -51,6 +51,7 @@ export default function QuizPage() {
     const newAnswers = [...selectedAnswers];
     newAnswers[currentQuestion] = answer;
     setSelectedAnswers(newAnswers);
+    console.log(type); // Log the selected answers for debugging
   };
 
   const handleNext = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -12,31 +12,82 @@ import {
   useColorMode,
   useColorModeValue,
   HStack,
-  Select,
-  Badge,
   IconButton,
-} from "@chakra-ui/react";
-import { FiArrowLeft, FiSun, FiMoon } from "react-icons/fi";
+  useToast,
+  VStack,
 
-export default function SettingsPage() {
+} from "@chakra-ui/react";
+import { FiArrowLeft, FiMoon, FiBell, FiMail } from "react-icons/fi";
+
+export default function AppSettingsPage() {
   const router = useRouter();
   const { colorMode, toggleColorMode } = useColorMode();
-  const [language, setLanguage] = useState("English");
-  const [subscription, setSubscription] = useState("Basic");
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
-  // Soft pastel colors
-  const bg = useColorModeValue("gray.50", "gray.800"); // Soft purple for light mode
+  // App settings state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [emailAlertsEnabled, setEmailAlertsEnabled] = useState(true);
+
+  const bg = useColorModeValue("gray.50", "gray.800");
   const textColor = useColorModeValue("gray.700", "gray.200");
   const borderColor = useColorModeValue("gray.300", "gray.600");
-  const primaryColor = "#6EC3C4"; // Soft teal
-  const hoverBg = useColorModeValue("#E0F7FA", "gray.700"); // Light teal for hover
+  const primaryColor = "#6EC3C4";
+  const hoverBg = useColorModeValue("#E0F7FA", "gray.700");
+
+  // Fetch initial settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Set initial values from API response
+        setNotificationsEnabled(true);
+        setEmailAlertsEnabled(true);
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+        toast({
+          title: "Error loading settings",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, [toast]);
+
+  const saveSettings = async () => {
+    try {
+      setLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      toast({
+        title: "Settings saved successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      toast({
+        title: "Error saving settings",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Container maxW="container.2xl" py={10}>
+    <Container maxW="container.xl" py={6}>
       <Box
         p={6}
-        borderRadius="2xl"
-        boxShadow="2xl"
         bg={bg}
         w="100%"
         textAlign="center"
@@ -51,22 +102,25 @@ export default function SettingsPage() {
             color={textColor}
             _hover={{ bg: hoverBg }}
           />
-          <IconButton
-            aria-label="Toggle Theme"
-            icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
-            onClick={toggleColorMode}
-            variant="ghost"
-            color={textColor}
-            _hover={{ bg: hoverBg }}
-          />
         </HStack>
 
-        {/* Dark Mode Toggle */}
-        <Box textAlign="left" w="full">
+        {/* Appearance Section */}
+        <VStack align="stretch" spacing={4} mb={6}>
+          <Text
+            fontSize="lg"
+            fontWeight="bold"
+            textAlign="left"
+            color={textColor}
+          >
+            Appearance
+          </Text>
+
+          {/* Dark Mode Toggle */}
           <HStack justify="space-between">
-            <Text fontSize="lg" fontWeight="medium" color={textColor}>
-              Dark Mode
-            </Text>
+            <HStack>
+              <FiMoon />
+              <Text>Dark Mode</Text>
+            </HStack>
             <Switch
               size="lg"
               colorScheme="teal"
@@ -74,66 +128,53 @@ export default function SettingsPage() {
               onChange={toggleColorMode}
             />
           </HStack>
-        </Box>
+        </VStack>
 
         <Divider my={4} borderColor={borderColor} />
 
-        {/* Subscription Plan */}
-        <Box textAlign="left" w="full">
-          <Text fontSize="lg" fontWeight="medium" color={textColor}>
-            Subscription Plan
-          </Text>
-          <HStack justify="space-between" mt={2}>
-            <Badge
-              colorScheme={subscription === "Pro" ? "green" : "blue"}
-              fontSize="md"
-              px={3}
-              py={1}
-              borderRadius="full"
-            >
-              {subscription} Plan
-            </Badge>
-            <Button
-              size="sm"
-              bg={primaryColor}
-              color="white"
-              _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
-              onClick={() => setSubscription("Pro")}
-              transition="all 0.2s"
-            >
-              Upgrade to Pro
-            </Button>
-          </HStack>
-        </Box>
-
-        <Divider my={4} borderColor={borderColor} />
-
-        {/* General Settings */}
-        <Box textAlign="left" w="full">
-          <Text fontSize="lg" fontWeight="medium" color={textColor}>
-            Language
-          </Text>
-          <Select
-            mt={2}
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            bg={useColorModeValue("white", "gray.700")}
-            borderColor={borderColor}
-            _hover={{ borderColor: primaryColor }}
-            _focus={{
-              borderColor: primaryColor,
-              boxShadow: `0 0 0 1px ${primaryColor}`,
-            }}
+        {/* Notifications Section */}
+        <VStack align="stretch" spacing={4} mb={6}>
+          <Text
+            fontSize="lg"
+            fontWeight="bold"
+            textAlign="left"
+            color={textColor}
           >
-            <option value="English">English</option>
-            <option value="French">French</option>
-            <option value="Spanish">Spanish</option>
-          </Select>
-        </Box>
+            Notifications
+          </Text>
+
+          {/* In-App Notifications */}
+          <HStack justify="space-between">
+            <HStack>
+              <FiBell />
+              <Text>In-App Notifications</Text>
+            </HStack>
+            <Switch
+              size="lg"
+              colorScheme="teal"
+              isChecked={notificationsEnabled}
+              onChange={() => setNotificationsEnabled(!notificationsEnabled)}
+            />
+          </HStack>
+
+          {/* Email Alerts */}
+          <HStack justify="space-between">
+            <HStack>
+              <FiMail />
+              <Text>Email Alerts</Text>
+            </HStack>
+            <Switch
+              size="lg"
+              colorScheme="teal"
+              isChecked={emailAlertsEnabled}
+              onChange={() => setEmailAlertsEnabled(!emailAlertsEnabled)}
+            />
+          </HStack>
+        </VStack>
 
         <Divider my={4} borderColor={borderColor} />
 
-        {/* Save Changes Button */}
+        {/* Save Button */}
         <Button
           bg={primaryColor}
           color="white"
@@ -141,8 +182,11 @@ export default function SettingsPage() {
           mt={4}
           _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
           transition="all 0.2s"
+          onClick={saveSettings}
+          isLoading={loading}
+          loadingText="Saving..."
         >
-          Save Changes
+          Save Settings
         </Button>
       </Box>
     </Container>

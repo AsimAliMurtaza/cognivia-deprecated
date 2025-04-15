@@ -1,21 +1,11 @@
-import type { NextAuthOptions, Session as NextAuthSession } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-
-// Extend session and token types to avoid `any`
-interface ExtendedSession extends NextAuthSession {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    gender?: string | null;
-  };
-}
+import { sendEmail } from "@/lib/mailer";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -32,35 +22,71 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        otp: { label: "2FA Code", type: "text" },
       },
+
       async authorize(credentials) {
-        if (!credentials) {
-          throw new Error("No credentials provided");
-        }
+        if (!credentials) return null;
 
+        const { email, password, otp } = credentials;
         await dbConnect();
+        const user = await User.findOne({ email });
+        if (!user) return null;
+        if (!user.verified) throw new Error("Please verify your email first");
 
-        const user = await User.findOne({ email: credentials.email });
+        // ✅ Handle 2FA login after OTP is already verified
+        if (otp && password === "__OTP__") {
+          if (!user.is2FAEnabled) return null;
 
-        if (!user) {
-          throw new Error("User not found");
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            gender: user.gender,
+            is2FAEnabled: true,
+            is2FAVerified: true,
+          };
         }
 
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        // ✅ Check password
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) return null;
 
-        if (!isValidPassword) {
-          throw new Error("Invalid credentials");
+        // ✅ Trigger 2FA email if enabled
+        if (user.is2FAEnabled) {
+          const otpCode = Math.floor(
+            100000 + Math.random() * 900000
+          ).toString();
+          const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+          user.twoFactorOtp = otpCode;
+          user.twoFactorOtpExpiry = expiry;
+          await user.save();
+
+          await sendEmail({
+            from: process.env.EMAIL_USER as string,
+            to: user.email,
+            subject: "Your 2FA Verification Code",
+            text: `Your verification code is: ${otpCode}`,
+          });
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            requires2FA: true,
+            is2FAEnabled: true,
+          };
         }
 
+        // ✅ Regular login
         return {
-          id: user.id,
+          id: user._id.toString(),
           email: user.email,
-          image: user.image,
           name: user.name,
+          image: user.image,
           gender: user.gender,
+          is2FAEnabled: false,
         };
       },
     }),
@@ -68,6 +94,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
+    verifyRequest: "/login/2fa-verification",
   },
   session: {
     strategy: "jwt",
@@ -75,18 +102,41 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id; // Store user ID in the token
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.image = user.image;
+        token.gender = user.gender;
+        token.is2FAEnabled = user.is2FAEnabled;
+        token.is2FAVerified = user.is2FAVerified;
       }
       return token;
     },
-    async session({ session, token }): Promise<ExtendedSession> {
+    async session({ session, token }) {
       return {
         ...session,
         user: {
           ...session.user,
-          id: token.id as string, // Ensure `id` is typed properly
+          id: token.id,
+          name: token.name,
+          email: token.email,
+          image: token.image,
+          gender: token.gender,
+          is2FAEnabled: token.is2FAEnabled,
+          is2FAVerified: token.is2FAVerified,
         },
       };
+    },
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") return true;
+
+      if (user.requires2FA) {
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        return `${baseUrl}/login/2fa-verification?email=${encodeURIComponent(
+          user.email ?? ""
+        )}`;
+      }
+      return true;
     },
   },
 };

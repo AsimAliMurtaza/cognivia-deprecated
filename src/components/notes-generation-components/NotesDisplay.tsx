@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import ReactMarkdown from "react-markdown";
 import {
   Box,
   Heading,
@@ -6,7 +9,14 @@ import {
   IconButton,
   Tooltip,
   useColorModeValue,
+  Flex,
+  Divider,
   Code,
+  Link,
+  UnorderedList,
+  OrderedList,
+  ListItem,
+  BoxProps,
 } from "@chakra-ui/react";
 import { AiOutlineCopy } from "react-icons/ai";
 import { motion } from "framer-motion";
@@ -18,103 +28,167 @@ interface NotesDisplayProps {
   onCopyNotes: (text: string) => void;
 }
 
+type MarkdownComponentProps = {
+  children?: React.ReactNode;
+  inline?: boolean;
+};
+
 const NotesDisplay: React.FC<NotesDisplayProps> = ({
   generatedNotes,
   onCopyNotes,
 }) => {
-  const bg = useColorModeValue("gray.100", "gray.800");
-  const headingColor = useColorModeValue("teal.700", "teal.300");
-  const textColor = useColorModeValue("gray.700", "gray.300");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
-  const hoverBg = useColorModeValue("gray.200", "gray.600");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const primaryColor = useColorModeValue("teal.600", "blue.300");
+  const textColor = useColorModeValue("gray.800", "gray.200");
+  const subTextColor = useColorModeValue("gray.600", "gray.400");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const codeBg = useColorModeValue("teal.50", "blue.900");
+  const linkColor = useColorModeValue("blue.600", "blue.300");
+  const bgColor = useColorModeValue("teal.50", "blue.900");
 
-  // Function to format text (Headings, Code, Paragraphs)
-  const formatText = (text: string) => {
-    return text.split("\n").map((line, index) => {
-      if (line.startsWith("** ")) {
-        return (
-          <Heading key={index} size="md" color={headingColor} mt={3}>
-            {line.replace("** ", "")}
-          </Heading>
-        );
-      } else if (line.startsWith("`") && line.endsWith("`")) {
-        return (
-          <Code key={index} p={1} borderRadius="md" fontSize="sm" colorScheme="teal">
-            {line.replace(/`/g, "")}
+  const components = {
+    h1: ({ children, ...props }: MarkdownComponentProps) => (
+      <Heading as="h1" size="xl" color={primaryColor} mt={8} mb={4} {...props}>
+        {children}
+      </Heading>
+    ),
+    h2: ({ children, ...props }: MarkdownComponentProps) => (
+      <Heading as="h2" size="lg" color={primaryColor} mt={6} mb={3} {...props}>
+        {children}
+      </Heading>
+    ),
+    h3: ({ children, ...props }: MarkdownComponentProps) => (
+      <Heading as="h3" size="md" color={primaryColor} mt={5} mb={2} {...props}>
+        {children}
+      </Heading>
+    ),
+    p: ({ children, ...props }: MarkdownComponentProps) => (
+      <Text fontSize="md" color={textColor} my={3} {...props}>
+        {children}
+      </Text>
+    ),
+    a: ({ children, ...props }: MarkdownComponentProps) => (
+      <Link color={linkColor} isExternal {...props}>
+        {children}
+      </Link>
+    ),
+    ul: ({ children, ...props }: MarkdownComponentProps) => (
+      <UnorderedList spacing={1} my={3} pl={5} {...props}>
+        {children}
+      </UnorderedList>
+    ),
+    ol: ({ children, ...props }: MarkdownComponentProps) => (
+      <OrderedList spacing={1} my={3} pl={5} {...props}>
+        {children}
+      </OrderedList>
+    ),
+    li: ({ children, ...props }: MarkdownComponentProps) => (
+      <ListItem pb={1} {...props}>
+        {children}
+      </ListItem>
+    ),
+    code: ({ inline, children, ...props }: MarkdownComponentProps) =>
+      inline ? (
+        <Code
+          p={1}
+          borderRadius="md"
+          bg={codeBg}
+          color={textColor}
+          fontSize="0.9em"
+          {...props}
+        >
+          {children}
+        </Code>
+      ) : (
+        <Box
+          as="pre"
+          p={3}
+          borderRadius="md"
+          bg={codeBg}
+          overflowX="auto"
+          my={4}
+          {...props}
+        >
+          <Code
+            display="block"
+            whiteSpace="pre"
+            color={textColor}
+            fontSize="0.9em"
+          >
+            {children}
           </Code>
-        );
-      } else {
-        return (
-          <Text key={index} fontSize="md" color={textColor} mt={1} whiteSpace="pre-wrap">
-            {line}
-          </Text>
-        );
-      }
-    });
+        </Box>
+      ),
+    blockquote: ({ children, ...props }: MarkdownComponentProps) => (
+      <Box
+        borderLeft="4px solid"
+        borderColor={primaryColor}
+        pl={4}
+        py={1}
+        my={3}
+        bg={bgColor}
+        {...props}
+      >
+        {children}
+      </Box>
+    ),
+  };
+
+  const scrollbarStyles: BoxProps["css"] = {
+    "&::-webkit-scrollbar": {
+      width: "6px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: subTextColor,
+      borderRadius: "3px",
+    },
   };
 
   return (
     <Box
       flex="2"
-      bg={bg}
-      borderRadius="lg"
+      bg={surfaceColor}
+      borderRadius="2xl"
       p={6}
       boxShadow="lg"
       border="1px solid"
       borderColor={borderColor}
-      minH="450px"
+      minH="500px"
       position="relative"
     >
-      <Heading
-        size="md"
-        fontWeight="thin"
-        mb={4}
-        color={headingColor}
-        textAlign="center"
+      <Flex justify="space-between" align="center" mb={4}>
+        <Heading size="md" fontWeight="semibold" color={primaryColor}>
+          {generatedNotes ? "Generated Notes" : "No Notes Generated"}
+        </Heading>
+        <Flex gap={3} align="center">
+          {generatedNotes && (
+            <Tooltip label="Copy to clipboard" hasArrow>
+              <IconButton
+                icon={<AiOutlineCopy />}
+                aria-label="Copy notes"
+                onClick={() => onCopyNotes(generatedNotes)}
+                variant="ghost"
+                colorScheme="blue"
+                size="sm"
+              />
+            </Tooltip>
+          )}
+        </Flex>
+      </Flex>
+
+      <Divider mb={4} borderColor={borderColor} />
+
+      <MotionBox
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        overflowY="auto"
+        maxH="400px"
+        pr={2}
+        css={scrollbarStyles}
       >
-        {generatedNotes ? "Your Generated Notes" : "Generated Notes"}
-      </Heading>
-
-      {generatedNotes ? (
-        <MotionBox
-          p={5}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          h="350px" // Fixed height
-          overflowY="auto" // Scrollable content
-          css={{
-            "&::-webkit-scrollbar": {
-              width: "6px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              background: hoverBg,
-              borderRadius: "6px",
-            },
-          }}
-        >
-          {formatText(generatedNotes)}
-        </MotionBox>
-      ) : (
-        <Text textAlign="center" fontSize="sm" color={textColor} mt={4}>
-          No notes available yet.
-        </Text>
-      )}
-
-      {/* Copy Button at the Bottom Right */}
-      {generatedNotes && (
-        <Tooltip label="Copy Text" hasArrow>
-          <IconButton
-            icon={<AiOutlineCopy />}
-            size="sm"
-            onClick={() => onCopyNotes(generatedNotes)}
-            aria-label="Copy Text"
-            _hover={{ bg: hoverBg }}
-            bottom="0px"
-            right="10px"
-          />
-        </Tooltip>
-      )}
+        <ReactMarkdown components={components}>{generatedNotes}</ReactMarkdown>
+      </MotionBox>
     </Box>
   );
 };
