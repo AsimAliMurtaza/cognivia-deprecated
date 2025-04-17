@@ -148,7 +148,10 @@ export async function POST(req: NextRequest) {
         answers: formattedQuiz?.answers,
       });
 
+      console.log("quiz ID:", newQuiz._id); // Log for debugging
+
       const savedQuiz = await newQuiz.save();
+      console.log(savedQuiz);
 
       console.log("Formatted Quiz:", formattedQuiz); // Log for debugging
 
@@ -156,7 +159,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             message: "Quiz generated and saved successfully!",
-            quizId: savedQuiz._id.toString(), // Optionally return the ID
+            quizId: newQuiz._id, // Optionally return the ID
             generated_quiz: geminiOutput,
             questions: formattedQuiz.questions,
             options: formattedQuiz.options,

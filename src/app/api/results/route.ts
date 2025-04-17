@@ -1,26 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server';
-
-// Simple in-memory store (for testing purposes)
-let results: any[] = [];
-
-export async function GET() {
-  return NextResponse.json({ results });
-}
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import QuizResult from "@/models/QuizResult";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  if (!body.username || body.score == null || body.total == null || body.percentage == null) {
-    return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    const { userID, quizID, score, total, percentage } = body;
+
+    if (
+      !userID ||
+      !quizID ||
+      score == null ||
+      total == null ||
+      percentage == null
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    await dbConnect();
+
+    const result = await QuizResult.create({
+      userID,
+      quizID,
+      score,
+      total,
+      percentage,
+    });
+
+    return NextResponse.json(
+      { message: "Result stored successfully", result },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error storing quiz result:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
-
-  const newResult = {
-    id: Date.now(),
-    ...body,
-    createdAt: new Date().toISOString(),
-  };
-
-  results.push(newResult);
-
-  return NextResponse.json({ message: "Result saved", result: newResult }, { status: 201 });
 }

@@ -68,8 +68,8 @@ export default function ViewNotesPage() {
   const toast = useToast();
 
   // Material You inspired colors
-  const primaryColor = useColorModeValue("teal.500", "teal.200");
-  const primaryContainer = useColorModeValue("teal.100", "teal.900");
+  const primaryColor = useColorModeValue("teal.500", "blue.200");
+  const primaryContainer = useColorModeValue("teal.100", "blue.900");
   const surfaceColor = useColorModeValue("white", "gray.800");
   const surfaceVariant = useColorModeValue("gray.50", "gray.700");
   const onSurfaceColor = useColorModeValue("gray.800", "gray.100");
@@ -177,6 +177,13 @@ export default function ViewNotesPage() {
         status: "error",
       });
     }
+  };
+
+  // 🧠 Helper function to extract note title
+  const extractNoteTitle = (prompt: string): string => {
+    // Match text between ":" and "(" to extract actual topic
+    const match = prompt.match(/:\s*(.+?)\s*(?:\(|$)/);
+    return match ? match[1].trim() : prompt;
   };
 
   const deleteNote = async (id: string) => {
@@ -333,7 +340,7 @@ export default function ViewNotesPage() {
                         color={onSurfaceColor}
                         noOfLines={2}
                       >
-                        {note.prompt}
+                        {extractNoteTitle(note.prompt)}
                       </Text>
                       <Text fontSize="sm" color="gray.500" fontFamily="mono">
                         {formatDate(note.createdAt)}
@@ -385,7 +392,7 @@ export default function ViewNotesPage() {
             borderColor={outlineColor}
           >
             <Text fontWeight="medium" fontSize="xl">
-              {selectedNote?.prompt}
+              {extractNoteTitle(selectedNote?.prompt || "")}
             </Text>
             <Text fontSize="sm" color={onSurfaceColor} mt={1}>
               Created on {selectedNote && formatDate(selectedNote.createdAt)}
