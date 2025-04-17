@@ -96,7 +96,6 @@ export default function SmartNotesGenerator() {
           date: new Date().toISOString().split("T")[0],
         },
       ]);
-      // In your SmartNotesGenerator.tsx, within the handleGenerateNotes function:
 
       if (session?.user?.id) {
         const saveResponse = await fetch("/api/save-notes", {

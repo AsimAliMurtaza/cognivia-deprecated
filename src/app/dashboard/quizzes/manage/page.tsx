@@ -14,7 +14,6 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
   ModalCloseButton,
   ModalBody,
   useDisclosure,
@@ -30,10 +29,10 @@ import {
   Flex,
   Divider,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { DeleteIcon } from "@chakra-ui/icons"; // Using a more Material-like icon
+import { DeleteIcon, ViewIcon } from "@chakra-ui/icons"; // Using ViewIcon for reveal
 
 interface Quiz {
   _id: string;
@@ -45,11 +44,16 @@ interface Quiz {
   userId: string;
 }
 
+interface QuestionWithVisibility extends Quiz {
+  areAnswersVisible: boolean[];
+}
+
 export default function ManageQuizzesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+  const [selectedQuiz, setSelectedQuiz] =
+    useState<QuestionWithVisibility | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isAlertDialogOpen,
@@ -69,36 +73,42 @@ export default function ManageQuizzesPage() {
   const cardColor = useColorModeValue("lg", "lg-dark");
   const boxColor = useColorModeValue("white", "gray.700");
 
+  const fetchUserQuizzes = useCallback(
+    async (userID: string) => {
+      try {
+        const res = await fetch(`/api/quizzes/user/${userID}`);
+        const data = await res.json();
+        if (res.ok) {
+          setQuizzes(data.quizzes || []);
+        } else {
+          throw new Error(data?.message || "Failed to fetch quizzes.");
+        }
+      } catch (err) {
+        toast({
+          title: "Error loading quizzes",
+          description: (err as Error).message || "Something went wrong.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    },
+    [toast]
+  );
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
     } else if (status === "authenticated" && session?.user?.id) {
       fetchUserQuizzes(session?.user?.id);
     }
-  }, [status, router]);
-
-  const fetchUserQuizzes = async (userID: string) => {
-    try {
-      const res = await fetch(`/api/quizzes/user/${userID}`);
-      const data = await res.json();
-      if (res.ok) {
-        setQuizzes(data.quizzes || []);
-      } else {
-        throw new Error(data?.message || "Failed to fetch quizzes.");
-      }
-    } catch (err) {
-      toast({
-        title: "Error loading quizzes",
-        description: (err as Error).message || "Something went wrong.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
+  }, [status, router, session?.user?.id, fetchUserQuizzes]);
 
   const handleCardClick = (quiz: Quiz) => {
-    setSelectedQuiz(quiz);
+    setSelectedQuiz({
+      ...quiz,
+      areAnswersVisible: quiz.questions.map(() => false),
+    });
     onOpen();
   };
 
@@ -142,6 +152,14 @@ export default function ManageQuizzesPage() {
     } finally {
       setQuizToDeleteId(null);
       onAlertDialogClose();
+    }
+  };
+
+  const toggleAnswerVisibility = (index: number) => {
+    if (selectedQuiz) {
+      const newVisibility = [...selectedQuiz.areAnswersVisible];
+      newVisibility[index] = !newVisibility[index];
+      setSelectedQuiz({ ...selectedQuiz, areAnswersVisible: newVisibility });
     }
   };
 
@@ -222,15 +240,12 @@ export default function ManageQuizzesPage() {
             borderRadius="md"
             boxShadow={boxShadow}
           >
-            <ModalHeader fontWeight="semibold" color={headingColor}>
-              Quiz Details
-            </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               {selectedQuiz && (
                 <VStack spacing={6} align="start">
                   <Heading size="lg" fontWeight="medium" color={headingColor}>
-                    {selectedQuiz.topic}
+                    Topic: {selectedQuiz.topic}
                   </Heading>
                   <Divider />
                   <Heading size="md" fontWeight="semibold" color={headingColor}>
@@ -260,9 +275,31 @@ export default function ManageQuizzesPage() {
                             </Text>
                           ))}
                         </VStack>
-                        <Text fontWeight="medium" mt={2} color="green.500">
-                          Answer: {selectedQuiz.answers[index]}
-                        </Text>
+                        <Flex mt={2} align="center">
+                          <Text fontWeight="medium" color="green.500" mr={2}>
+                            Answer:{" "}
+                            {selectedQuiz.areAnswersVisible[index]
+                              ? selectedQuiz.answers[index]
+                              : "********"}
+                          </Text>
+                          <IconButton
+                            icon={<ViewIcon />}
+                            aria-label={
+                              selectedQuiz.areAnswersVisible[index]
+                                ? "Hide Answer"
+                                : "Show Answer"
+                            }
+                            size="sm"
+                            colorScheme={
+                              selectedQuiz.areAnswersVisible[index]
+                                ? "gray"
+                                : "teal"
+                            }
+                            onClick={() => toggleAnswerVisibility(index)}
+                            borderRadius="full"
+                            variant="ghost"
+                          />
+                        </Flex>
                       </Box>
                     ))}
                   </VStack>
