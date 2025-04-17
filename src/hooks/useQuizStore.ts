@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 interface QuizData {
-  _id: { $oid: string };
+  _id: string;
   topic: string;
   questions: string[];
   options: string[][];

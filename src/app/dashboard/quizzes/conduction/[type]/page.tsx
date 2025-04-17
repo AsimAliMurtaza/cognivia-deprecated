@@ -1,13 +1,21 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 import {
-  Box, Button, Flex, Text, VStack, Heading, Progress, Icon,
-  useColorModeValue, useToast
+  Box,
+  Button,
+  Flex,
+  Text,
+  VStack,
+  Heading,
+  Progress,
+  Icon,
+  useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { useRouter, useParams } from 'next/navigation';
-import { FaArrowLeft, FaArrowRight, FaCheckCircle } from 'react-icons/fa';
-import { useQuizStore } from '@/hooks/useQuizStore';
+import { useRouter, useParams } from "next/navigation";
+import { FaArrowLeft, FaArrowRight, FaCheckCircle } from "react-icons/fa";
+import { useQuizStore } from "@/hooks/useQuizStore";
 
 export default function QuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -18,32 +26,39 @@ export default function QuizPage() {
   const { type } = useParams();
   const toast = useToast();
   const quizDataa = useQuizStore((state) => state.quizData);
+  const [quizData, setQuizData] = useState<
+    {
+      question: string;
+      options: string[];
+      correctIndex: number;
+    }[]
+  >([]);
 
-  const bgGradient = useColorModeValue("linear(to-br, gray.100, blue.100)", "linear(to-br, gray.800, gray.700)");
   const cardBg = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.700", "gray.100");
   const optionBg = useColorModeValue("gray.100", "gray.700");
   const optionHoverBg = useColorModeValue("gray.200", "gray.600");
 
-  if (!quizDataa) return <Text>Loading...</Text>;
-
   // Helper function to map options to their indices
   const letterToIndex = (letter: string) => letter.charCodeAt(0) - 65;
 
-  // Map quiz data to questions with options and correct answer index
-  const quizData = quizDataa.questions.map((q, i) => ({
-    question: q,
-    options: quizDataa.options[i],
-    correctIndex: letterToIndex(quizDataa.answers[i]),
-  }));
-
-  // Initialize selectedAnswers and answered arrays dynamically
   useEffect(() => {
-    if (quizData.length > 0) {
-      setSelectedAnswers(Array(quizData.length).fill(-1)); // -1 means no answer selected
-      setAnswered(Array(quizData.length).fill(false)); // false means question not answered
+    if (quizDataa) {
+      // Map quiz data to questions with options and correct answer index
+      const mappedQuizData = quizDataa.questions.map((q, i) => ({
+        question: q,
+        options: quizDataa.options[i],
+        correctIndex: letterToIndex(quizDataa.answers[i]),
+      }));
+      setQuizData(mappedQuizData);
+      // Initialize selectedAnswers and answered arrays
+      setSelectedAnswers(Array(mappedQuizData.length).fill(-1)); // -1 means no answer selected
+      setAnswered(Array(mappedQuizData.length).fill(false)); // false means question not answered
     }
-  }, [quizData.length]);
+  }, [quizDataa]);
+
+  if (!quizDataa) return <Text>Loading...</Text>;
+  if (quizData.length === 0) return <Text>No questions available.</Text>;
 
   const handleAnswerSelect = (index: number) => {
     const newAnswers = [...selectedAnswers];
@@ -83,11 +98,14 @@ export default function QuizPage() {
     const queryParams = new URLSearchParams({
       score: score.toString(),
       totalQuestions: quizData.length.toString(),
-      // You can add more query parameters here if needed (e.g., user ID, quiz type, etc.)
+      quizID: quizDataa._id, // Assuming quizDataa has an _id field
+      userID: quizDataa.userID, // Assuming quizDataa has a userID field
     });
 
     // Navigate to the results page with query parameters
-    router.push(`/dashboard/quizzes/conduction/${type}/results?${queryParams.toString()}`);
+    router.push(
+      `/dashboard/quizzes/conduction/${type}/results?${queryParams.toString()}`
+    );
   };
 
   const progress = ((currentQuestion + 1) / quizData.length) * 100;
@@ -96,7 +114,14 @@ export default function QuizPage() {
   const userAnswerIndex = selectedAnswers[currentQuestion];
 
   return (
-    <Flex direction="column" align="center" justify="center" minH="100vh" bgGradient={bgGradient} p={4}>
+    <Flex
+      direction="column"
+      align="center"
+      justify="center"
+      minH="100vh"
+      bgGradient={cardBg}
+      p={4}
+    >
       <Box
         as={motion.div}
         initial={{ opacity: 0, scale: 0.9 }}
@@ -110,16 +135,25 @@ export default function QuizPage() {
         w="full"
       >
         <VStack spacing={6} align="stretch">
-          <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold" color="teal.500" textAlign="center">
+          <Heading
+            fontSize={{ base: "2xl", md: "3xl" }}
+            fontWeight="bold"
+            color="teal.500"
+            textAlign="center"
+          >
             Quiz Time!
           </Heading>
 
-          <Progress value={progress} size="sm" colorScheme="teal" borderRadius="full" />
+          <Progress
+            value={progress}
+            size="sm"
+            colorScheme="teal"
+            borderRadius="full"
+          />
 
           <Text fontSize="lg" fontWeight="semibold" color={textColor}>
             {current.question}
           </Text>
-
           <VStack spacing={3}>
             {current.options.map((option, index) => {
               const isSelected = userAnswerIndex === index;
@@ -131,14 +165,18 @@ export default function QuizPage() {
 
               if (hasAnswered) {
                 if (isSelected && isCorrectAnswer) {
-                  bgColor = "green.400"; textColorOption = "white";
+                  bgColor = "green.400";
+                  textColorOption = "white";
                 } else if (isSelected && !isCorrectAnswer) {
-                  bgColor = "red.400"; textColorOption = "white";
+                  bgColor = "red.400";
+                  textColorOption = "white";
                 } else if (isCorrectAnswer) {
-                  bgColor = "green.200"; textColorOption = "black";
+                  bgColor = "green.200";
+                  textColorOption = "black";
                 }
               } else if (isSelected) {
-                bgColor = "teal.500"; textColorOption = "white";
+                bgColor = "teal.500";
+                textColorOption = "white";
               }
 
               return (
@@ -157,10 +195,16 @@ export default function QuizPage() {
                   fontWeight="medium"
                   borderRadius="xl"
                   boxShadow={isSelected ? "lg" : "base"}
-                  leftIcon={isSelected && hasAnswered ? <Icon as={FaCheckCircle} /> : undefined}
+                  leftIcon={
+                    isSelected && hasAnswered ? (
+                      <Icon as={FaCheckCircle} />
+                    ) : undefined
+                  }
                   _hover={{
                     bg: !hasAnswered
-                      ? isSelected ? "teal.600" : optionHoverBg
+                      ? isSelected
+                        ? "teal.600"
+                        : optionHoverBg
                       : bgColor,
                   }}
                 >
@@ -182,7 +226,11 @@ export default function QuizPage() {
             </Button>
 
             {currentQuestion < quizData.length - 1 ? (
-              <Button rightIcon={<FaArrowRight />} onClick={handleNext} colorScheme="teal">
+              <Button
+                rightIcon={<FaArrowRight />}
+                onClick={handleNext}
+                colorScheme="teal"
+              >
                 Next
               </Button>
             ) : (

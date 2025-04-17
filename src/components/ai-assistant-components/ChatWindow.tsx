@@ -172,8 +172,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               bg={primaryColor}
               color="white"
             />
-            <Text fontSize="xl" fontWeight="medium" mb={2}>
+            <Text fontSize="xl" fontWeight="medium" >
               Welcome to Cognivia AI
+            </Text>
+            <Text color={"gray.500"} fontSize="xs" fontWeight="thin" mb={2}>
+              (powered by Gemini)
             </Text>
             <Text textAlign="center" maxW="md">
               Ask me anything about your learning materials or start a new
