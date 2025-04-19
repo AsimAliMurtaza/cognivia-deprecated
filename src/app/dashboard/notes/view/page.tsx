@@ -43,6 +43,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import { useSession } from "next-auth/react";
+import { marked } from "marked";
 
 interface Note {
   _id: string;
@@ -133,39 +134,82 @@ export default function ViewNotesPage() {
 
   const exportToPDF = async (note: Note) => {
     try {
-      // Dynamically import html2pdf when needed
       const html2pdf = (await import("html2pdf.js")).default;
-
+  
+      // Convert Markdown to HTML properly
+      const parsedHTML = marked(note.generated_quiz, {
+        breaks: true,
+        gfm: true,
+      });
+  
       const wrapper = document.createElement("div");
       wrapper.innerHTML = `
         <style>
-          body { font-family: 'Roboto', sans-serif; padding: 24px; line-height: 1.6; }
-          .header { margin-bottom: 24px; }
-          .title { color: #6750A4; font-size: 22px; font-weight: 500; margin-bottom: 8px; }
-          .meta { font-size: 14px; color: #49454F; margin-bottom: 16px; }
-          .content { font-size: 16px; line-height: 1.8; }
-          strong { color: #6750A4; }
-          ul { padding-left: 24px; }
-          li { margin-bottom: 8px; }
+          body {
+            font-family: 'Roboto', sans-serif;
+            padding: 32px;
+            background: #FFFFFF;
+            color: #1C1B1F;
+            line-height: 1.6;
+          }
+          h1.title {
+            color: #6750A4;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+          }
+          .meta {
+            font-size: 14px;
+            color: #49454F;
+            margin-bottom: 24px;
+          }
+          .content h1, .content h2, .content h3 {
+            margin-top: 24px;
+            margin-bottom: 8px;
+            color: #6750A4;
+          }
+          .content p {
+            margin: 0 0 16px 0;
+          }
+          .content ul {
+            padding-left: 24px;
+            margin-bottom: 16px;
+          }
+          .content li {
+            margin-bottom: 8px;
+          }
+          .content pre {
+            font-family: 'Fira Code', monospace;
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+          }
+          .content code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 13px;
+          }
+          strong {
+            color: #6750A4;
+          }
         </style>
-        <div class="header">
+  
+        <div>
           <h1 class="title">${note.prompt}</h1>
           <div class="meta">Created on ${formatDate(note.createdAt)}</div>
+          <div class="content">${parsedHTML}</div>
         </div>
-        <div class="content">${note.generated_quiz
-          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-          .replace(/^- (.*)$/gm, "<ul><li>$1</li></ul>")
-          .replace(/\n{2,}/g, "<br/><br/>")
-          .replace(/\n/g, "<br/>")}</div>`;
-
-      html2pdf()
+      `;
+  
+      await html2pdf()
         .from(wrapper)
         .set({
           margin: [0.5, 0.5],
-          filename: `${note.prompt
-            .substring(0, 30)
-            .replace(/\s+/g, "_")}_notes.pdf`,
-          html2canvas: { scale: 2 },
+          filename: `${note.prompt.substring(0, 30).replace(/\s+/g, "_")}_notes.pdf`,
+          html2canvas: { scale: 2, backgroundColor: "#FFFFFF" },
           jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
         })
         .save();
@@ -178,6 +222,7 @@ export default function ViewNotesPage() {
       });
     }
   };
+  
 
   // 🧠 Helper function to extract note title
   const extractNoteTitle = (prompt: string): string => {
