@@ -1,15 +1,49 @@
 // app/api/gemini/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { generateGeminiContent } from "@/lib/gemini";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// Security Measure 1: Rate limiting
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+// 5 requests per 10 seconds per IP
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "60 s"),
+});
+
+//Security Measure 2: Prompt Sanitize function
+function sanitizePrompt(input: string): string {
+  return input
+    .replace(/<script.*?>.*?<\/script>/gi, "") // Remove scripts
+    .replace(/<\/?[^>]+(>|$)/g, "") // Remove HTML tags
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .trim();
+}
 
 export async function POST(req: NextRequest) {
-  const { prompt } = await req.json();
+  const ip = req.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
 
-  if (!prompt) {
-    return NextResponse.json({ error: "No prompt provided" }, { status: 400 });
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
   }
 
-  const response = await generateGeminiContent(prompt);
+  const body = await req.json();
+  const prompt = body?.prompt;
+
+  // Security Measure 3: Validate Input
+  if (!prompt || typeof prompt !== "string" || prompt.length > 1000) {
+    return NextResponse.json({ error: "Invalid or too long prompt" }, { status: 400 });
+  }
+
+  const sanitizedPrompt = sanitizePrompt(prompt);
+  const response = await generateGeminiContent(sanitizedPrompt);
 
   return NextResponse.json({ response });
 }

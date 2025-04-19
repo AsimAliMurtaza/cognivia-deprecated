@@ -119,7 +119,7 @@ export default function DashboardPage() {
     },
     {
       icon: FaCheckCircle,
-      title: "Cpmpleted Quizzes",
+      title: "Completed Quizzes",
       value: takenQuizCount.toString(),
       bgGradient: bgGradientColorsfour,
     },
