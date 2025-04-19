@@ -1,10 +1,11 @@
 // lib/gemini.ts
 import axios from "axios";
 
-const GEMINI_API_URL = process.env.GEMINI_API_URL;;
+const GEMINI_API_URL = process.env.GEMINI_API_URL;
 
 export async function generateGeminiContent(prompt: string) {
   try {
+    // Security Measure 4: HTTPS Use
     const response = await axios.post(
       `${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`,
       {
