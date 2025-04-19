@@ -19,9 +19,9 @@ import { useQuizStore } from "@/hooks/useQuizStore";
 
 export default function QuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]); // Track selected answers
-  const [answered, setAnswered] = useState<boolean[]>([]); // Track if question is answered
-  const [score, setScore] = useState(0); // Track score
+  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
+  const [answered, setAnswered] = useState<boolean[]>([]);
+  const [score, setScore] = useState(0);
   const router = useRouter();
   const { type } = useParams();
   const toast = useToast();
@@ -38,22 +38,20 @@ export default function QuizPage() {
   const textColor = useColorModeValue("gray.700", "gray.100");
   const optionBg = useColorModeValue("gray.100", "gray.700");
   const optionHoverBg = useColorModeValue("gray.200", "gray.600");
+  const flexColor = useColorModeValue("gray.50", "gray.900");
 
-  // Helper function to map options to their indices
   const letterToIndex = (letter: string) => letter.charCodeAt(0) - 65;
 
   useEffect(() => {
     if (quizDataa) {
-      // Map quiz data to questions with options and correct answer index
       const mappedQuizData = quizDataa.questions.map((q, i) => ({
         question: q,
         options: quizDataa.options[i],
         correctIndex: letterToIndex(quizDataa.answers[i]),
       }));
       setQuizData(mappedQuizData);
-      // Initialize selectedAnswers and answered arrays
-      setSelectedAnswers(Array(mappedQuizData.length).fill(-1)); // -1 means no answer selected
-      setAnswered(Array(mappedQuizData.length).fill(false)); // false means question not answered
+      setSelectedAnswers(Array(mappedQuizData.length).fill(-1));
+      setAnswered(Array(mappedQuizData.length).fill(false));
     }
   }, [quizDataa]);
 
@@ -69,12 +67,11 @@ export default function QuizPage() {
     newAnswered[currentQuestion] = true;
     setAnswered(newAnswered);
 
-    // Dynamically update the score if the answer is correct
     const current = quizData[currentQuestion];
     if (index === current.correctIndex) {
       setScore((prevScore) => prevScore + 1);
     } else if (selectedAnswers[currentQuestion] === current.correctIndex) {
-      setScore((prevScore) => prevScore - 1); // Deduct score if user changes from correct answer
+      setScore((prevScore) => prevScore - 1);
     }
   };
 
@@ -94,22 +91,19 @@ export default function QuizPage() {
   const handlePrevious = () => setCurrentQuestion((prev) => prev - 1);
 
   const handleSubmit = () => {
-    // Format the query parameters
     const queryParams = new URLSearchParams({
       score: score.toString(),
       totalQuestions: quizData.length.toString(),
-      quizID: quizDataa._id, // Assuming quizDataa has an _id field
-      userID: quizDataa.userID, // Assuming quizDataa has a userID field
+      quizID: quizDataa._id,
+      userID: quizDataa.userID,
     });
 
-    // Navigate to the results page with query parameters
     router.push(
       `/dashboard/quizzes/conduction/${type}/results?${queryParams.toString()}`
     );
   };
 
   const progress = ((currentQuestion + 1) / quizData.length) * 100;
-
   const current = quizData[currentQuestion];
   const userAnswerIndex = selectedAnswers[currentQuestion];
 
@@ -119,7 +113,7 @@ export default function QuizPage() {
       align="center"
       justify="center"
       minH="100vh"
-      bgGradient={cardBg}
+      bg={flexColor}
       p={4}
     >
       <Box
@@ -128,15 +122,15 @@ export default function QuizPage() {
         animate={{ opacity: 1, scale: 1 }}
         transition="0.5s ease"
         bg={cardBg}
-        p={{ base: 6, md: 8 }}
+        p={{ base: 4, md: 6, lg: 8 }}
         borderRadius="2xl"
         boxShadow="2xl"
-        maxW="lg"
         w="full"
+        maxW={{ base: "100%", sm: "90%", md: "80%", lg: "700px" }}
       >
         <VStack spacing={6} align="stretch">
           <Heading
-            fontSize={{ base: "2xl", md: "3xl" }}
+            fontSize={{ base: "xl", md: "2xl", lg: "3xl" }}
             fontWeight="bold"
             color="teal.500"
             textAlign="center"
@@ -151,10 +145,16 @@ export default function QuizPage() {
             borderRadius="full"
           />
 
-          <Text fontSize="lg" fontWeight="semibold" color={textColor}>
+          <Text
+            fontSize={{ base: "md", md: "lg" }}
+            fontWeight="semibold"
+            color={textColor}
+            wordBreak="break-word"
+          >
             {current.question}
           </Text>
-          <VStack spacing={3}>
+
+          <VStack spacing={3} align="stretch">
             {current.options.map((option, index) => {
               const isSelected = userAnswerIndex === index;
               const isCorrectAnswer = index === current.correctIndex;
@@ -183,18 +183,19 @@ export default function QuizPage() {
                 <Button
                   key={index}
                   as={motion.button}
-                  whileHover={{ scale: 1.03 }}
+                  whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => !hasAnswered && handleAnswerSelect(index)}
                   w="full"
-                  justifyContent="start"
-                  px={6}
-                  py={5}
+                  justifyContent="flex-start"
+                  textAlign="left"
+                  px={4}
+                  py={3}
                   bg={bgColor}
                   color={textColorOption}
                   fontWeight="medium"
-                  borderRadius="xl"
-                  boxShadow={isSelected ? "lg" : "base"}
+                  borderRadius="lg"
+                  boxShadow={isSelected ? "md" : "sm"}
                   leftIcon={
                     isSelected && hasAnswered ? (
                       <Icon as={FaCheckCircle} />
@@ -207,20 +208,31 @@ export default function QuizPage() {
                         : optionHoverBg
                       : bgColor,
                   }}
+                  whiteSpace="normal"
+                  height="auto"
+                  minH="60px"
                 >
-                  {option}
+                  <Text w="full" wordBreak="break-word" textAlign="left" px={2}>
+                    {option}
+                  </Text>
                 </Button>
               );
             })}
           </VStack>
 
-          <Flex justify="space-between" mt={4}>
+          <Flex
+            justify="space-between"
+            mt={4}
+            flexDirection={{ base: "column-reverse", sm: "row" }}
+            gap={{ base: 3, sm: 0 }}
+          >
             <Button
               leftIcon={<FaArrowLeft />}
               onClick={handlePrevious}
               isDisabled={currentQuestion === 0}
               colorScheme="teal"
               variant="ghost"
+              size={{ base: "sm", md: "md" }}
             >
               Previous
             </Button>
@@ -230,20 +242,24 @@ export default function QuizPage() {
                 rightIcon={<FaArrowRight />}
                 onClick={handleNext}
                 colorScheme="teal"
+                size={{ base: "sm", md: "md" }}
               >
                 Next
               </Button>
             ) : (
-              <Button onClick={handleSubmit} colorScheme="green">
+              <Button
+                onClick={handleSubmit}
+                colorScheme="green"
+                size={{ base: "sm", md: "md" }}
+              >
                 Submit
               </Button>
             )}
           </Flex>
 
-          {/* Score Display */}
           {currentQuestion === quizData.length - 1 && (
-            <Box textAlign="center" mt={6}>
-              <Text fontSize="xl" fontWeight="bold" color="teal.500">
+            <Box textAlign="center" mt={4}>
+              <Text fontSize="lg" fontWeight="bold" color="teal.500">
                 Total Score: {score} / {quizData.length}
               </Text>
             </Box>
