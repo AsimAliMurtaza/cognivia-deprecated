@@ -7,7 +7,6 @@ import {
   Flex,
   HStack,
   Input,
-  Button,
   Text,
   IconButton,
   Spinner,
@@ -24,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { FaCopy, FaRobot, FaUser } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { ArrowUpIcon } from "@chakra-ui/icons";
 
 const MotionBox = motion(Box);
 
@@ -69,7 +69,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             p={1}
             borderRadius="md"
             fontSize="0.9em"
-            {...props as CodeProps}
+            {...(props as CodeProps)}
           >
             {children}
           </Code>
@@ -82,7 +82,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             size="lg"
             color={primaryColor}
             my={4}
-            {...props as HeadingProps}
+            {...(props as HeadingProps)}
           >
             {children}
           </Heading>
@@ -95,7 +95,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             size="md"
             color={primaryColor}
             my={3}
-            {...props as HeadingProps}
+            {...(props as HeadingProps)}
           >
             {children}
           </Heading>
@@ -108,7 +108,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             size="sm"
             color={primaryColor}
             my={2}
-            {...props as HeadingProps}
+            {...(props as HeadingProps)}
           >
             {children}
           </Heading>
@@ -116,18 +116,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       },
       p({ children, ...props }: MarkdownComponentProps) {
         return (
-          <Text my={2} lineHeight="tall" {...props as TextProps}>
+          <Text my={2} lineHeight="tall" {...(props as TextProps)}>
             {children}
           </Text>
         );
       },
     };
 
-    return (
-      <ReactMarkdown components={components}>
-        {text}
-      </ReactMarkdown>
-    );
+    return <ReactMarkdown components={components}>{text}</ReactMarkdown>;
   };
 
   const scrollbarStyles = {
@@ -172,8 +168,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               bg={primaryColor}
               color="white"
             />
-            <Text fontSize="xl" fontWeight="medium" >
-              Welcome to Cognivia AI
+            <Text fontSize="xl" fontWeight="medium">
+              Cognivia AI
             </Text>
             <Text color={"gray.500"} fontSize="xs" fontWeight="thin" mb={2}>
               (powered by Gemini)
@@ -306,29 +302,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           bg={surfaceColor}
           color={textColor}
           onKeyDown={handleKeyDown}
-          borderRadius="lg"
+          borderRadius="full"
           borderColor={dividerColor}
           _focus={{
             borderColor: primaryColor,
             boxShadow: "none",
           }}
         />
-        <Button
+        <IconButton
+          aria-label="Ask AI"
+          variant="outline"
           colorScheme={askButtonColor}
           onClick={onAskAI}
           isLoading={loading}
-          leftIcon={<FaRobot />}
+          icon={<ArrowUpIcon />}
           size="lg"
           borderRadius="full"
-          px={6}
           _hover={{
             transform: "translateY(-2px)",
             boxShadow: "md",
           }}
           transition="all 0.2s"
-        >
-          Ask
-        </Button>
+        ></IconButton>
       </HStack>
     </Flex>
   );

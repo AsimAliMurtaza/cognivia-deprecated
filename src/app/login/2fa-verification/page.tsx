@@ -11,6 +11,7 @@ import {
   useToast,
   HStack,
   Link,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -24,6 +25,17 @@ function TwoFAVerificationContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  // Color mode values
+  const bgColor = useColorModeValue("white", "gray.900");
+
+  const textColor = useColorModeValue("gray.700", "gray.200");
+  const headingColor = useColorModeValue("teal.500", "blue.300");
+  const inputBg = useColorModeValue("gray.100", "gray.700");
+  const inputBorderColor = useColorModeValue("gray.300", "gray.600");
+  const buttonBg = useColorModeValue("teal.500", "blue.400");
+  const buttonHoverBg = useColorModeValue("teal.600", "blue.500");
+  const linkColor = useColorModeValue("teal.500", "blue.400");
 
   // const handleResendOTP = async () => {
   //   if (!email) {
@@ -131,30 +143,29 @@ function TwoFAVerificationContent() {
       setLoading(false);
     }
   };
-
   return (
-    <Container centerContent maxW="container.sm">
+    <Container centerContent maxW="100vw" bg={bgColor} py={16} height="100vh">
       <Box
-        mt={20}
-        p={8}
-        borderWidth={1}
-        borderRadius="lg"
-        boxShadow="lg"
-        w="full"
+        bg={bgColor}
+        color={textColor}
+        borderRadius="30"
+        boxShadow="md"
+        maxW={{ base: "90vw", md: "500px" }}
+        p={{ base: 6, md: 8 }}
       >
-        <VStack spacing={6} align="stretch">
-          <Heading size="lg" textAlign="center">
-            Two-Factor Authentication
+        <VStack spacing={8} align="stretch">
+          <Heading size="xl" textAlign="center" color={headingColor}>
+            Verify Your Account
           </Heading>
-          <Text textAlign="center">
+          <Text fontSize="lg" textAlign="center">
             Enter the 6-digit code sent to{" "}
-            <Text as="span" fontWeight="bold">
+            <Text as="span" fontWeight="semibold" color={headingColor}>
               {email}
             </Text>
           </Text>
 
           <Input
-            placeholder="Enter 6-digit OTP"
+            placeholder="ـ ـ ـ ـ ـ ـ"
             value={otp}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "").slice(0, 6);
@@ -163,27 +174,39 @@ function TwoFAVerificationContent() {
             type="text"
             inputMode="numeric"
             pattern="\d{6}"
-            size="lg"
+            size="md"
             textAlign="center"
-            fontSize="2xl"
-            letterSpacing="0.5rem"
+            fontSize="xl"
+            letterSpacing="1rem"
             py={6}
+            bg={inputBg}
+            borderColor={inputBorderColor}
+            borderRadius="full"
+            _focus={{
+              borderColor: headingColor,
+              boxShadow: `0 0 0 1px ${headingColor}`,
+            }}
           />
 
           <Button
-            colorScheme="blue"
+            bg={buttonBg}
+            color="white"
+            _hover={{ bg: buttonHoverBg }}
             onClick={handleVerify}
             isLoading={loading}
             isDisabled={otp.length !== 6}
-            size="lg"
+            size="md"
+            borderRadius="full"
+            fontWeight="semibold"
+            aria-label="Verify and continue with OTP"
           >
             Verify & Continue
           </Button>
 
-          <HStack justify="center" mt={4}>
-            <Text>Didn&apos;t receive code?</Text>
-            <Link color="blue.500">
-              Resend OTP
+          <HStack justify="center" spacing={2}>
+            <Text color={textColor}>Didn&apos;t receive a code?</Text>
+            <Link color={linkColor} fontWeight="medium">
+              Resend Code
             </Link>
           </HStack>
         </VStack>
@@ -196,8 +219,8 @@ export default function TwoFAVerification() {
   return (
     <Suspense
       fallback={
-        <Container centerContent>
-          <Box mt={20} p={8}>
+        <Container centerContent py={10}>
+          <Box>
             <Text>Loading verification...</Text>
           </Box>
         </Container>
