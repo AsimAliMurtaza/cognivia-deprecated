@@ -3,6 +3,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateGeminiContent } from "@/lib/gemini"; // Assuming your gemini.ts is in the lib directory
 import dbConnect from "@/lib/mongodb";
 import Quiz from "@/models/Quiz";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// Security Measure 1: Rate limiting
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+// 5 requests per 10 seconds per IP
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "60 s"),
+});
+
+//Security Measure 2: Prompt Sanitize function
+function sanitizePrompt(input: string): string {
+  return input
+    .replace(/<script.*?>.*?<\/script>/gi, "") // Remove scripts
+    .replace(/<\/?[^>]+(>|$)/g, "") // Remove HTML tags
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .trim();
+}
 
 async function formatQuiz(geminiOutput: string): Promise<{
   questions: string[];
@@ -120,8 +143,17 @@ async function formatQuiz(geminiOutput: string): Promise<{
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, userID } = await req.json(); // Expect userId in the request body
+    // Security Measure 1: Rate limiting
+    const ip = req.headers.get("x-forwarded-for") || "anonymous";
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429 }
+      );
+    }
 
+    const { prompt, userID } = await req.json(); // Expect userId in the request body
     const user_id = userID;
 
     if (!prompt || !user_id) {
@@ -131,8 +163,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if user has enough credits BEFORE making the Gemini call
+    const creditCheckRes = await fetch(
+      `${process.env.NEXTAUTH_URL}/api/credits/check`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user_id }),
+      }
+    );
+
+    const creditData = await creditCheckRes.json();
+
+    if (creditData.credits < 10) {
+      return NextResponse.json({ redirectToPricing: true }, { status: 402 });
+    }
+
+    // Security Measure 2: Validate Input
+    const sanitizedPrompt = sanitizePrompt(prompt);
+    if (!sanitizedPrompt || typeof sanitizedPrompt !== "string") {
+      return NextResponse.json(
+        { error: "Invalid or too long prompt" },
+        { status: 400 }
+      );
+    }
+
     const geminiOutput = await generateGeminiContent(
-      `Generate a 10-question multiple-choice quiz on the following topic. Format each question with the question number followed by the question statement. Then, list four options, each on a new line, starting with the option letter (A, B, C, D) optionally followed by a parenthesis or a space, and then the option text. Provide the correct answers at the end, clearly labeled "Answers:", with each answer indicating the correct option letter, optionally preceded by the question number and a period.: ${prompt}`
+      `Generate a 10-question multiple-choice quiz on the following topic. Format each question with the question number followed by the question statement. Then, list four options, each on a new line, starting with the option letter (A, B, C, D) optionally followed by a parenthesis or a space, and then the option text. Provide the correct answers at the end, clearly labeled "Answers:", with each answer indicating the correct option letter, optionally preceded by the question number and a period.: ${sanitizedPrompt}`
     );
 
     if (geminiOutput) {
@@ -156,6 +213,29 @@ export async function POST(req: NextRequest) {
       console.log("Formatted Quiz:", formattedQuiz); // Log for debugging
 
       if (formattedQuiz) {
+        const creditsRes = await fetch(
+          `${process.env.NEXTAUTH_URL}/api/credits/use`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user_id,
+              amount: 10, // Deduct 10 credit for quiz generation
+            }),
+          }
+        );
+
+        if (creditsRes.status === 402) {
+          console.error("Low credits", await creditsRes.json());
+          return NextResponse.json(
+            { error: "Failed to deduct credits" },
+            { status: 500 }
+          );
+        }
+        console.log("Credits deducted successfully.");
+
         return NextResponse.json(
           {
             message: "Quiz generated and saved successfully!",
@@ -185,7 +265,10 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error generating quiz:", error);
     return NextResponse.json(
-      { error: (error as Error).message || "Failed to communicate with Gemini API" },
+      {
+        error:
+          (error as Error).message || "Failed to communicate with Gemini API",
+      },
       { status: 500 }
     );
   }

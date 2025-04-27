@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -39,7 +39,6 @@ import {
   Heading,
   Select,
   Spinner,
-
 } from "@chakra-ui/react";
 import {
   FiCamera,
@@ -53,7 +52,6 @@ import {
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { uploadImage } from "@/lib/uploadImage";
-
 
 const MotionBox = motion(Box);
 const MotionCard = motion(Card);
@@ -74,6 +72,7 @@ export default function EditProfilePage() {
   } = useDisclosure();
 
   // State for form fields
+  const [isDeleteButtonEnabled, setIsDeleteButtonEnabled] = useState(false);
   const [name, setName] = useState(session?.user?.name);
   const [email] = useState(session?.user?.email || "");
   const [image, setImage] = useState(session?.user?.image || "");
@@ -89,7 +88,6 @@ export default function EditProfilePage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [toggling, setToggling] = useState(false);
 
-  // Color scheme
   const cardBg = useColorModeValue("white", "gray.800");
   const primaryColor = useColorModeValue("teal.500", "blue.400");
   const dangerColor = useColorModeValue("red.500", "red.400");
@@ -110,7 +108,6 @@ export default function EditProfilePage() {
     };
   }, [image]);
 
-  // Redirect to login if not authenticated
   if (status === "loading") {
     return (
       <Box
@@ -119,7 +116,6 @@ export default function EditProfilePage() {
         alignItems="center"
         minH="100vh"
       >
-
         <CircularProgress isIndeterminate color={primaryColor} />
       </Box>
     );
@@ -246,7 +242,6 @@ export default function EditProfilePage() {
         gender: data.gender,
       });
 
-
       setProfileCompletion(Math.min(profileCompletion + 10, 100));
       toast({
         title: "Profile Updated",
@@ -285,8 +280,22 @@ export default function EditProfilePage() {
     }
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/user/change-password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to change password");
+      }
+
       toast({
         title: "Password Changed",
         description: "Your password has been updated successfully.",
@@ -314,7 +323,17 @@ export default function EditProfilePage() {
     setLoading(true);
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/user/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete account");
+      }
+      // Optionally, you can clear the session here
+      await signOut({ redirect: false });
       toast({
         title: "Account Deleted",
         description: "Your account has been permanently deleted.",
@@ -338,9 +357,9 @@ export default function EditProfilePage() {
     }
   };
 
+
   return (
     <Container maxW="container.XL">
-
       <MotionBox
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -352,7 +371,6 @@ export default function EditProfilePage() {
             <Heading size="lg" fontWeight="semibold" color={textColor}>
               Profile Settings
             </Heading>
-
           </HStack>
 
           <Grid templateColumns={{ base: "1fr", md: "1fr 2fr" }} gap={8}>
@@ -442,7 +460,6 @@ export default function EditProfilePage() {
                       display="flex"
                       alignItems="center"
                     >
-
                       <FiUser style={{ marginRight: "8px" }} />
                       Full Name
                     </FormLabel>
@@ -465,7 +482,6 @@ export default function EditProfilePage() {
                       display="flex"
                       alignItems="center"
                     >
-
                       <FiMail style={{ marginRight: "8px" }} />
                       Email Address
                     </FormLabel>
@@ -559,9 +575,6 @@ export default function EditProfilePage() {
                     <Text fontWeight="medium" color={textColor}>
                       Password
                     </Text>
-                    <Text fontSize="sm" color={secondaryText}>
-                      Last changed 3 months ago
-                    </Text>
                   </Box>
                   <Button
                     leftIcon={<FiLock />}
@@ -570,22 +583,6 @@ export default function EditProfilePage() {
                     onClick={onPasswordOpen}
                   >
                     Change Password
-                  </Button>
-                </HStack>
-
-                <Divider borderColor={borderColor} />
-
-                <HStack justify="space-between">
-                  <Box>
-                    <Text fontWeight="medium" color={textColor}>
-                      Active Sessions
-                    </Text>
-                    <Text fontSize="sm" color={secondaryText}>
-                      2 devices currently logged in
-                    </Text>
-                  </Box>
-                  <Button variant="outline" colorScheme={colorSchemeColor}>
-                    View Sessions
                   </Button>
                 </HStack>
               </VStack>
@@ -719,7 +716,9 @@ export default function EditProfilePage() {
               bg={inputBg}
               onChange={(e) => {
                 if (e.target.value === email) {
-                  // Enable delete button
+                  setIsDeleteButtonEnabled(true);
+                } else {
+                  setIsDeleteButtonEnabled(false);
                 }
               }}
             />
@@ -732,7 +731,7 @@ export default function EditProfilePage() {
               colorScheme="red"
               onClick={handleDeleteAccount}
               isLoading={loading}
-              isDisabled={true} // Would enable when email matches
+              isDisabled={!isDeleteButtonEnabled}
             >
               Delete Account Permanently
             </Button>

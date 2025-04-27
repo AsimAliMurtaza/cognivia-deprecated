@@ -43,7 +43,6 @@ export default function AIAssistant() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const isMobile = useBreakpointValue({ base: true, md: false });
 
-  // Material You colors
   const surfaceColor = useColorModeValue("white", "gray.800");
   const dividerColor = useColorModeValue("gray.200", "gray.600");
 
@@ -84,7 +83,10 @@ export default function AIAssistant() {
 
       setCurrentResponse(responseData?.response || "No response.");
 
-      const newMessage = { query, response: responseData?.response || "No response." };
+      const newMessage = {
+        query,
+        response: responseData?.response || "No response.",
+      };
 
       if (!currentChatId) {
         const newChatId = generateChatId();
@@ -213,9 +215,11 @@ export default function AIAssistant() {
         {!isMobile && (
           <Box
             w="300px"
-            borderRadius={"xl"}
+            borderRadius="xl"
             borderColor={dividerColor}
             overflowY="auto"
+            px={4}
+            py={6}
           >
             <ChatHistory
               chatHistory={chatHistory}
@@ -228,7 +232,7 @@ export default function AIAssistant() {
         )}
 
         {/* Main Chat Area */}
-        <Box flex={1} overflowY="auto" px={2}>
+        <Box flex={1} overflowY="auto" px={4} py={6}>
           <ChatWindow
             query={query}
             setQuery={setQuery}
