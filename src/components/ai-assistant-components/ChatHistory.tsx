@@ -52,7 +52,14 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
   const askButtonColor = useColorModeValue("teal", "blue");
 
   return (
-    <VStack spacing={4} p={4} h="90vh" bg={surfaceColor} align="stretch">
+    <VStack
+      borderRadius="xl"
+      spacing={4}
+      p={4}
+      h="90vh"
+      bg={surfaceColor}
+      align="stretch"
+    >
       <Flex justify="space-between" align="center">
         <Heading size="md" fontWeight="semibold" color={textColor}>
           Conversations
@@ -68,7 +75,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
         colorScheme={askButtonColor}
         onClick={onNewChat}
         leftIcon={<FaPlus />}
-        size="lg"
+        size="md"
         borderRadius="full"
         _hover={{
           transform: "translateY(-2px)",

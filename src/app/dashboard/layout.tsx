@@ -265,7 +265,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       {/* Main Content */}
       <Box
         flex="1"
-        p={{ base: 4, md: 8 }}
+        // p={{ base: 4, md: 8 }}
         ml={!isMobile ? sidebarWidth : 0}
         transition="margin-left 0.3s ease"
       >

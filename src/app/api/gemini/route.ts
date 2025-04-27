@@ -31,7 +31,10 @@ export async function POST(req: NextRequest) {
   const { success } = await ratelimit.limit(ip);
 
   if (!success) {
-    return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down." },
+      { status: 429 }
+    );
   }
 
   const body = await req.json();
@@ -39,11 +42,17 @@ export async function POST(req: NextRequest) {
 
   // Security Measure 3: Validate Input
   if (!prompt || typeof prompt !== "string" || prompt.length > 1000) {
-    return NextResponse.json({ error: "Invalid or too long prompt" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid or too long prompt" },
+      { status: 400 }
+    );
   }
 
   const sanitizedPrompt = sanitizePrompt(prompt);
-  const response = await generateGeminiContent(sanitizedPrompt);
+  const newSanitizedPrompt =
+    "You are an educational assistant. Avoid political, violent, or controversial material" +
+    sanitizedPrompt;
+  const response = await generateGeminiContent(newSanitizedPrompt);
 
   return NextResponse.json({ response });
 }
