@@ -79,7 +79,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const dividerColor = useColorModeValue("gray.200", "gray.600");
   const surfaceColor = useColorModeValue("gray.50", "gray.900");
 
-
   if (status === "loading")
     return (
       <Center h="100vh">
@@ -230,7 +229,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             boxShadow={{ base: "none", md: "md" }}
             position="fixed"
             h="100vh"
-            zIndex={20}
+            zIndex="1100"
+            onMouseEnter={() => !isMobile && setCollapsed(false)}
+            onMouseLeave={() => !isMobile && setCollapsed(true)}
           >
             {renderSidebarContent()}
           </MotionBox>
