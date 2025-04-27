@@ -43,9 +43,11 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.name,
             image: user.image,
+
             gender: user.gender,
             is2FAEnabled: true,
             is2FAVerified: true,
+            role: user.role || "user",
           };
         }
 
@@ -86,6 +88,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           image: user.image,
           gender: user.gender,
+          role: user.role || "user",
           is2FAEnabled: false,
         };
       },
@@ -114,6 +117,9 @@ export const authOptions: NextAuthOptions = {
         token.gender = user.gender;
         token.is2FAEnabled = user.is2FAEnabled;
         token.is2FAVerified = user.is2FAVerified;
+        if (user) {
+          token.role = user.role || "user";
+        }
       }
       return token;
     },
@@ -127,6 +133,7 @@ export const authOptions: NextAuthOptions = {
           email: token.email,
           image: token.image,
           gender: token.gender,
+          role: token.role as string,
           is2FAEnabled: token.is2FAEnabled,
           is2FAVerified: token.is2FAVerified,
         },
