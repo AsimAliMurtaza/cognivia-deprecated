@@ -6,12 +6,12 @@ export interface IUser extends Document {
   name?: string;
   image?: string;
   gender?: string;
+  role?: string;
   verified: boolean;
   verificationToken?: string;
   is2FAEnabled?: boolean;
   twoFactorOtp?: string;
   twoFactorOtpExpiry?: Date;
-
   credits: number;
   creditHistory: {
     type: "usage" | "purchase";
@@ -47,6 +47,11 @@ const UserSchema: Schema = new Schema({
     default: "",
   },
   gender: { type: String, enum: ["male", "female", "other", ""], default: "" },
+  role: {
+    type: String,
+    enum: ["admin", "user"],
+    default: "user",
+  },
   verified: {
     type: Boolean,
     default: false,

@@ -1,5 +1,3 @@
-// app/api/gemini/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { generateGeminiContent } from "@/lib/gemini";
 import { Ratelimit } from "@upstash/ratelimit";

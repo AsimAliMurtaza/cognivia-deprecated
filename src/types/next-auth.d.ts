@@ -11,6 +11,7 @@ declare module "next-auth" {
     email?: string | null;
     image?: string | null;
     gender?: string | null;
+    role?: string | null;
     is2FAEnabled?: boolean;
     is2FAVerified?: boolean;
     requires2FA?: boolean;
