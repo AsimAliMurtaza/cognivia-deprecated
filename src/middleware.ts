@@ -9,6 +9,7 @@ export async function middleware(req: NextRequest) {
   const isDashboardRoute = req.nextUrl.pathname.startsWith("/dashboard");
   const isUserDashboard = isDashboardRoute && !isAdminRoute;
 
+    
   // Block all dashboard access if not logged in
   if (!token && isDashboardRoute) {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -23,6 +24,27 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }
 
+  let userAction="";
+  if (token?.role==="admin")
+  {
+    userAction="View Admin Dashboard";
+  }else{
+
+    userAction="View User Dashboard";
+  }
+  await fetch("http://localhost:3000/api/logging/audit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId: token?.id,
+      userEmail: token?.email,
+      role: token?.role,
+      action: userAction || "Unauthenticated User" ,
+    }),
+  });
+  
   return NextResponse.next();
 }
 
