@@ -10,17 +10,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(logs);
   } catch (error) {
     console.error("❌ Error fetching audit logs:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
 // POST request – store a new audit log
 export async function POST(req: NextRequest) {
   try {
-    const { userId, userEmail, role, action } = await req.json();
+    const { userId, userEmail, role, action, type, sessionId, ip, userAgent } =
+      await req.json();
 
-    if (!userId || !userEmail || !role || !action) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!action || !type) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     await dbConnect();
@@ -29,11 +36,18 @@ export async function POST(req: NextRequest) {
       userEmail,
       role,
       action,
+      type,
+      sessionId,
+      ip,
+      userAgent,
     });
 
     return NextResponse.json({ success: true, log: newLog }, { status: 201 });
   } catch (error) {
     console.error("❌ Error logging action:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

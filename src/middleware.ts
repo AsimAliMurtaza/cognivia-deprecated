@@ -1,15 +1,22 @@
-// middleware.ts
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
+  // Get IP address (supporting proxies)
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.ip ||
+    req.headers.get("cf-connecting-ip") ||
+    "unknown";
+
+  const userAgent = req.headers.get("user-agent") || "unknown";
+
   const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
   const isDashboardRoute = req.nextUrl.pathname.startsWith("/dashboard");
   const isUserDashboard = isDashboardRoute && !isAdminRoute;
 
-    
   // Block all dashboard access if not logged in
   if (!token && isDashboardRoute) {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -24,14 +31,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }
 
-  let userAction="";
-  if (token?.role==="admin")
-  {
-    userAction="View Admin Dashboard";
-  }else{
-
-    userAction="View User Dashboard";
+  let userAction = "";
+  if (token?.role === "admin") {
+    userAction = "View Admin Dashboard";
+  } else {
+    userAction = "View User Dashboard";
   }
+
   await fetch("http://localhost:3000/api/logging/audit", {
     method: "POST",
     headers: {
@@ -41,10 +47,13 @@ export async function middleware(req: NextRequest) {
       userId: token?.id,
       userEmail: token?.email,
       role: token?.role,
-      action: userAction || "Unauthenticated User" ,
+      action: userAction,
+      type: "action",
+      ip,
+      userAgent,
     }),
   });
-  
+
   return NextResponse.next();
 }
 
