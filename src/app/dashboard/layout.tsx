@@ -46,6 +46,7 @@ import {
 import { IconType } from "react-icons/lib";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession, signOut } from "next-auth/react";
+import SessionLogger from "@/components/SessionLogger";
 
 const MotionBox = motion(Box);
 
@@ -92,6 +93,23 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   }
 
   const sidebarWidth = collapsed ? "80px" : "280px";
+
+  const handleLogout = async () => {
+    if (session?.user) {
+      await fetch("/api/logging/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: session.user.id,
+          userEmail: session.user.email,
+          role: session.user.role,
+          action: "Session Ended",
+        }),
+      });
+    }
+
+    signOut();
+  };
 
   const renderSidebarContent = () => (
     <VStack align="start" spacing={4} h="full">
@@ -203,7 +221,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             >
               Profile
             </MenuItem>
-            <MenuItem icon={<BiLogOut />} onClick={() => signOut()}>
+            <MenuItem icon={<BiLogOut />} onClick={handleLogout}>
               Sign Out
             </MenuItem>
           </MenuList>
@@ -270,6 +288,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         ml={!isMobile ? sidebarWidth : 0}
         transition="margin-left 0.3s ease"
       >
+        <SessionLogger />
+
         {children}
       </Box>
     </Flex>
