@@ -47,6 +47,7 @@ import {
   FiMail,
   FiShield,
 } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 interface User {
   _id: string;
@@ -66,6 +67,7 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   const isAdmin = session?.user?.role === "admin";
 
@@ -110,6 +112,23 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("❌ Error updating role:", error);
     }
+  };
+
+  const handleLogout = async () => {
+    if (session?.user) {
+      await fetch("/api/logging/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: session.user.id,
+          userEmail: session.user.email,
+          role: session.user.role,
+          action: "Session Ended",
+        }),
+      });
+    }
+
+    signOut({ callbackUrl: "/" });
   };
 
   const handleDeleteUser = async () => {
@@ -191,7 +210,19 @@ export default function AdminDashboard() {
             variant="ghost"
             py={1}
             borderRadius="full"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => {
+              router.push("/admin/dashboard/logs");
+            }}
+          >
+            LOGS
+          </Button>
+          <Button
+            colorScheme="purple"
+            px={3}
+            variant="ghost"
+            py={1}
+            borderRadius="full"
+            onClick={handleLogout}
           >
             LOGOUT
           </Button>
