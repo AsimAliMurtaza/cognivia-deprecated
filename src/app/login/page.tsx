@@ -77,9 +77,7 @@ export default function LoginPage() {
           router.push(result.url);
           return;
         }
-
-        // Regular successful login
-        router.push("/dashboard");
+        router.push("/redirect");
         toast({
           title: "Login successful",
           status: "success",
@@ -234,7 +232,6 @@ export default function LoginPage() {
                       {error}
                     </FormHelperText>
                   </FormControl>
-
                 )}
 
                 <Button

@@ -100,7 +100,12 @@ export default function DashboardPage() {
 
   if (status === "loading" || loading) {
     return (
-      <Box minH="100vh" display="flex" justifyContent="center" alignItems="center">
+      <Box
+        minH="100vh"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
         <Spinner size="xl" />
       </Box>
     );
@@ -108,7 +113,14 @@ export default function DashboardPage() {
 
   if (!dashboardData) return null;
 
-  const { quizzesCount, averageScore, notesCount, recentNotes, recentQuizzes, takenQuizCount } = dashboardData;
+  const {
+    quizzesCount,
+    averageScore,
+    notesCount,
+    recentNotes,
+    recentQuizzes,
+    takenQuizCount,
+  } = dashboardData;
 
   const stats = [
     {
@@ -150,11 +162,18 @@ export default function DashboardPage() {
           boxShadow="sm"
         >
           <CardHeader pb={0}>
-            <Heading as="h1" size="lg" fontWeight="semibold" color={accentColor} mb={2}>
+            <Heading
+              as="h1"
+              size="lg"
+              fontWeight="semibold"
+              color={accentColor}
+              mb={2}
+            >
               Overview
             </Heading>
             <Text color={secondaryText} fontSize="md">
-              Welcome back, {session?.user?.name || session?.user?.email}! Here&apos;s your progress.
+              Welcome back, {session?.user?.name || session?.user?.email}!
+              Here&apos;s your progress.
             </Text>
           </CardHeader>
         </MotionCard>
@@ -179,7 +198,11 @@ export default function DashboardPage() {
                 <VStack align="flex-start" spacing={4}>
                   <HStack>
                     <Icon as={stat.icon} boxSize={6} opacity={0.9} />
-                    <Text fontSize="lg" fontWeight="medium" letterSpacing="wide">
+                    <Text
+                      fontSize="lg"
+                      fontWeight="medium"
+                      letterSpacing="wide"
+                    >
                       {stat.title}
                     </Text>
                   </HStack>
@@ -202,7 +225,12 @@ export default function DashboardPage() {
           boxShadow="sm"
         >
           <CardHeader>
-            <Heading as="h2" size="md" fontWeight="semibold" color={accentColor}>
+            <Heading
+              as="h2"
+              size="md"
+              fontWeight="semibold"
+              color={accentColor}
+            >
               Recent Activity
             </Heading>
           </CardHeader>
@@ -262,7 +290,9 @@ export default function DashboardPage() {
                       bg={boxColor}
                     >
                       <HStack justify="space-between">
-                        <Text fontWeight="medium">{extractNoteTitle(note.prompt)}</Text>
+                        <Text fontWeight="medium">
+                          {extractNoteTitle(note.prompt)}
+                        </Text>
                         <Text fontSize="xs" color="gray.500">
                           {new Date(note.createdAt).toLocaleDateString()}
                         </Text>

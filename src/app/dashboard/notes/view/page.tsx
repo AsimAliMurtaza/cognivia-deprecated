@@ -68,15 +68,14 @@ export default function ViewNotesPage() {
   const limit = 6;
   const toast = useToast();
 
-  // Material You inspired colors
   const primaryColor = useColorModeValue("teal.500", "blue.200");
   const primaryContainer = useColorModeValue("teal.100", "blue.900");
   const surfaceColor = useColorModeValue("white", "gray.800");
-  const surfaceVariant = useColorModeValue("gray.50", "gray.700");
+  const surfaceVariant = useColorModeValue("white", "gray.700");
   const onSurfaceColor = useColorModeValue("gray.800", "gray.100");
   const outlineColor = useColorModeValue("gray.200", "gray.600");
 
-  const userID = session?.user?.id || null; // Get user ID from session
+  const userID = session?.user?.id || null;
 
   const fetchNotes = useCallback(async () => {
     if (!userID) {
@@ -136,7 +135,6 @@ export default function ViewNotesPage() {
     try {
       const html2pdf = (await import("html2pdf.js")).default;
   
-      // Convert Markdown to HTML properly
       const parsedHTML = marked(note.generated_quiz, {
         breaks: true,
         gfm: true,
@@ -224,7 +222,6 @@ export default function ViewNotesPage() {
   };
   
 
-  // 🧠 Helper function to extract note title
   const extractNoteTitle = (prompt: string): string => {
     // Match text between ":" and "(" to extract actual topic
     const match = prompt.match(/:\s*(.+?)\s*(?:\(|$)/);
@@ -334,7 +331,7 @@ export default function ViewNotesPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           variant="filled"
-          size="lg"
+          size="md"
           borderRadius="full"
           bg={surfaceVariant}
           borderColor="transparent"

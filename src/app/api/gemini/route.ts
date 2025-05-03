@@ -1,5 +1,3 @@
-// app/api/gemini/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { generateGeminiContent } from "@/lib/gemini";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -31,7 +29,10 @@ export async function POST(req: NextRequest) {
   const { success } = await ratelimit.limit(ip);
 
   if (!success) {
-    return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down." },
+      { status: 429 }
+    );
   }
 
   const body = await req.json();
@@ -39,11 +40,17 @@ export async function POST(req: NextRequest) {
 
   // Security Measure 3: Validate Input
   if (!prompt || typeof prompt !== "string" || prompt.length > 1000) {
-    return NextResponse.json({ error: "Invalid or too long prompt" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid or too long prompt" },
+      { status: 400 }
+    );
   }
 
   const sanitizedPrompt = sanitizePrompt(prompt);
-  const response = await generateGeminiContent(sanitizedPrompt);
+  const newSanitizedPrompt =
+    "You are strictly an educational assistant. Strictly avoid political, racist, stereotypes, violent, or controversial material or user queries. Tell user to refrain from such queries but if the user asks about something educational, then help them according to following prompt" +
+    sanitizedPrompt;
+  const response = await generateGeminiContent(newSanitizedPrompt);
 
   return NextResponse.json({ response });
 }

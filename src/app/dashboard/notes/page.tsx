@@ -132,8 +132,8 @@ export default function SmartNotesPage() {
           </CardHeader>
           <CardBody textAlign="center" px={6} pb={6}>
             <Text fontSize="md" color={textColor}>
-              Access your saved notes, edit them, and keep track of what you&apos;ve
-              learned.
+              Access your saved notes, edit them, and keep track of what
+              you&apos;ve learned.
             </Text>
           </CardBody>
         </MotionCard>

@@ -66,7 +66,7 @@ export default function SignUpPage() {
     if (res.ok) {
       toast({
         title: "Account created!",
-        description: "You can now log in.",
+        description: "Verify your acount by clicking on the email link sent to you.",
         status: "success",
         duration: 3000,
         isClosable: true,

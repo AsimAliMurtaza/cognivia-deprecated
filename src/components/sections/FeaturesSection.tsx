@@ -15,8 +15,6 @@ import { motion } from "framer-motion";
 import {
   FaBrain,
   FaClock,
-  FaTrophy,
-  FaChartLine,
   FaBookOpen,
   FaMobileAlt,
 } from "react-icons/fa";
@@ -35,17 +33,17 @@ export default function FeaturesSection() {
         "Get instant feedback and actionable insights to accelerate your learning process.",
       icon: FaClock,
     },
-    {
-      title: "Gamified Learning",
-      description: "Earn badges, unlock achievements, and climb leaderboards.",
-      icon: FaTrophy,
-    },
-    {
-      title: "Adaptive Learning",
-      description:
-        "Smart AI adjusts difficulty dynamically based on your performance.",
-      icon: FaChartLine,
-    },
+    // {
+    //   title: "Gamified Learning",
+    //   description: "Earn badges, unlock achievements, and climb leaderboards.",
+    //   icon: FaTrophy,
+    // },
+    // {
+    //   title: "Adaptive Learning",
+    //   description:
+    //     "Smart AI adjusts difficulty dynamically based on your performance.",
+    //   icon: FaChartLine,
+    // },
     {
       title: "Personalized Insights",
       description:

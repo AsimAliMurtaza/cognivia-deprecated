@@ -46,6 +46,7 @@ import {
 import { IconType } from "react-icons/lib";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession, signOut } from "next-auth/react";
+import SessionLogger from "@/components/SessionLogger";
 
 const MotionBox = motion(Box);
 
@@ -79,7 +80,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const dividerColor = useColorModeValue("gray.200", "gray.600");
   const surfaceColor = useColorModeValue("gray.50", "gray.900");
 
-
   if (status === "loading")
     return (
       <Center h="100vh">
@@ -93,6 +93,23 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   }
 
   const sidebarWidth = collapsed ? "80px" : "280px";
+
+  const handleLogout = async () => {
+    if (session?.user) {
+      await fetch("/api/logging/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: session.user.id,
+          userEmail: session.user.email,
+          role: session.user.role,
+          action: "Session Ended",
+        }),
+      });
+    }
+
+    signOut();
+  };
 
   const renderSidebarContent = () => (
     <VStack align="start" spacing={4} h="full">
@@ -204,7 +221,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             >
               Profile
             </MenuItem>
-            <MenuItem icon={<BiLogOut />} onClick={() => signOut()}>
+            <MenuItem icon={<BiLogOut />} onClick={handleLogout}>
               Sign Out
             </MenuItem>
           </MenuList>
@@ -230,7 +247,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             boxShadow={{ base: "none", md: "md" }}
             position="fixed"
             h="100vh"
-            zIndex={20}
+            zIndex="1100"
+            onMouseEnter={() => !isMobile && setCollapsed(false)}
+            onMouseLeave={() => !isMobile && setCollapsed(true)}
           >
             {renderSidebarContent()}
           </MotionBox>
@@ -265,10 +284,12 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       {/* Main Content */}
       <Box
         flex="1"
-        p={{ base: 4, md: 8 }}
+        // p={{ base: 4, md: 8 }}
         ml={!isMobile ? sidebarWidth : 0}
         transition="margin-left 0.3s ease"
       >
+        <SessionLogger />
+
         {children}
       </Box>
     </Flex>

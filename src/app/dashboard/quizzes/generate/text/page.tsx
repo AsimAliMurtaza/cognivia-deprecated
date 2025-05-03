@@ -82,7 +82,12 @@ const TextQuizGeneration = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData?.error || "Failed to generate quiz");
+
+        if (response.status === 402 && errorData.redirectToPricing) {
+          router.push("/dashboard/pricing");
+        } else {
+          throw new Error(errorData?.error || "Failed to generate quiz");
+        }
       }
 
       const data = await response.json();
@@ -159,9 +164,13 @@ const TextQuizGeneration = () => {
   };
 
   return (
-    <Box minH="100vh" bg={bg} py={10} px={{ base: 6, md: 10 }}>
+    <Box minH="100vh" bg={bg} py={4} px={{ base: 6, md: 4 }}>
       <Container maxW="container.xl">
-        <MotionBox variants={containerVariants} initial="hidden" animate="visible">
+        <MotionBox
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <MotionBox variants={itemVariants} mb={6}>
             <Button
               as={Link}
@@ -179,7 +188,10 @@ const TextQuizGeneration = () => {
           </MotionBox>
 
           <MotionGrid
-            templateColumns={{ base: "1fr", md: generatedQuiz || loading ? "1fr 1fr" : "1fr" }}
+            templateColumns={{
+              base: "1fr",
+              md: generatedQuiz || loading ? "1fr 1fr" : "1fr",
+            }}
             gap={8}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -193,15 +205,20 @@ const TextQuizGeneration = () => {
                 overflow="hidden"
                 boxShadow="md"
                 h="full"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
               >
                 <CardHeader pb={3}>
-                  <Heading as="h1" size="xl" fontWeight="semibold" color={primary} letterSpacing="tight">
-                    Generate Quiz from Text
+                  <Heading
+                    as="h1"
+                    size="xl"
+                    fontWeight="semibold"
+                    color={primary}
+                    letterSpacing="tight"
+                  >
+                    Generate a Quiz from Text
                   </Heading>
                   <Text color={secondary} fontSize="md" mt={2}>
-                    Provide any text, and our AI will craft a tailored quiz for you.
+                    Provide any text, and our AI will craft a tailored quiz for
+                    you.
                   </Text>
                 </CardHeader>
                 <CardBody>
@@ -258,9 +275,20 @@ const TextQuizGeneration = () => {
                   exit={{ opacity: 0, x: 20 }}
                   transition={gridTransition}
                 >
-                  <MotionCard bg={surface} borderRadius="xl" boxShadow="md" h="full">
+                  <MotionCard
+                    bg={surface}
+                    borderRadius="xl"
+                    boxShadow="md"
+                    h="full"
+                  >
                     <CardHeader>
-                      <Heading as="h2" size="lg" fontWeight="semibold" color={primary} letterSpacing="tight">
+                      <Heading
+                        as="h2"
+                        size="lg"
+                        fontWeight="semibold"
+                        color={primary}
+                        letterSpacing="tight"
+                      >
                         {loading ? "Generating Quiz..." : "Generated Quiz"}
                       </Heading>
                     </CardHeader>
@@ -288,16 +316,34 @@ const TextQuizGeneration = () => {
                             boxShadow="inner"
                           >
                             <HStack align="start" spacing={3}>
-                              <Icon as={FaCheckCircle} boxSize={5} color={success} mt={1} />
-                              <Text fontSize="md" lineHeight="tall" whiteSpace="pre-wrap">
+                              <Icon
+                                as={FaCheckCircle}
+                                boxSize={5}
+                                color={success}
+                                mt={1}
+                              />
+                              <Text
+                                fontSize="md"
+                                lineHeight="tall"
+                                whiteSpace="pre-wrap"
+                              >
                                 <Text as="span" fontWeight="semibold">
                                   Your quiz is ready!
                                 </Text>{" "}
-                                Review the questions below. Click &quot;Start Quiz&quot; when you&apos;re ready.
+                                Review the questions below. Click &quot;Start
+                                Quiz&quot; when you&apos;re ready.
                               </Text>
                             </HStack>
-                            <Divider my={4} borderColor={border} opacity={0.5} />
-                            <Text fontSize="sm" lineHeight="relaxed" whiteSpace="pre-wrap">
+                            <Divider
+                              my={4}
+                              borderColor={border}
+                              opacity={0.5}
+                            />
+                            <Text
+                              fontSize="sm"
+                              lineHeight="relaxed"
+                              whiteSpace="pre-wrap"
+                            >
                               {generatedQuiz}
                             </Text>
                           </Box>
@@ -319,7 +365,9 @@ const TextQuizGeneration = () => {
                               borderRadius="full"
                               onClick={() => {
                                 const type = "text";
-                                router.push(`/dashboard/quizzes/conduction/${type}`);
+                                router.push(
+                                  `/dashboard/quizzes/conduction/${type}`
+                                );
                               }}
                               whileHover={{ scale: 1.01 }}
                               whileTap={{ scale: 0.99 }}

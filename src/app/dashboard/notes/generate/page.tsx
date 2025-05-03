@@ -38,7 +38,6 @@ export default function SmartNotesGenerator() {
   const toast = useToast();
   const { data: session } = useSession();
 
-  // Color Mode Values
   const primaryColor = useColorModeValue("teal.500", "blue.400");
   const buttonColor = useColorModeValue("teal", "blue");
 
@@ -181,7 +180,7 @@ export default function SmartNotesGenerator() {
   };
 
   return (
-    <Box maxW="1400px" mx="auto" minH="calc(100vh - 80px)">
+    <Box maxW="1400px" mx="auto" p="6" minH="calc(100vh - 80px)">
       <Flex
         justifyContent="space-between"
         alignItems="center"
