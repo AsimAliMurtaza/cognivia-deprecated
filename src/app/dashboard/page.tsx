@@ -20,7 +20,6 @@ import {
 import { FaCheckCircle, FaChartLine, FaStickyNote } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import SessionLogger from "@/components/SessionLogger";
 
 const MotionCard = motion(Card);
 

@@ -6,7 +6,7 @@ import {
   Text,
   VStack,
   HStack,
-  Spinner,
+  Skeleton,
   Stat,
   StatLabel,
   StatNumber,
@@ -15,6 +15,8 @@ import {
   CardBody,
   Grid,
   Progress,
+  Badge,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -46,80 +48,109 @@ export default function PerformancePage() {
     }
   }, [session?.user?.id]);
 
-  if (loading) {
-    return (
-      <Box minH="80vh" display="flex" justifyContent="center" alignItems="center">
-        <Spinner size="xl" />
-      </Box>
-    );
-  }
-
-  if (!performanceData) return null;
-
-  const { totalQuizzes, averageScore, topTopics, recentScores } = performanceData;
+  const cardBg = useColorModeValue("white", "gray.800");
+  const sectionTitleColor = useColorModeValue("gray.700", "gray.200");
 
   return (
-    <Box p={{ base: 4, md: 8 }} maxW="6xl" mx="auto">
+    <Box p={{ base: 4, md: 8 }} maxW="6xl" mx="auto" minH="80vh">
       <VStack spacing={8} align="stretch">
-        <Card>
+        {/* Performance Stats */}
+        <Card bg={cardBg} borderRadius="xl" shadow="md">
           <CardHeader>
-            <Heading size="md">Your Learning Analytics</Heading>
+            <Heading size="lg" color={sectionTitleColor}>
+              Your Learning Analytics
+            </Heading>
           </CardHeader>
           <CardBody>
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-              <Stat>
-                <StatLabel>Total Quizzes Taken</StatLabel>
-                <StatNumber>{totalQuizzes}</StatNumber>
-              </Stat>
-              <Stat>
-                <StatLabel>Average Score</StatLabel>
-                <StatNumber>{averageScore}%</StatNumber>
-              </Stat>
-            </Grid>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <Heading size="sm">Top Topics</Heading>
-          </CardHeader>
-          <CardBody>
-            {topTopics.length === 0 ? (
-              <Text>No topic data available.</Text>
+            {loading ? (
+              <Skeleton height="100px" />
+            ) : performanceData ? (
+              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
+                <Stat>
+                  <StatLabel>Total Quizzes Taken</StatLabel>
+                  <StatNumber>{performanceData.totalQuizzes}</StatNumber>
+                </Stat>
+                <Stat>
+                  <StatLabel>Average Score</StatLabel>
+                  <StatNumber>{performanceData.averageScore}%</StatNumber>
+                </Stat>
+              </Grid>
             ) : (
-              <VStack spacing={3} align="stretch">
-                {topTopics.map((t) => (
-                  <Box key={t.topic}>
-                    <Text fontWeight="medium">{t.topic}</Text>
-                    <Progress value={(t.count / totalQuizzes) * 100} colorScheme="teal" />
-                  </Box>
-                ))}
-              </VStack>
+              <Text>No performance data available.</Text>
             )}
           </CardBody>
         </Card>
 
-        <Card>
+        {/* Top Topics */}
+        <Card bg={cardBg} borderRadius="xl" shadow="md">
           <CardHeader>
-            <Heading size="sm">Recent Quiz Scores</Heading>
+            <Heading size="md" color={sectionTitleColor}>
+              Top Topics
+            </Heading>
           </CardHeader>
           <CardBody>
-            {recentScores.length === 0 ? (
-              <Text>No recent quiz scores.</Text>
-            ) : (
+            {loading ? (
+              <VStack spacing={4}>
+                <Skeleton height="20px" w="100%" />
+                <Skeleton height="20px" w="100%" />
+                <Skeleton height="20px" w="100%" />
+              </VStack>
+            ) : performanceData?.topTopics?.length ? (
               <VStack spacing={4} align="stretch">
-                {recentScores.map((r, i) => (
-                  <HStack key={i} justify="space-between">
-                    <Text>
-                      <strong>{r.topic}</strong>
+                {performanceData.topTopics.map((t) => (
+                  <Box key={t.topic}>
+                    <Text fontWeight="medium" mb={1}>
+                      {t.topic}
                     </Text>
-                    <Text color="gray.500" fontSize="sm">
+                    <Progress value={(t.count / performanceData.totalQuizzes) * 100} colorScheme="teal" />
+                  </Box>
+                ))}
+              </VStack>
+            ) : (
+              <Text>No top topics found.</Text>
+            )}
+          </CardBody>
+        </Card>
+
+        {/* Recent Scores */}
+        <Card bg={cardBg} borderRadius="xl" shadow="md">
+          <CardHeader>
+            <Heading size="md" color={sectionTitleColor}>
+              Recent Quiz Scores
+            </Heading>
+          </CardHeader>
+          <CardBody>
+            {loading ? (
+              <VStack spacing={4}>
+                <Skeleton height="24px" w="100%" />
+                <Skeleton height="24px" w="100%" />
+              </VStack>
+            ) : performanceData?.recentScores?.length ? (
+              <VStack spacing={4} align="stretch">
+                {performanceData.recentScores.map((r, i) => (
+                  <HStack key={i} justify="space-between" wrap="wrap">
+                    <Text fontWeight="medium">{r.topic}</Text>
+                    <Text fontSize="sm" color="gray.500">
                       {new Date(r.date).toLocaleDateString()}
                     </Text>
-                    <Text>{r.score}%</Text>
+                    <Badge
+                      colorScheme={
+                        r.score >= 80
+                          ? "green"
+                          : r.score >= 50
+                          ? "yellow"
+                          : "red"
+                      }
+                      borderRadius="full"
+                      px={2}
+                    >
+                      {r.score}%
+                    </Badge>
                   </HStack>
                 ))}
               </VStack>
+            ) : (
+              <Text>No recent quiz scores.</Text>
             )}
           </CardBody>
         </Card>
