@@ -5,7 +5,8 @@ import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import { sendEmail } from "@/lib/mailer";
+import crypto from "crypto";
+import { sendEmail, sendSuspiciousLoginEmail } from "@/lib/mailer";
 import { sign } from "jsonwebtoken";
 
 export const authOptions: NextAuthOptions = {
@@ -30,21 +31,40 @@ export const authOptions: NextAuthOptions = {
         if (!credentials) return null;
 
         const { email, password, otp } = credentials;
+
         await dbConnect();
         const user = await User.findOne({ email });
+
         if (!user) return null;
         if (!user.verified) throw new Error("Please verify your email first");
+        if (user.isAccountLocked) {
+          if (user.unblockToken && user.unblockTokenExpires) {
+            const isTokenValid = user.unblockTokenExpires > Date.now();
+            if (isTokenValid) {
+              await sendSuspiciousLoginEmail(user.email, user.unblockToken);
+            }
+          }
+          if (!user.unblockToken && !user.unblockTokenExpires) {
+            // Generate a new token and set expiry (e.g., 1 hour)
+            const token = crypto.randomBytes(32).toString("hex");
+            user.unblockToken = token;
+            user.unblockTokenExpires = Date.now() + 60 * 60 * 1000;
+            await user.save();
+            await sendSuspiciousLoginEmail(user.email, token);
+          }
+          throw new Error(
+            "Your account is blocked due to suspicious activity."
+          );
+        }
 
-        // ✅ Handle 2FA login after OTP is already verified
+        //Handle 2FA login after OTP is already verified
         if (otp && password === "__OTP__") {
           if (!user.is2FAEnabled) return null;
-
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
             image: user.image,
-
             gender: user.gender,
             is2FAEnabled: true,
             is2FAVerified: true,
@@ -52,21 +72,40 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // ✅ Check password
+        //Check password
         const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) return null;
+        if (!isValidPassword) {
+          user.loginAttempts += 1;
+          if (user.loginAttempts >= 3) {
+            user.isAccountLocked = true;
+            // Generate a token and set expiry (e.g., 1 hour)
+            const token = crypto.randomBytes(32).toString("hex");
+            user.unblockToken = token;
+            user.unblockTokenExpires = Date.now() + 60 * 60 * 1000;
+            await user.save();
+            // Send suspicious activity email
+            await sendSuspiciousLoginEmail(user.email, token);
+            throw new Error(
+              "Account blocked due to multiple failed login attempts."
+            );
+          }
+          await user.save();
+          throw new Error("Invalid password");
+        }
 
-        // ✅ Trigger 2FA email if enabled
+        // Reset login attempts on successful password verification
+        user.loginAttempts = 0;
+        await user.save();
+
+        //Trigger 2FA email if enabled
         if (user.is2FAEnabled) {
           const otpCode = Math.floor(
             100000 + Math.random() * 900000
           ).toString();
           const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
           user.twoFactorOtp = otpCode;
           user.twoFactorOtpExpiry = expiry;
           await user.save();
-
           await sendEmail({
             from: process.env.EMAIL_USER as string,
             to: user.email,
@@ -82,7 +121,7 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // ✅ Regular login
+        //Regular login
         return {
           id: user._id.toString(),
           email: user.email,
@@ -91,7 +130,6 @@ export const authOptions: NextAuthOptions = {
           gender: user.gender,
           role: user.role || "user",
           is2FAEnabled: false,
-          
         };
       },
     }),
@@ -103,11 +141,11 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60 * 8, // 8 hours
+    maxAge: 60 * 60 * 5, // 5 hours
     updateAge: 60 * 60, // refresh every 1 hour of activity
   },
   jwt: {
-    maxAge: 60 * 60 * 8, // tokens are valid for 8 hours max
+    maxAge: 60 * 60 * 5, // tokens are valid for 5 hours max
   },
   callbacks: {
     async jwt({ token, user }) {

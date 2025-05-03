@@ -13,6 +13,12 @@ export interface IUser extends Document {
   twoFactorOtp?: string;
   twoFactorOtpExpiry?: Date;
   accessToken?: string;
+  createdAt?: Date;
+  loginAttempts?: number;
+  isAccountLocked?: boolean;
+  unblockToken?: string;
+  unblockTokenExpires?: Date; 
+  lastLogin?: Date;
   credits: number;
   creditHistory: {
     type: "usage" | "purchase";
@@ -46,6 +52,30 @@ const UserSchema: Schema = new Schema({
   image: {
     type: String,
     default: "",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  loginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  isAccountLocked: {
+    type: Boolean,
+    default: false,
+  },
+  unblockToken: {
+    type: String,
+    default: null,
+  },
+  unblockTokenExpires: {
+    type: Date,
+    default: null,
+  },
+  lastLogin: {
+    type: Date,
+    default: null,
   },
   gender: { type: String, enum: ["male", "female", "other", ""], default: "" },
   role: {
