@@ -19,11 +19,13 @@ import { FiMenu } from "react-icons/fi";
 import ChatHistory from "@/components/ai-assistant-components/ChatHistory";
 import ChatWindow from "@/components/ai-assistant-components/ChatWindow";
 import { useDisclosure } from "@chakra-ui/react";
+import { useSession } from "next-auth/react";
 
 const generateChatId = () =>
   `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
 export default function AIAssistant() {
+  const { data: session } = useSession();
   const [query, setQuery] = useState<string>("");
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<
@@ -77,6 +79,7 @@ export default function AIAssistant() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.accessToken}`,
         },
         body: JSON.stringify({ prompt: query }),
       }).then((res) => res.json());

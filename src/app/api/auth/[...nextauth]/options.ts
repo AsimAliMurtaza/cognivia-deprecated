@@ -6,6 +6,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/mailer";
+import { sign } from "jsonwebtoken";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -90,6 +91,7 @@ export const authOptions: NextAuthOptions = {
           gender: user.gender,
           role: user.role || "user",
           is2FAEnabled: false,
+          
         };
       },
     }),
@@ -120,6 +122,7 @@ export const authOptions: NextAuthOptions = {
         if (user) {
           token.role = user.role || "user";
         }
+        token.accessToken = await sign(token, process.env.NEXTAUTH_SECRET!);
       }
       return token;
     },
@@ -136,6 +139,7 @@ export const authOptions: NextAuthOptions = {
           role: token.role as string,
           is2FAEnabled: token.is2FAEnabled,
           is2FAVerified: token.is2FAVerified,
+          accessToken: token.accessToken,
         },
       };
     },

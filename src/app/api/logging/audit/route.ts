@@ -2,13 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import AuditLog from "@/models/AuditLog";
 
-// GET request – fetch recent audit logs
+// GET request – fetch paginated audit logs
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
-    console.log(req.url);
-    const logs = await AuditLog.find().sort({ createdAt: -1 }).limit(100);
-    return NextResponse.json(logs);
+
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const skip = (page - 1) * limit;
+
+    const [logs, total] = await Promise.all([
+      AuditLog.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      AuditLog.countDocuments(),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      total,
+      logs,
+    });
   } catch (error) {
     console.error("❌ Error fetching audit logs:", error);
     return NextResponse.json(

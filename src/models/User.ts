@@ -12,6 +12,7 @@ export interface IUser extends Document {
   is2FAEnabled?: boolean;
   twoFactorOtp?: string;
   twoFactorOtpExpiry?: Date;
+  accessToken?: string;
   credits: number;
   creditHistory: {
     type: "usage" | "purchase";
@@ -52,6 +53,10 @@ const UserSchema: Schema = new Schema({
     enum: ["admin", "user"],
     default: "user",
   },
+  accessToken: {
+    type: String,
+    default: null,
+  },
   verified: {
     type: Boolean,
     default: false,
@@ -67,7 +72,7 @@ const UserSchema: Schema = new Schema({
   // Credit-based payment model fields
   credits: {
     type: Number,
-    default: 100, // Free credits on signup
+    default: 200, // Free credits on signup
   },
   creditHistory: [
     {
