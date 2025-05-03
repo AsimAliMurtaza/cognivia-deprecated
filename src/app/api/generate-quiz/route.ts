@@ -5,6 +5,8 @@ import dbConnect from "@/lib/mongodb";
 import Quiz from "@/models/Quiz";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { getToken } from "next-auth/jwt";
+const secret = process.env.NEXTAUTH_SECRET;
 
 // Security Measure 1: Rate limiting
 const redis = new Redis({
@@ -143,6 +145,23 @@ async function formatQuiz(geminiOutput: string): Promise<{
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Get token from Authorization header
+    const authHeader = req.headers.get("authorization");
+    const token = authHeader?.split(" ")[1]; // "Bearer <token>" → "<token>"
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 2. Validate token using next-auth
+    const verifiedToken = await getToken({ req, secret, raw: true });
+
+    if (!verifiedToken) {
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 403 }
+      );
+    }
     // Security Measure 1: Rate limiting
     const ip = req.headers.get("x-forwarded-for") || "anonymous";
     const { success } = await ratelimit.limit(ip);

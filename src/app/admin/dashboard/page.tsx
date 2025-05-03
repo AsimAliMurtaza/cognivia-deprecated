@@ -80,7 +80,13 @@ export default function AdminDashboard() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/admin/users");
+      const response = await fetch("/api/admin/users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.accessToken}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }

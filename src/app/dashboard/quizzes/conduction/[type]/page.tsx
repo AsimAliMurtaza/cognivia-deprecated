@@ -156,6 +156,7 @@ export default function QuizPage() {
 
           <VStack spacing={3} align="stretch">
             {current.options.map((option, index) => {
+              const optionLetter = String.fromCharCode(65 + index); // A, B, C, D
               const isSelected = userAnswerIndex === index;
               const isCorrectAnswer = index === current.correctIndex;
               const hasAnswered = answered[currentQuestion];
@@ -212,9 +213,12 @@ export default function QuizPage() {
                   height="auto"
                   minH="60px"
                 >
-                  <Text w="full" wordBreak="break-word" textAlign="left" px={2}>
-                    {option}
-                  </Text>
+                  <Flex align="center" w="full">
+                    <Text color={textColorOption}>{optionLetter}</Text>
+                    <Text wordBreak="break-word" textAlign="left">
+                      {option}
+                    </Text>
+                  </Flex>
                 </Button>
               );
             })}
