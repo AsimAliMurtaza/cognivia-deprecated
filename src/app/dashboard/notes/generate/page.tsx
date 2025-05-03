@@ -81,6 +81,7 @@ export default function SmartNotesGenerator() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.accessToken}`,
         },
         body: JSON.stringify({ prompt: finalPrompt }),
       }).then((res) => res.json());
@@ -101,6 +102,7 @@ export default function SmartNotesGenerator() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.accessToken}`,
           },
           body: JSON.stringify({
             userId: session.user.id,

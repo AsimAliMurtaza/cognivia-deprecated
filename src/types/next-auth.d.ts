@@ -12,6 +12,7 @@ declare module "next-auth" {
     image?: string | null;
     gender?: string | null;
     role?: string | null;
+    accessToken?: string;
     is2FAEnabled?: boolean;
     is2FAVerified?: boolean;
     requires2FA?: boolean;
@@ -36,6 +37,7 @@ declare module "next-auth/jwt" {
     image?: string | null;
     gender?: string | null;
     is2FAEnabled?: boolean;
+    accessToken?: string;
     is2FAVerified?: boolean;
     requires2FA?: boolean;
   }

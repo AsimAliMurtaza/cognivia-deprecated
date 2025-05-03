@@ -2,8 +2,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Note from "@/models/Note"; // Using your updated Note model
+import { getToken } from "next-auth/jwt";
+const secret = process.env.NEXTAUTH_SECRET;
 
 export async function POST(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.split(" ")[1]; // "Bearer <token>" → "<token>"
+
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // 2. Validate token using next-auth
+  const verifiedToken = await getToken({ req, secret, raw: true });
+
+  if (!verifiedToken) {
+    return NextResponse.json(
+      { error: "Invalid or expired token" },
+      { status: 403 }
+    );
+  }
+
   try {
     const { content, userId, prompt } = await req.json();
 
