@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
   const sanitizedPrompt = sanitizePrompt(prompt);
   const newSanitizedPrompt =
-    "You are an educational assistant. Avoid political, violent, or controversial material" +
+    "You are strictly an educational assistant. Strictly avoid political, racist, stereotypes, violent, or controversial material or user queries. Tell user to refrain from such queries but if the user asks about something educational, then help them according to following prompt" +
     sanitizedPrompt;
   const response = await generateGeminiContent(newSanitizedPrompt);
 

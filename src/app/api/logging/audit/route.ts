@@ -6,6 +6,7 @@ import AuditLog from "@/models/AuditLog";
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
+    console.log(req.url);
     const logs = await AuditLog.find().sort({ createdAt: -1 }).limit(100);
     return NextResponse.json(logs);
   } catch (error) {

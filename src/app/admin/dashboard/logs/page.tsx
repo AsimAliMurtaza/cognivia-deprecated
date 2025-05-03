@@ -41,6 +41,7 @@ export default function LogsPage() {
         const data = await res.json();
         setLogs(data);
       } catch (err) {
+        console.error(err);
         toast({
           title: "Error fetching logs",
           status: "error",
