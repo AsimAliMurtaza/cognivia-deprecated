@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest) {
     userAction = "View User Dashboard";
   }
 
-  await fetch("http://localhost:3000/api/logging/audit", {
+  await fetch(`${process.env.NEXTAUTH_URL}/api/logging/audit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
