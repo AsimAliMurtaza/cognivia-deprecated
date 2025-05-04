@@ -17,7 +17,6 @@ export async function middleware(req: NextRequest) {
   const isDashboardRoute = req.nextUrl.pathname.startsWith("/dashboard");
   const isUserDashboard = isDashboardRoute && !isAdminRoute;
 
-  // Block all dashboard access if not logged in
   if (!token && isDashboardRoute) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -26,7 +25,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 🔒 Block user dashboard for admins
   if (isUserDashboard && token?.role === "admin") {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }

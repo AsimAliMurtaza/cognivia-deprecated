@@ -1,13 +1,13 @@
 // app/api/save-notes/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Note from "@/models/Note"; // Using your updated Note model
+import Note from "@/models/Note"; 
 import { getToken } from "next-auth/jwt";
 const secret = process.env.NEXTAUTH_SECRET;
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
-  const token = authHeader?.split(" ")[1]; // "Bearer <token>" → "<token>"
+  const token = authHeader?.split(" ")[1]; 
 
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
       _id: `note_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate a unique _id
       userID: userId,
       prompt: prompt,
-      generated_quiz: content, // Assuming 'content' from the request is the generated quiz
-      createdAt: new Date(), // This will be overridden by timestamps: true in the schema
+      generated_quiz: content,
+      createdAt: new Date(),
     });
 
     const savedNote = await newNote.save();

@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
             }
           }
           if (!user.unblockToken && !user.unblockTokenExpires) {
-            // Generate a new token and set expiry (e.g., 1 hour)
+            // Generate a new token and set expiry (1 hour)
             const token = crypto.randomBytes(32).toString("hex");
             user.unblockToken = token;
             user.unblockTokenExpires = Date.now() + 60 * 60 * 1000;
@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
           user.loginAttempts += 1;
           if (user.loginAttempts >= 3) {
             user.isAccountLocked = true;
-            // Generate a token and set expiry (e.g., 1 hour)
+            // Generate a token and set expiry (1 hour)
             const token = crypto.randomBytes(32).toString("hex");
             user.unblockToken = token;
             user.unblockTokenExpires = Date.now() + 60 * 60 * 1000;

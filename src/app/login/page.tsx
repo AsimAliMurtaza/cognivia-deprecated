@@ -37,7 +37,6 @@ export default function LoginPage() {
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
 
-  // 🔥 Color Mode Responsive Styling
   const bgColor = useColorModeValue(
     "linear(to-br, #E0F7FA, #F3E5F5)",
     "gray.900"
@@ -67,7 +66,6 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        // This shouldn't happen with our new flow
         throw new Error(result.error);
       }
 

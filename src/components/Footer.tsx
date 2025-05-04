@@ -52,7 +52,10 @@ const Footer = () => {
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Cognivia
             </Link>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            <Link
+              href="https://zenflow-eight.vercel.app"
+              _hover={{ color: linkHoverColor }}
+            >
               ZenFlow
             </Link>
             <Link fontWeight="bold" href="#" _hover={{ color: linkHoverColor }}>

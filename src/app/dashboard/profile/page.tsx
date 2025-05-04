@@ -71,7 +71,6 @@ export default function EditProfilePage() {
     onClose: onPasswordClose,
   } = useDisclosure();
 
-  // State for form fields
   const [isDeleteButtonEnabled, setIsDeleteButtonEnabled] = useState(false);
   const [name, setName] = useState(session?.user?.name);
   const [email] = useState(session?.user?.email || "");
@@ -356,7 +355,6 @@ export default function EditProfilePage() {
       onDeleteClose();
     }
   };
-
 
   return (
     <Container maxW="container.XL">

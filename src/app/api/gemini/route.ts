@@ -12,7 +12,7 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-// 5 requests per 10 seconds per IP
+// 5 requests per 60 seconds per IP
 const ratelimit = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(5, "60 s"),
@@ -30,7 +30,7 @@ function sanitizePrompt(input: string): string {
 export async function POST(req: NextRequest) {
   // 1. Get token from Authorization header
   const authHeader = req.headers.get("authorization");
-  const token = authHeader?.split(" ")[1]; // "Bearer <token>" → "<token>"
+  const token = authHeader?.split(" ")[1];
 
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -69,8 +69,7 @@ export async function POST(req: NextRequest) {
 
   const sanitizedPrompt = sanitizePrompt(prompt);
   const newSanitizedPrompt =
-    "You are an educational assistant" +
-    sanitizedPrompt;
+    "You are an educational assistant" + sanitizedPrompt;
   const response = await generateGeminiContent(newSanitizedPrompt);
 
   return NextResponse.json({ response });

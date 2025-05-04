@@ -21,6 +21,7 @@ const QuizResultSchema: Schema = new Schema(
 );
 
 const QuizResult =
-  models.QuizResult || mongoose.model<IQuizResult>("QuizResult", QuizResultSchema);
+  models.QuizResult ||
+  mongoose.model<IQuizResult>("QuizResult", QuizResultSchema);
 
 export default QuizResult;

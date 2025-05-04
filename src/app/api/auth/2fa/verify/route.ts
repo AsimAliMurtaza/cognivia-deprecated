@@ -6,11 +6,9 @@ import User from "@/models/User";
 export async function POST(req: Request) {
   await dbConnect();
   const { email, otp } = await req.json();
-  console.log("Verifying OTP for email:", email, "OTP:", otp); // Log input
 
   try {
     const user = await User.findOne({ email });
-    console.log("Found user:", user); // Log user data
 
     if (!user) {
       console.log("User not found");
@@ -56,7 +54,7 @@ export async function POST(req: Request) {
     console.log("OTP verified and cleared for user:", email);
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("OTP verification error:", err); // Log the full error
+    console.error("OTP verification error:", err);
     return NextResponse.json(
       { error: "OTP verification failed" },
       { status: 500 }

@@ -49,14 +49,12 @@ const roleColor: Record<string, string> = {
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-// Define log types and common actions for filtering
 const LOG_TYPES = [
   { value: "all", label: "All Types" },
   { value: "action", label: "Actions" },
   { value: "session", label: "Sessions" },
 ];
 
-// Add more action types as needed based on your schema
 const ACTION_TYPES = [
   { value: "all", label: "All Actions" },
   { value: "login", label: "Login" },
@@ -79,7 +77,6 @@ export default function LogsPage() {
   const toast = useToast();
   const router = useRouter();
 
-  // Color mode values
   const cardBg = useColorModeValue("white", "gray.800");
   const tableHeaderBg = useColorModeValue("gray.50", "gray.700");
   const hoverBg = useColorModeValue("gray.50", "gray.700");

@@ -12,12 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import {
-  FaBrain,
-  FaClock,
-  FaBookOpen,
-  FaMobileAlt,
-} from "react-icons/fa";
+import { FaBrain, FaClock, FaBookOpen, FaMobileAlt } from "react-icons/fa";
 
 export default function FeaturesSection() {
   const features = [
@@ -33,17 +28,6 @@ export default function FeaturesSection() {
         "Get instant feedback and actionable insights to accelerate your learning process.",
       icon: FaClock,
     },
-    // {
-    //   title: "Gamified Learning",
-    //   description: "Earn badges, unlock achievements, and climb leaderboards.",
-    //   icon: FaTrophy,
-    // },
-    // {
-    //   title: "Adaptive Learning",
-    //   description:
-    //     "Smart AI adjusts difficulty dynamically based on your performance.",
-    //   icon: FaChartLine,
-    // },
     {
       title: "Personalized Insights",
       description:
@@ -58,7 +42,6 @@ export default function FeaturesSection() {
     },
   ];
 
-  // Material You inspired colors
   const bgColor = useColorModeValue("gray.50", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.100");
   const subTextColor = useColorModeValue("gray.600", "gray.300");

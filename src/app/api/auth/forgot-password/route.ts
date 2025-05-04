@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb"; // your DB util
+import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import crypto from "crypto";
-import { sendPasswordEmail } from "@/lib/mailer"; // implement this
+import { sendPasswordEmail } from "@/lib/mailer"; 
 
 export async function POST(req: Request) {
   await dbConnect();

@@ -134,12 +134,12 @@ export default function ViewNotesPage() {
   const exportToPDF = async (note: Note) => {
     try {
       const html2pdf = (await import("html2pdf.js")).default;
-  
+
       const parsedHTML = marked(note.generated_quiz, {
         breaks: true,
         gfm: true,
       });
-  
+
       const wrapper = document.createElement("div");
       wrapper.innerHTML = `
         <style>
@@ -201,12 +201,14 @@ export default function ViewNotesPage() {
           <div class="content">${parsedHTML}</div>
         </div>
       `;
-  
+
       await html2pdf()
         .from(wrapper)
         .set({
           margin: [0.5, 0.5],
-          filename: `${note.prompt.substring(0, 30).replace(/\s+/g, "_")}_notes.pdf`,
+          filename: `${note.prompt
+            .substring(0, 30)
+            .replace(/\s+/g, "_")}_notes.pdf`,
           html2canvas: { scale: 2, backgroundColor: "#FFFFFF" },
           jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
         })
@@ -220,7 +222,6 @@ export default function ViewNotesPage() {
       });
     }
   };
-  
 
   const extractNoteTitle = (prompt: string): string => {
     // Match text between ":" and "(" to extract actual topic

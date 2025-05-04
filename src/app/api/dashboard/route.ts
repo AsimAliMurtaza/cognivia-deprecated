@@ -9,10 +9,8 @@ export async function POST(req: Request) {
     await dbConnect();
     const { userID } = await req.json();
 
-    // Count quizzes created
     const quizzesCount = await Quiz.countDocuments({ userID });
 
-    // Average quiz result percentage
     const resultsAgg = await QuizResult.aggregate([
       { $match: { userID } },
       {
@@ -23,19 +21,13 @@ export async function POST(req: Request) {
       },
     ]);
     const averageScore = resultsAgg[0]?.avgPercentage || 0;
-
-    // Count notes created
     const notesCount = await Note.countDocuments({ userID });
-
     const takenQuizCount = await QuizResult.countDocuments({ userID });
-
-    // Fetch latest 2 quizzes (sorted by createdAt descending)
     const recentQuizzes = await Quiz.find({ userID })
       .sort({ createdAt: -1 })
       .limit(2)
       .select("topic createdAt");
 
-    // Fetch latest 2 notes (sorted by createdAt descending)
     const recentNotes = await Note.find({ userID })
       .sort({ createdAt: -1 })
       .limit(2)

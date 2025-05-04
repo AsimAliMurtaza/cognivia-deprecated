@@ -13,7 +13,11 @@ export interface ISessionLog extends Document {
 const SessionLogSchema = new Schema<ISessionLog>({
   userId: { type: String, required: true },
   email: { type: String, required: true },
-  event: { type: String, enum: ["login", "logout", "session_refresh"], required: true },
+  event: {
+    type: String,
+    enum: ["login", "logout", "session_refresh"],
+    required: true,
+  },
   ip: String,
   userAgent: String,
   timestamp: { type: Date, default: Date.now },

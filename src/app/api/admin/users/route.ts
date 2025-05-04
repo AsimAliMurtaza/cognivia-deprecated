@@ -1,9 +1,9 @@
 // app/api/admin/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"; // Make sure this exists and exports your authOptions
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/mongodb";
-import User from "@/models/User"; // Your Mongoose User model
+import User from "@/models/User";
 import { getToken } from "next-auth/jwt";
 const secret = process.env.NEXTAUTH_SECRET;
 

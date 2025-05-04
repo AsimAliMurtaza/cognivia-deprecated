@@ -44,7 +44,8 @@ const HeroSection = () => {
                 as="h1"
                 fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
                 fontWeight="bold"
-                lineHeight="1.5">
+                lineHeight="1.5"
+              >
                 <Box as="span" display="block" mb={2}>
                   Enhance your learning experience with
                 </Box>

@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import crypto from "crypto";
-import {sendVerificationEmail} from "@/lib/mailer";
+import { sendVerificationEmail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {

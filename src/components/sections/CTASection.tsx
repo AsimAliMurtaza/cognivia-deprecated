@@ -57,7 +57,7 @@ const CTASection = () => {
             spacing={6}
           >
             <Text fontSize="md" mt={-12} color={textColor} fontWeight="medium">
-            LEARNERS AND STUDENTS
+              LEARNERS AND STUDENTS
             </Text>
 
             <Heading
@@ -79,7 +79,6 @@ const CTASection = () => {
                 />
               </Box>
             </Heading>
-
 
             <Text
               fontSize={{ base: "lg", md: "xl" }}

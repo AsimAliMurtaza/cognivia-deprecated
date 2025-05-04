@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"; // Adjust path as needed
-import dbConnect from "@/lib/mongodb"; // Your MongoDB connection function
-import User from "@/models/User"; // Your Mongoose User model
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import dbConnect from "@/lib/mongodb";
+import User from "@/models/User";
 
 export async function DELETE(req: NextRequest) {
   console.log(req.body);

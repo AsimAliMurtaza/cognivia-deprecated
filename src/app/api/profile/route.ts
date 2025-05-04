@@ -4,7 +4,6 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
-
 export async function GET() {
   await dbConnect();
   const session = await getServerSession(authOptions);

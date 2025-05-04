@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -74,7 +73,7 @@ export default function ImageQuizGeneration() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-  
+
   return (
     <Box minH="100vh" bg={bgColor} py={12}>
       <Container maxW={{ base: "90%", md: "3xl" }}>
@@ -106,7 +105,6 @@ export default function ImageQuizGeneration() {
               border="1px solid"
               borderColor={borderColor}
             >
-
               <VStack spacing={6} align="stretch">
                 <Heading as="h1" size="md" color="teal.500">
                   Generate Quiz from Image
@@ -119,9 +117,7 @@ export default function ImageQuizGeneration() {
                   borderRadius="md"
                   p={6}
                   textAlign="center"
-
                   borderColor={borderColor}
-
                   position="relative"
                   cursor="pointer"
                   _hover={{ borderColor: "teal.500" }}
@@ -216,12 +212,14 @@ export default function ImageQuizGeneration() {
                           flex={1}
                           onClick={() => {
                             // Make sure the `type` is dynamically fetched or set
-                            const type = "image";  // or "image" based on your app logic
-                            router.push(`/dashboard/quizzes/conduction/${type}`);
+                            const type = "image"; // or "image" based on your app logic
+                            router.push(
+                              `/dashboard/quizzes/conduction/${type}`
+                            );
                           }}
-                          >
+                        >
                           Start Quiz
-                          </MotionButton>
+                        </MotionButton>
                       </HStack>
                     </VStack>
                   </MotionBox>

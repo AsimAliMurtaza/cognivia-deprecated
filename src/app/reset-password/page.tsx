@@ -29,7 +29,6 @@ const ResetPasswordContent = () => {
   const inputBg = useColorModeValue("gray.50", "gray.700");
   const buttonColor = useColorModeValue("teal", "blue");
 
-  // Safe memoized callback to extract token from search params
   const extractToken = useCallback(() => {
     const foundToken = searchParams.get("token");
     if (foundToken) {

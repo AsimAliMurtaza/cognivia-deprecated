@@ -23,7 +23,6 @@ import { useEffect, useState } from "react";
 
 const MotionCard = motion(Card);
 
-// 🧠 Helper function to extract note title
 const extractNoteTitle = (prompt: string): string => {
   // Match text between ":" and "(" to extract actual topic
   const match = prompt.match(/:\s*(.+?)\s*(?:\(|$)/);

@@ -152,7 +152,6 @@ export default function QuizGenerationModule() {
               AI technology. Choose your preferred method below to get started.
             </Text>
           </VStack>
-
           <SimpleGrid
             columns={{ base: 1, md: 3 }}
             spacing={{ base: 6, md: 8 }}
@@ -177,10 +176,12 @@ export default function QuizGenerationModule() {
               href="/dashboard/quizzes/generate/image"
             />
           </SimpleGrid>
-
           <Divider my={8} /> {/* Horizontal separator */}
-
-          <SimpleGrid columns={{ base: 1, md: 1 }} spacing={{ base: 6, md: 8 }} w="full">
+          <SimpleGrid
+            columns={{ base: 1, md: 1 }}
+            spacing={{ base: 6, md: 8 }}
+            w="full"
+          >
             <FeatureCard
               icon={ListChecks}
               title="Manage Quizzes"
