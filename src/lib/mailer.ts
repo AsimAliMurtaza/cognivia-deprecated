@@ -53,7 +53,7 @@ export async function sendSuspiciousLoginEmail(toEmail: string, token: string) {
   });
 
   const mailOptions = {
-    from: `"Security@Cognivia" <${process.env.EMAIL_USER}>`,
+    from: `"security@Cognivia" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: "Suspicious Login Detected - Action Required",
     html: `
@@ -64,4 +64,25 @@ export async function sendSuspiciousLoginEmail(toEmail: string, token: string) {
     `,
   };
   await transporter.sendMail(mailOptions);
+}
+
+export async function sendPasswordEmail(
+  to: string,
+  subject: string,
+  text: string
+) {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"security@Cognivia" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    text,
+  });
 }
