@@ -253,6 +253,7 @@ export default function LoginPage() {
                   cursor="pointer"
                   textAlign="center"
                   _hover={{ textDecoration: "underline" }}
+                  onClick={() => router.push("/forgot-password")}
                 >
                   Forgot password?
                 </Text>
