@@ -17,7 +17,9 @@ export interface IUser extends Document {
   loginAttempts?: number;
   isAccountLocked?: boolean;
   unblockToken?: string;
-  unblockTokenExpires?: Date; 
+  unblockTokenExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   lastLogin?: Date;
   credits: number;
   creditHistory: {
@@ -70,6 +72,14 @@ const UserSchema: Schema = new Schema({
     default: null,
   },
   unblockTokenExpires: {
+    type: Date,
+    default: null,
+  },
+  passwordResetToken: {
+    type: String,
+    default: null,
+  },
+  passwordResetExpires: {
     type: Date,
     default: null,
   },
