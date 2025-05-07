@@ -12,16 +12,20 @@ import {
   List,
   ListItem,
   ListIcon,
-  Badge,
   SimpleGrid,
   Icon,
   useColorModeValue,
   Link,
+  Container,
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+  Flex,
 } from "@chakra-ui/react";
 import { CheckCircleIcon } from "@chakra-ui/icons";
-import { FaBolt } from "react-icons/fa";
+import { FaBolt, FaArrowLeft } from "react-icons/fa";
 import { useSession } from "next-auth/react";
-import { ArrowLeft } from "lucide-react";
 
 const subscriptionPlans = [
   {
@@ -66,35 +70,46 @@ const creditPacks = [
 
 const priceMap: Record<
   string,
-  { priceId: string; type: "subscription" | "credit_pack"; metadata?: Record<string, string | number> }
+  {
+    name: string;
+    priceId: string;
+    type: "subscription" | "credit_pack";
+    metadata?: Record<string, string | number | boolean | undefined>;
+  }
 > = {
   Basic: {
+    name: "Basic",
     priceId: process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID!,
     type: "subscription",
     metadata: { plan: "Basic" },
   },
   Pro: {
+    name: "Pro",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!,
     type: "subscription",
     metadata: { plan: "Pro" },
   },
   Premium: {
+    name: "Premium",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID!,
     type: "subscription",
     metadata: { plan: "Premium" },
   },
 
   "100 Credits": {
+    name: "100 Credits",
     priceId: process.env.NEXT_PUBLIC_STRIPE_100_CREDITS_PRICE_ID!,
     type: "credit_pack",
     metadata: { credits: 100 },
   },
   "500 Credits": {
+    name: "500 Credits",
     priceId: process.env.NEXT_PUBLIC_STRIPE_500_CREDITS_PRICE_ID!,
     type: "credit_pack",
     metadata: { credits: 500 },
   },
   "1000 Credits": {
+    name: "1000 Credits",
     priceId: process.env.NEXT_PUBLIC_STRIPE_1000_CREDITS_PRICE_ID!,
     type: "credit_pack",
     metadata: { credits: 1000 },
@@ -103,14 +118,16 @@ const priceMap: Record<
 
 export default function SubscriptionPage() {
   const toast = useToast();
-  const bgCard = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
   const { data: session } = useSession();
-  // Then use session.user.id and session.user.email
-    // to get the user ID and email from the session.
-    const userId = session?.user?.id;
-    const userEmail = session?.user?.email;
-    
+  const userId = session?.user?.id;
+  const userEmail = session?.user?.email;
+
+  // Material You inspired colors
+  const primaryColor = useColorModeValue("blue.500", "blue.300");
+  const surfaceColor = useColorModeValue("white", "gray.800");
+  const onSurfaceColor = useColorModeValue("gray.800", "whiteAlpha.900");
+  const secondaryContainer = useColorModeValue("blue.100", "blue.900");
+  const onSecondaryContainer = useColorModeValue("blue.900", "blue.100");
 
   const handleSelectPlan = async (planName: string) => {
     const plan = priceMap[planName];
@@ -126,10 +143,10 @@ export default function SubscriptionPage() {
         body: JSON.stringify({
           type: plan.type,
           priceId: plan.priceId,
-          userId: userId, // Replace with actual user ID
-          email: userEmail, // Replace with actual user email
+          userId: userId,
+          email: userEmail,
           metadata: plan.metadata,
-          productName: planName,
+          productName: plan.name,
         }),
       });
 
@@ -151,133 +168,206 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <Box px={[4, 8]} py={10} maxW="7xl" mx="auto">
-      {/* Heading */}
+    <Container maxW="7xl" py={10} px={{ base: 4, md: 8 }}>
+      {/* Back button */}
       <Button
         as={Link}
         href="/dashboard"
-        leftIcon={<ArrowLeft size={20} />}
+        leftIcon={<FaArrowLeft />}
         variant="ghost"
-        color={useColorModeValue("gray.800", "white")}
+        color={onSurfaceColor}
         size="md"
         borderRadius="full"
+        mb={8}
+        px={4}
         _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
-        _focus={{ boxShadow: "outline" }}
       >
         Back to Dashboard
       </Button>
-      <VStack spacing={2} textAlign="center" mb={10}>
-        <Heading as="h1" size="2xl" fontWeight="bold">
-          Invest in your career with{" "}
-          <Text as="span" color="blue.500">
+
+      {/* Hero section */}
+      <VStack spacing={4} textAlign="center" mb={12}>
+        <Heading
+          as="h1"
+          size={{ base: "2xl", md: "3xl" }}
+          fontWeight="bold"
+          color={onSurfaceColor}
+        >
+          Elevate your career with{" "}
+          <Text as="span" color={primaryColor}>
             Enhancy
           </Text>
         </Heading>
-        <Text fontSize="lg" color="gray.600">
-          One plan, endless possibilities
+        <Text fontSize={{ base: "lg", md: "xl" }} color="gray.500">
+          Choose the perfect plan for your professional growth
         </Text>
       </VStack>
 
       {/* Subscription Plans */}
-      <SimpleGrid columns={[1, 2, 3]} spacing={8}>
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={16}>
         {subscriptionPlans.map((plan, index) => (
-          <Box
+          <Card
             key={index}
-            bg={plan.highlighted ? "blue.50" : bgCard}
-            borderWidth={2}
-            borderColor={plan.highlighted ? "blue.400" : border}
+            bg={surfaceColor}
+            borderWidth={1}
+            borderColor={plan.highlighted ? primaryColor : "transparent"}
             borderRadius="2xl"
-            shadow={plan.highlighted ? "lg" : "base"}
-            p={6}
+            boxShadow={plan.highlighted ? "xl" : "md"}
             position="relative"
-            transition="all 0.2s ease"
-            _hover={{ shadow: "xl", transform: "translateY(-4px)" }}
+            transition="all 0.3s ease"
+            _hover={{
+              transform: "translateY(-8px)",
+              boxShadow: "2xl",
+            }}
+            overflow="hidden"
           >
             {plan.highlighted && (
-              <Badge colorScheme="blue" position="absolute" top={4} right={4}>
+              <Box
+                bg={primaryColor}
+                color="white"
+                px={4}
+                py={2}
+                textAlign="center"
+                fontWeight="bold"
+                fontSize="sm"
+                position="absolute"
+                top={0}
+                left={0}
+                right={0}
+              >
                 Most Popular
-              </Badge>
+              </Box>
             )}
-            <VStack align="stretch" spacing={5}>
-              <Box>
-                <Text fontSize="2xl" fontWeight="bold">
+
+            <CardHeader pt={plan.highlighted ? 12 : 6}>
+              <VStack spacing={1} align="flex-start">
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  color={plan.highlighted ? primaryColor : onSurfaceColor}
+                >
                   {plan.name}
                 </Text>
-                <Text fontSize="3xl" fontWeight="extrabold">
+                <Text
+                  fontSize="4xl"
+                  fontWeight="extrabold"
+                  color={onSurfaceColor}
+                >
                   {plan.price}
                 </Text>
-              </Box>
+              </VStack>
+            </CardHeader>
 
-              <Divider />
+            <Divider borderColor="gray.200" />
 
+            <CardBody>
               <List spacing={3}>
                 {plan.features.map((feature, i) => (
                   <ListItem key={i}>
-                    <HStack align="start">
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      <Text>{feature}</Text>
+                    <HStack align="flex-start">
+                      <ListIcon
+                        as={CheckCircleIcon}
+                        color={plan.highlighted ? primaryColor : "green.500"}
+                        mt={1}
+                      />
+                      <Text color={onSurfaceColor}>{feature}</Text>
                     </HStack>
                   </ListItem>
                 ))}
               </List>
+            </CardBody>
 
+            <CardFooter>
               <Button
                 colorScheme={plan.highlighted ? "blue" : "gray"}
                 size="lg"
-                mt={2}
+                w="full"
+                borderRadius="full"
                 onClick={() => handleSelectPlan(plan.name)}
+                variant={plan.highlighted ? "solid" : "outline"}
+                height="56px"
+                fontSize="lg"
+                fontWeight="semibold"
               >
                 {plan.cta}
               </Button>
-            </VStack>
-          </Box>
+            </CardFooter>
+          </Card>
         ))}
       </SimpleGrid>
 
       {/* Credit Packs */}
-      <Box mt={16} textAlign="center">
-        <Heading as="h2" size="lg" mb={4}>
-          Prefer pay-as-you-go?
+      <Box textAlign="center" mb={8}>
+        <Heading
+          as="h2"
+          size={{ base: "lg", md: "xl" }}
+          mb={4}
+          color={onSurfaceColor}
+        >
+          Need more flexibility?
         </Heading>
-        <Text fontSize="md" color="gray.600" mb={8}>
-          Buy credits and use them anytime to generate resumes, cover letters,
-          or quizzes.
+        <Text fontSize={{ base: "md", md: "lg" }} color="gray.500" mb={8}>
+          Purchase credit packs and use them whenever you need
         </Text>
 
-        <SimpleGrid columns={[1, 2, 3]} spacing={6} maxW="5xl" mx="auto">
+        <SimpleGrid
+          columns={{ base: 1, md: 3 }}
+          spacing={6}
+          maxW="6xl"
+          mx="auto"
+        >
           {creditPacks.map((pack, idx) => (
-            <Box
+            <Card
               key={idx}
-              borderWidth={1}
-              borderColor={border}
-              borderRadius="xl"
-              p={6}
-              shadow="sm"
-              bg={bgCard}
-              transition="all 0.2s ease"
-              _hover={{ shadow: "md", transform: "translateY(-2px)" }}
+              bg={surfaceColor}
+              borderRadius="2xl"
+              boxShadow="md"
+              transition="all 0.3s ease"
+              _hover={{
+                transform: "translateY(-4px)",
+                boxShadow: "lg",
+              }}
             >
-              <VStack spacing={4}>
-                <Icon as={FaBolt} boxSize={6} color="yellow.400" />
-                <Text fontSize="xl" fontWeight="bold">
-                  {pack.name}
-                </Text>
-                <Text fontSize="2xl" color="blue.500" fontWeight="extrabold">
-                  {pack.price}
-                </Text>
-                <Button
-                  variant="outline"
-                  colorScheme="blue"
-                  size="md"
-                  onClick={() => handleSelectPlan(pack.name)}
-                >
-                  {pack.cta}
-                </Button>
-              </VStack>
-            </Box>
+              <CardBody>
+                <VStack spacing={6} py={6}>
+                  <Flex
+                    align="center"
+                    justify="center"
+                    bg={secondaryContainer}
+                    color={onSecondaryContainer}
+                    w={16}
+                    h={16}
+                    borderRadius="full"
+                  >
+                    <Icon as={FaBolt} boxSize={6} />
+                  </Flex>
+                  <Text fontSize="xl" fontWeight="bold" color={onSurfaceColor}>
+                    {pack.name}
+                  </Text>
+                  <Text
+                    fontSize="3xl"
+                    color={primaryColor}
+                    fontWeight="extrabold"
+                  >
+                    {pack.price}
+                  </Text>
+                  <Button
+                    variant="outline"
+                    colorScheme="blue"
+                    size="md"
+                    w="full"
+                    borderRadius="full"
+                    onClick={() => handleSelectPlan(pack.name)}
+                    height="48px"
+                  >
+                    {pack.cta}
+                  </Button>
+                </VStack>
+              </CardBody>
+            </Card>
           ))}
         </SimpleGrid>
       </Box>
-    </Box>
+    </Container>
   );
 }

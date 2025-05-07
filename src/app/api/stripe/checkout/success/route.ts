@@ -40,16 +40,16 @@ export async function GET(req: NextRequest) {
       status: session.payment_status,
       paymentMethod: session.payment_method_types[0],
       purchasedAt: new Date(),
-      productName: session.metadata?.productName || "Unknown",
+      productPlan: session.metadata?.productName || "Unknown",
     };
 
     const existing = await Transaction.findOne({ stripeSessionId: session.id });
     if (!existing) {
       await Transaction.create(transactionData);
 
+      const productName = session.metadata?.productName || "Unknown";
       // Update user's credit count
       if (session.customer_email && session.metadata?.productName) {
-        const productName = session.metadata.productName;
         const credits = creditMap[productName as keyof typeof creditMap] || 0;
         await User.findOneAndUpdate(
           { email: session.customer_email },

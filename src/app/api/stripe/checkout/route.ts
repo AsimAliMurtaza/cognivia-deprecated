@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function POST(req: Request) {
   const { type, priceId, productName, userId, email, metadata = {} } = await req.json();
 
-  if (!type || !priceId || !userId || !email) {
+  if (!type || !priceId || !userId || !email || !productName) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           metadata: {
             userId,
             plan: metadata.plan,
-            productName: metadata.productName,
+            productName,
           },
         },
       }),
