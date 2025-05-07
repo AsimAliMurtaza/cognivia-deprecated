@@ -52,6 +52,8 @@ import {
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { uploadImage } from "@/lib/uploadImage";
+import { BiRocket } from "react-icons/bi";
+import { FaHistory } from "react-icons/fa";
 
 const MotionBox = motion(Box);
 const MotionCard = motion(Card);
@@ -79,7 +81,9 @@ export default function EditProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(
+    session?.user?.is2FAEnabled || false
+  );
   const [loading, setLoading] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(65);
   const [gender, setGender] = useState(session?.user?.gender);
@@ -106,6 +110,13 @@ export default function EditProfilePage() {
       }
     };
   }, [image]);
+
+  // Add this useEffect to sync with session changes
+  useEffect(() => {
+    if (session?.user?.is2FAEnabled !== undefined) {
+      setIs2FAEnabled(session.user.is2FAEnabled);
+    }
+  }, [session?.user?.is2FAEnabled]);
 
   if (status === "loading") {
     return (
@@ -264,6 +275,14 @@ export default function EditProfilePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onClickHandleSubscription = async () => {
+    router.push("/dashboard/pricing");
+  };
+
+  const onClickHandleSubscriptionHistory = async () => {
+    router.push("/dashboard/transactions");
   };
 
   // Handle password change
@@ -581,6 +600,38 @@ export default function EditProfilePage() {
                     onClick={onPasswordOpen}
                   >
                     Change Password
+                  </Button>
+                </HStack>
+
+                <HStack justify="space-between">
+                  <Box>
+                    <Text fontWeight="medium" color={textColor}>
+                      Upgrade Subscription
+                    </Text>
+                  </Box>
+                  <Button
+                    leftIcon={<BiRocket />}
+                    variant="outline"
+                    colorScheme={colorSchemeColor}
+                    onClick={onClickHandleSubscription}
+                  >
+                    Upgrade
+                  </Button>
+                </HStack>
+
+                <HStack justify="space-between">
+                  <Box>
+                    <Text fontWeight="medium" color={textColor}>
+                      View Subscriptions History
+                    </Text>
+                  </Box>
+                  <Button
+                    leftIcon={<FaHistory />}
+                    variant="outline"
+                    colorScheme={colorSchemeColor}
+                    onClick={onClickHandleSubscriptionHistory}
+                  >
+                    View
                   </Button>
                 </HStack>
               </VStack>

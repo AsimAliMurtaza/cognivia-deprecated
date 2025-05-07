@@ -20,6 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { CheckCircleIcon } from "@chakra-ui/icons";
 import { FaBolt } from "react-icons/fa";
+import { useSession } from "next-auth/react";
 import { ArrowLeft } from "lucide-react";
 
 const subscriptionPlans = [
@@ -63,19 +64,90 @@ const creditPacks = [
   { name: "1000 Credits", price: "$35", cta: "Buy 1000 Credits" },
 ];
 
+const priceMap: Record<
+  string,
+  { priceId: string; type: "subscription" | "credit_pack"; metadata?: Record<string, string | number> }
+> = {
+  Basic: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID!,
+    type: "subscription",
+    metadata: { plan: "Basic" },
+  },
+  Pro: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!,
+    type: "subscription",
+    metadata: { plan: "Pro" },
+  },
+  Premium: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID!,
+    type: "subscription",
+    metadata: { plan: "Premium" },
+  },
+
+  "100 Credits": {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_100_CREDITS_PRICE_ID!,
+    type: "credit_pack",
+    metadata: { credits: 100 },
+  },
+  "500 Credits": {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_500_CREDITS_PRICE_ID!,
+    type: "credit_pack",
+    metadata: { credits: 500 },
+  },
+  "1000 Credits": {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_1000_CREDITS_PRICE_ID!,
+    type: "credit_pack",
+    metadata: { credits: 1000 },
+  },
+};
+
 export default function SubscriptionPage() {
   const toast = useToast();
   const bgCard = useColorModeValue("white", "gray.800");
   const border = useColorModeValue("gray.200", "gray.700");
+  const { data: session } = useSession();
+  // Then use session.user.id and session.user.email
+    // to get the user ID and email from the session.
+    const userId = session?.user?.id;
+    const userEmail = session?.user?.email;
+    
 
-  const handleSelectPlan = (planName: string) => {
-    toast({
-      title: `Selected ${planName}`,
-      status: "info",
-      duration: 2000,
-    });
+  const handleSelectPlan = async (planName: string) => {
+    const plan = priceMap[planName];
+    if (!plan) {
+      toast({ title: "Invalid plan", status: "error", duration: 2000 });
+      return;
+    }
 
-    // TODO: integrate payment gateway call or redirect
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: plan.type,
+          priceId: plan.priceId,
+          userId: userId, // Replace with actual user ID
+          email: userEmail, // Replace with actual user email
+          metadata: plan.metadata,
+          productName: planName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Checkout session failed");
+      }
+    } catch (err) {
+      toast({
+        title: "Error initiating checkout",
+        status: "error",
+        duration: 3000,
+      });
+      console.error(err);
+    }
   };
 
   return (

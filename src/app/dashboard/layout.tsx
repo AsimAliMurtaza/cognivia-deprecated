@@ -35,6 +35,7 @@ import {
   BiMenu,
   BiUser,
   BiLogOut,
+  BiRocket,
 } from "react-icons/bi";
 import {
   FiBarChart2,
@@ -169,7 +170,21 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       <Divider borderColor={dividerColor} />
 
       {/* Profile Section */}
-      <Box w="full" pt={2}>
+      <Box w="full" pt={2} alignItems="center">
+        {/* Upgrade Button */}
+        <Button
+          w="full"
+          variant="ghost"
+          borderRadius="full"
+          leftIcon={!collapsed ? <BiRocket /> : undefined}
+          justifyContent={collapsed ? "center" : "flex-start"}
+          onClick={() => router.push("/dashboard/pricing")}
+          px={collapsed ? 0 : 4}
+          py={collapsed ? 2 : 2}
+        >
+          {!collapsed ? "Upgrade" : <BiRocket size={20} />}
+        </Button>
+
         <Menu>
           <Tooltip
             label={!isMobile && collapsed ? "Profile" : ""}
@@ -179,7 +194,10 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <MenuButton
               as={Button}
               variant="ghost"
+              borderRadius="full"
               w="full"
+              px={collapsed ? 7 : 4}
+              py={2}
               justifyContent={!isMobile && collapsed ? "center" : "flex-start"}
               leftIcon={
                 !isMobile && collapsed ? (
@@ -192,18 +210,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                   <BiUser size={20} />
                 )
               }
-              rightIcon={!isMobile && !collapsed ? undefined : undefined}
               _hover={{ bg: hoverBg }}
             >
-              {!isMobile && !collapsed && (
-                <Flex direction="column" align="flex-start">
-                  <Text fontWeight="medium">{session.user?.name}</Text>
-                  <Text fontSize="sm" color="gray.500">
-                    {session.user?.email}
-                  </Text>
-                </Flex>
-              )}
-              {isMobile && (
+              {!collapsed && (
                 <Flex direction="column" align="flex-start">
                   <Text fontWeight="medium">{session.user?.name}</Text>
                   <Text fontSize="sm" color="gray.500">
@@ -213,6 +222,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               )}
             </MenuButton>
           </Tooltip>
+
           <MenuList>
             <MenuItem
               icon={<BiUser />}

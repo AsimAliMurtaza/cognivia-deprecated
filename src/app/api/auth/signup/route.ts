@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     await newUser.save();
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXTAUTH_URL;
     const verifyLink = `${baseUrl}/verify-email?token=${verificationToken}`;
 
     await sendVerificationEmail(email, verifyLink);
