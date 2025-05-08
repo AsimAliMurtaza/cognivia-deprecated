@@ -14,18 +14,12 @@ import CTASection from "@/components/sections/CTASection";
 export default function LandingPage() {
   const controls = useAnimation();
 
-  // Scroll-based gradient animation
-
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);
 
   return (
-    <Box
-      bg="white"
-      position="relative"
-      overflow="hidden"
-    >
+    <Box bg="white" position="relative" overflow="hidden">
       <Header />
       {/* Hero Section */}
       <HeroSection />

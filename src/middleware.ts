@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // Get IP address (supporting proxies)
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.ip ||
@@ -17,7 +16,6 @@ export async function middleware(req: NextRequest) {
   const isDashboardRoute = req.nextUrl.pathname.startsWith("/dashboard");
   const isUserDashboard = isDashboardRoute && !isAdminRoute;
 
-  // Block all dashboard access if not logged in
   if (!token && isDashboardRoute) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -26,7 +24,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 🔒 Block user dashboard for admins
   if (isUserDashboard && token?.role === "admin") {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }

@@ -32,7 +32,7 @@ import {
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { DeleteIcon, ViewIcon } from "@chakra-ui/icons"; // Using ViewIcon for reveal
+import { DeleteIcon, ViewIcon } from "@chakra-ui/icons"; 
 
 interface Quiz {
   _id: string;
@@ -64,12 +64,12 @@ export default function ManageQuizzesPage() {
   const [quizToDeleteId, setQuizToDeleteId] = useState<string | null>(null);
   const toast = useToast();
 
-  const bg = useColorModeValue("gray.50", "gray.900"); // Lighter background
+  const bg = useColorModeValue("gray.50", "gray.900"); 
   const cardBg = useColorModeValue("white", "gray.800");
-  const textColor = useColorModeValue("gray.800", "gray.200"); // Darker text for better contrast
-  const headingColor = useColorModeValue("teal.700", "blue.300"); // Accent color for headings
+  const textColor = useColorModeValue("gray.800", "gray.200");
+  const headingColor = useColorModeValue("teal.700", "blue.300"); 
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const boxShadow = useColorModeValue("md", "md-dark"); // Subtle shadow
+  const boxShadow = useColorModeValue("md", "md-dark");
   const cardColor = useColorModeValue("lg", "lg-dark");
   const boxColor = useColorModeValue("white", "gray.700");
 

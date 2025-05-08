@@ -102,7 +102,10 @@ export default function PerformancePage() {
                     <Text fontWeight="medium" mb={1}>
                       {t.topic}
                     </Text>
-                    <Progress value={(t.count / performanceData.totalQuizzes) * 100} colorScheme="teal" />
+                    <Progress
+                      value={(t.count / performanceData.totalQuizzes) * 100}
+                      colorScheme="teal"
+                    />
                   </Box>
                 ))}
               </VStack>

@@ -19,10 +19,9 @@ const NoteSchema = new Schema<INote>(
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
-  { timestamps: true, collection: "generated_notes" } // Specify the collection name here
+  { timestamps: true, collection: "generated_notes" }
 );
 
-// Use models cache to avoid recompilation on hot reload
 const Note = models.GeneratedNote || model<INote>("GeneratedNote", NoteSchema);
 
 export default Note;

@@ -20,7 +20,6 @@ const MotionBox = motion(Box);
 export default function SignInErrorPage() {
   const router = useRouter();
 
-  // Material You inspired colors with teal/blue theming
   const cardBg = useColorModeValue("white", "gray.800");
   const errorColor = useColorModeValue("red.500", "red.300");
   const textColor = useColorModeValue("gray.700", "gray.200");
@@ -75,8 +74,8 @@ export default function SignInErrorPage() {
             </Heading>
 
             <Text fontSize="md" color={secondaryText} lineHeight="tall">
-              Oops! We couldn&apos;t sign you in. Please check your credentials and
-              try again.
+              Oops! We couldn&apos;t sign you in. Please check your credentials
+              and try again.
             </Text>
 
             <VStack spacing={4} w="full" pt={4}>

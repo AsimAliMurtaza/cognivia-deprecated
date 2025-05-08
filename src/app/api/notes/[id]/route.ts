@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Note from "@/models/Note";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"; // Assuming your auth options are here
+import { authOptions } from "@/app/api/auth/[...nextauth]/options"; 
 
 export async function DELETE(
   req: NextRequest,

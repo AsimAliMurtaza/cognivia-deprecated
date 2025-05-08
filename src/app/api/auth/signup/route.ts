@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import crypto from "crypto";
-import {sendVerificationEmail} from "@/lib/mailer";
+import { sendVerificationEmail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     await newUser.save();
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXTAUTH_URL;
     const verifyLink = `${baseUrl}/verify-email?token=${verificationToken}`;
 
     await sendVerificationEmail(email, verifyLink);

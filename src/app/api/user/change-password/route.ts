@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"; // Adjust path as needed
-import dbConnect from "@/lib/mongodb"; // Your MongoDB connection function
+import { authOptions } from "@/app/api/auth/[...nextauth]/options"; 
+import dbConnect from "@/lib/mongodb"; 
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 

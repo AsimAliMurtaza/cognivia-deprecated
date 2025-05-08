@@ -1,6 +1,6 @@
 // app/api/generate-quiz/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { generateGeminiContent } from "@/lib/gemini"; // Assuming your gemini.ts is in the lib directory
+import { generateGeminiContent } from "@/lib/gemini"; 
 import dbConnect from "@/lib/mongodb";
 import Quiz from "@/models/Quiz";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -14,7 +14,7 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-// 5 requests per 10 seconds per IP
+// 5 requests per 60 seconds per IP
 const ratelimit = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(5, "60 s"),
@@ -66,7 +66,7 @@ async function formatQuiz(geminiOutput: string): Promise<{
             options.push(currentOptions);
           }
           questionCounter = parseInt(questionMatch[1]);
-          console.log("Question Counter:", questionCounter); // Debugging line
+          console.log("Question Counter:", questionCounter); 
           currentQuestion = questionMatch[2].trim();
           currentOptions = [];
         } else if (currentQuestion) {
@@ -101,7 +101,7 @@ async function formatQuiz(geminiOutput: string): Promise<{
             answerMatchLetterOnly[1].toUpperCase();
         } else if (answerMatchLetterColonValue) {
           const letter = answerMatchLetterColonValue[1].toUpperCase();
-          console.log("Letter:", letter); // Debugging line
+          console.log("Letter:", letter); 
           const value = answerMatchLetterColonValue[2].trim().toUpperCase();
           // Try to infer the question number based on the order
           if (
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Get token from Authorization header
     const authHeader = req.headers.get("authorization");
-    const token = authHeader?.split(" ")[1]; // "Bearer <token>" → "<token>"
+    const token = authHeader?.split(" ")[1]; 
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { prompt, userID } = await req.json(); // Expect userId in the request body
+    const { prompt, userID } = await req.json(); 
     const user_id = userID;
 
     if (!prompt || !user_id) {
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
 
     if (geminiOutput) {
       const formattedQuiz = await formatQuiz(geminiOutput);
-      await dbConnect(); // Connect to MongoDB
+      await dbConnect();
 
       const newQuiz = new Quiz({
         _id: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate a unique _id
@@ -224,12 +224,12 @@ export async function POST(req: NextRequest) {
         answers: formattedQuiz?.answers,
       });
 
-      console.log("quiz ID:", newQuiz._id); // Log for debugging
+      console.log("quiz ID:", newQuiz._id); 
 
       const savedQuiz = await newQuiz.save();
       console.log(savedQuiz);
 
-      console.log("Formatted Quiz:", formattedQuiz); // Log for debugging
+      console.log("Formatted Quiz:", formattedQuiz);
 
       if (formattedQuiz) {
         const creditsRes = await fetch(
@@ -258,7 +258,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             message: "Quiz generated and saved successfully!",
-            quizId: newQuiz._id, // Optionally return the ID
+            quizId: newQuiz._id,
             generated_quiz: geminiOutput,
             questions: formattedQuiz.questions,
             options: formattedQuiz.options,

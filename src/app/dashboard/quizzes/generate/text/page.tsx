@@ -44,7 +44,6 @@ const TextQuizGeneration = () => {
   const router = useRouter();
   const { data: session } = useSession();
 
-  // 🎨 Material You inspired colors with teal/blue theming
   const bg = useColorModeValue("gray.50", "gray.900");
   const surface = useColorModeValue("white", "gray.800");
   const primary = useColorModeValue("teal.600", "blue.400");

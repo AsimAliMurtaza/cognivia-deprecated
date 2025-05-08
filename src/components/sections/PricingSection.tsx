@@ -129,11 +129,7 @@ export default function PricingSection() {
                   >
                     <CardHeader pb={0}>
                       <VStack spacing={1}>
-                        <Heading
-                          as="h3"
-                          size="lg"
-                          color={planColorScheme}
-                        >
+                        <Heading as="h3" size="lg" color={planColorScheme}>
                           {plan.name}
                         </Heading>
                         <Box>
@@ -163,10 +159,7 @@ export default function PricingSection() {
                             alignItems="center"
                             gap={2}
                           >
-                            <Box
-                              as="span"
-                              color={anotherPlanColorScheme}
-                            >
+                            <Box as="span" color={anotherPlanColorScheme}>
                               ✓
                             </Box>
                             {feature}

@@ -8,28 +8,28 @@ export async function POST(req: NextRequest) {
     await dbConnect();
     const { userID } = await req.json();
 
-    const results = await QuizResultModel.find({ userID }).sort({ createdAt: -1 });
+    const results = await QuizResultModel.find({ userID }).sort({
+      createdAt: -1,
+    });
 
     const totalQuizzes = results.length;
 
     const averageScore =
       totalQuizzes > 0
         ? Math.round(
-            results.reduce((acc, r) => acc + (r.percentage || 0), 0) / totalQuizzes
+            results.reduce((acc, r) => acc + (r.percentage || 0), 0) /
+              totalQuizzes
           )
         : 0;
 
-    // Fetch related quizzes for topics
     const quizIDs = results.map((r) => r.quizID);
     const quizzes = await QuizModel.find({ _id: { $in: quizIDs } });
 
-    // Create a map of quizID -> topic
     const quizTopicMap = new Map();
     quizzes.forEach((quiz) => {
       quizTopicMap.set(quiz._id.toString(), quiz.topic || "Unknown");
     });
 
-    // Count topics based on quiz results
     const topicFrequency: Record<string, number> = {};
     results.forEach((r) => {
       const topic = quizTopicMap.get(r.quizID?.toString()) || "Unknown";
