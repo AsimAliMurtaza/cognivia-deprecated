@@ -2,8 +2,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface IQuiz extends Document {
-  _id: string; // This is the unique identifier for the quiz, typically a string.
-  userID: string; // Changed from userID to userId to match the POST request. Consistency is key.
+  _id: string;
+  userID: string;
   topic: string;
   questions: string[];
   options: string[][];
@@ -12,8 +12,8 @@ interface IQuiz extends Document {
 }
 
 const QuizSchema: Schema = new Schema({
-  _id: { type: String, required: true }, // This is the unique identifier for the quiz, typically a string.
-  userID: { type: String, required: true }, // Changed from userID to userId
+  _id: { type: String, required: true },
+  userID: { type: String, required: true },
   topic: { type: String, required: true },
   questions: { type: [String], required: true },
   options: { type: [[String]], required: true },

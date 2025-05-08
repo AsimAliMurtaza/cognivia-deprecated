@@ -153,23 +153,6 @@ export default function SmartNotesGenerator() {
     }
   };
 
-
-  // const handleChatClick = (chat: {
-  //   sourceType: string | null;
-  //   content: string;
-  //   date: string;
-  // }) => {
-  //   setGeneratedNotes(chat.content);
-  // };
-
-  // const handleDeleteChat = (index: number) => {
-  //   const updatedHistory = chatHistory.filter((_, i) => i !== index);
-  //   setChatHistory(updatedHistory);
-  //   if (generatedNotes === chatHistory[index].content) {
-  //     setGeneratedNotes("");
-  //   }
-  // };
-
   const handleCopyNotes = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({

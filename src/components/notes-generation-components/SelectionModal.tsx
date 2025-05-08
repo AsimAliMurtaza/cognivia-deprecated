@@ -89,7 +89,9 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
             {options.map(({ type, label, description, icon }) => (
               <GridItem key={type}>
                 <MotionCard
-                  onClick={() => onOptionSelect(type as "prompt" | "youtube" | "file")}
+                  onClick={() =>
+                    onOptionSelect(type as "prompt" | "youtube" | "file")
+                  }
                   cursor="pointer"
                   borderRadius="xl"
                   boxShadow="sm"
@@ -122,12 +124,7 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
         </ModalBody>
         <Divider borderColor={borderColor} />
         <ModalFooter>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            borderRadius="lg"
-            px={6}
-          >
+          <Button variant="outline" onClick={onClose} borderRadius="lg" px={6}>
             Cancel
           </Button>
         </ModalFooter>

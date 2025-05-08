@@ -15,7 +15,6 @@ import {
   IconButton,
   useToast,
   VStack,
-
 } from "@chakra-ui/react";
 import { FiArrowLeft, FiMoon, FiBell, FiMail } from "react-icons/fi";
 
@@ -25,7 +24,6 @@ export default function AppSettingsPage() {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  // App settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailAlertsEnabled, setEmailAlertsEnabled] = useState(true);
 
@@ -35,13 +33,10 @@ export default function AppSettingsPage() {
   const primaryColor = "#6EC3C4";
   const hoverBg = useColorModeValue("#E0F7FA", "gray.700");
 
-  // Fetch initial settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 500));
-        // Set initial values from API response
         setNotificationsEnabled(true);
         setEmailAlertsEnabled(true);
       } catch (err) {
@@ -62,7 +57,6 @@ export default function AppSettingsPage() {
   const saveSettings = async () => {
     try {
       setLoading(true);
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       toast({
@@ -86,12 +80,7 @@ export default function AppSettingsPage() {
 
   return (
     <Container maxW="container.xl" py={6}>
-      <Box
-        p={6}
-        bg={bg}
-        w="100%"
-        textAlign="center"
-      >
+      <Box p={6} bg={bg} w="100%" textAlign="center">
         {/* Header */}
         <HStack w="full" justify="space-between" mb={4}>
           <IconButton

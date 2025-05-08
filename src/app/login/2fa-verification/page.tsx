@@ -19,16 +19,13 @@ import { signIn } from "next-auth/react";
 function TwoFAVerificationContent() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  // const [resendLoading, setResendLoading] = useState(false);
   const toast = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  // Color mode values
   const bgColor = useColorModeValue("white", "gray.900");
-
   const textColor = useColorModeValue("gray.700", "gray.200");
   const headingColor = useColorModeValue("teal.500", "blue.300");
   const inputBg = useColorModeValue("gray.100", "gray.700");
@@ -36,42 +33,6 @@ function TwoFAVerificationContent() {
   const buttonBg = useColorModeValue("teal.500", "blue.400");
   const buttonHoverBg = useColorModeValue("teal.600", "blue.500");
   const linkColor = useColorModeValue("teal.500", "blue.400");
-
-  // const handleResendOTP = async () => {
-  //   if (!email) {
-  //     toast({ title: "Session expired", status: "error" });
-  //     router.push("/login");
-  //     return;
-  //   }
-
-  //   setResendLoading(true);
-  //   try {
-  //     const res = await fetch("/api/auth/2fa/resend", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ email }),
-  //     });
-
-  //     if (!res.ok) {
-  //       throw new Error("Failed to resend OTP");
-  //     }
-
-  //     toast({
-  //       title: "OTP resent",
-  //       description: "A new OTP has been sent to your email",
-  //       status: "success",
-  //     });
-  //   } catch (error) {
-  //     toast({
-  //       title: "Error",
-  //       description:
-  //         error instanceof Error ? error.message : "Failed to resend OTP",
-  //       status: "error",
-  //     });
-  //   } finally {
-  //     setResendLoading(false);
-  //   }
-  // };
 
   const handleVerify = async () => {
     if (!email) {

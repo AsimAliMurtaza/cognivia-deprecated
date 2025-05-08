@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
   const user = await User.findOne({
     unblockToken: token,
-    unblockTokenExpires: { $gt: Date.now() }, // not expired
+    unblockTokenExpires: { $gt: Date.now() },
   });
 
   if (!user) {

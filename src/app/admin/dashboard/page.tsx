@@ -114,9 +114,9 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update role");
 
-      console.log("✅ Role updated:", data.user);
+      console.log("Role updated:", data.user);
     } catch (error) {
-      console.error("❌ Error updating role:", error);
+      console.error("Error updating role:", error);
     }
   };
 
@@ -154,10 +154,8 @@ export default function AdminDashboard() {
         throw new Error(errorData.error || "Failed to delete user");
       }
 
-      // Optimistically update the UI
       setUsers(users.filter((u) => u._id !== selectedUser._id));
 
-      // Show success message
       toast({
         title: "User deleted",
         description: `${selectedUser.name} has been removed`,
@@ -374,7 +372,6 @@ export default function AdminDashboard() {
                           colorScheme="red"
                           leftIcon={<FiTrash2 />}
                           onClick={() => {
-                            // Make sure we have a valid user object
                             if (user?._id) {
                               setSelectedUser(user);
                               onOpen();
