@@ -42,7 +42,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
   onOpenChat,
   onDeleteChat,
 }) => {
-  const surfaceColor = useColorModeValue("white", "gray.800");
+  const surfaceColor = useColorModeValue("gray.50", "gray.900");
   const hoverBg = useColorModeValue("gray.100", "gray.700");
   const activeBg = useColorModeValue("teal.50", "blue.900");
   const textColor = useColorModeValue("gray.800", "gray.200");
@@ -53,7 +53,6 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
 
   return (
     <VStack
-      borderRadius="xl"
       spacing={4}
       p={4}
       h="90vh"
@@ -96,8 +95,8 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Flex
-                p={3}
-                borderRadius="lg"
+                p={2}
+                borderRadius="full"
                 align="center"
                 justify="space-between"
                 cursor="pointer"

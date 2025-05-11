@@ -15,8 +15,12 @@ import {
   IconButton,
   useToast,
   VStack,
+  Select,
+  FormControl,
+  FormLabel,
+  useToken,
 } from "@chakra-ui/react";
-import { FiArrowLeft, FiMoon, FiBell, FiMail } from "react-icons/fi";
+import { FiArrowLeft, FiMoon, FiBell, FiMail, FiGlobe } from "react-icons/fi";
 
 export default function AppSettingsPage() {
   const router = useRouter();
@@ -26,12 +30,23 @@ export default function AppSettingsPage() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailAlertsEnabled, setEmailAlertsEnabled] = useState(true);
+  const [language, setLanguage] = useState("en");
 
-  const bg = useColorModeValue("gray.50", "gray.800");
-  const textColor = useColorModeValue("gray.700", "gray.200");
-  const borderColor = useColorModeValue("gray.300", "gray.600");
-  const primaryColor = "#6EC3C4";
-  const hoverBg = useColorModeValue("#E0F7FA", "gray.700");
+  // Get Material You colors from theme
+  const [primary, primaryDark] = useToken("colors", ["teal.400", "blue.500"]);
+  const [surface, surfaceDark] = useToken("colors", ["white", "gray.900"]);
+  const [onSurface, onSurfaceDark] = useToken("colors", ["gray.900", "white"]);
+  const [surfaceVariant, surfaceVariantDark] = useToken("colors", [
+    "gray.100",
+    "gray.700",
+  ]);
+
+  // Dynamic colors based on theme
+  const bg = useColorModeValue(surface, surfaceDark);
+  const textColor = useColorModeValue(onSurface, onSurfaceDark);
+  const cardBg = useColorModeValue(surfaceVariant, surfaceVariantDark);
+  const primaryColor = useColorModeValue(primary, primaryDark);
+  const hoverBg = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -39,6 +54,8 @@ export default function AppSettingsPage() {
         await new Promise((resolve) => setTimeout(resolve, 500));
         setNotificationsEnabled(true);
         setEmailAlertsEnabled(true);
+        // Set language from localStorage or default
+        setLanguage(localStorage.getItem("language") || "en");
       } catch (err) {
         console.error("Error fetching settings:", err);
         toast({
@@ -59,6 +76,9 @@ export default function AppSettingsPage() {
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // Save language preference
+      localStorage.setItem("language", language);
+      
       toast({
         title: "Settings saved successfully",
         status: "success",
@@ -78,99 +98,183 @@ export default function AppSettingsPage() {
     }
   };
 
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value);
+  };
+
   return (
-    <Container maxW="container.xl" py={6}>
-      <Box p={6} bg={bg} w="100%" textAlign="center">
+    <Container maxW="100vw" py={6}>
+      <Box
+        p={6}
+        bg={bg}
+        borderRadius="xl"
+        boxShadow={useColorModeValue("sm", "dark-lg")}
+      >
         {/* Header */}
-        <HStack w="full" justify="space-between" mb={4}>
+        <HStack w="full" justify="space-between" mb={8}>
           <IconButton
             aria-label="Back"
             icon={<FiArrowLeft />}
             onClick={() => router.back()}
             variant="ghost"
             color={textColor}
+            borderRadius="full"
             _hover={{ bg: hoverBg }}
           />
+          <Text fontSize="xl" fontWeight="bold" color={textColor}>
+            Settings
+          </Text>
+          <Box w={10} /> {/* Spacer for alignment */}
         </HStack>
+
+        {/* Language Section */}
+        <VStack align="stretch" spacing={4} mb={6}>
+          <Text
+            fontSize="md"
+            fontWeight="semibold"
+            textAlign="left"
+            color={textColor}
+            opacity={0.8}
+          >
+            Language & Region
+          </Text>
+          <Box
+            p={4}
+            bg={cardBg}
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor="transparent"
+            _hover={{ borderColor: useColorModeValue("gray.200", "gray.600") }}
+          >
+            <FormControl>
+              <HStack justify="space-between">
+                <HStack>
+                  <FiGlobe />
+                  <FormLabel mb={0}>Language</FormLabel>
+                </HStack>
+                <Select
+                  value={language}
+                  onChange={handleLanguageChange}
+                  variant="filled"
+                  size="sm"
+                  width="150px"
+                  bg={useColorModeValue("white", "gray.700")}
+                >
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="de">Deutsch</option>
+                  <option value="ja">日本語</option>
+                </Select>
+              </HStack>
+            </FormControl>
+          </Box>
+        </VStack>
+
+        <Divider my={4} borderColor={useColorModeValue("gray.200", "gray.600")} />
 
         {/* Appearance Section */}
         <VStack align="stretch" spacing={4} mb={6}>
           <Text
-            fontSize="lg"
-            fontWeight="bold"
+            fontSize="md"
+            fontWeight="semibold"
             textAlign="left"
             color={textColor}
+            opacity={0.8}
           >
             Appearance
           </Text>
-
-          {/* Dark Mode Toggle */}
-          <HStack justify="space-between">
-            <HStack>
-              <FiMoon />
-              <Text>Dark Mode</Text>
+          <Box
+            p={4}
+            bg={cardBg}
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor="transparent"
+            _hover={{ borderColor: useColorModeValue("gray.200", "gray.600") }}
+          >
+            <HStack justify="space-between">
+              <HStack>
+                <FiMoon />
+                <Text>Dark Mode</Text>
+              </HStack>
+              <Switch
+                size="lg"
+                colorScheme="teal"
+                isChecked={colorMode === "dark"}
+                onChange={toggleColorMode}
+              />
             </HStack>
-            <Switch
-              size="lg"
-              colorScheme="teal"
-              isChecked={colorMode === "dark"}
-              onChange={toggleColorMode}
-            />
-          </HStack>
+          </Box>
         </VStack>
 
-        <Divider my={4} borderColor={borderColor} />
+        <Divider my={4} borderColor={useColorModeValue("gray.200", "gray.600")} />
 
         {/* Notifications Section */}
         <VStack align="stretch" spacing={4} mb={6}>
           <Text
-            fontSize="lg"
-            fontWeight="bold"
+            fontSize="md"
+            fontWeight="semibold"
             textAlign="left"
             color={textColor}
+            opacity={0.8}
           >
             Notifications
           </Text>
-
-          {/* In-App Notifications */}
-          <HStack justify="space-between">
-            <HStack>
-              <FiBell />
-              <Text>In-App Notifications</Text>
-            </HStack>
-            <Switch
-              size="lg"
-              colorScheme="teal"
-              isChecked={notificationsEnabled}
-              onChange={() => setNotificationsEnabled(!notificationsEnabled)}
-            />
-          </HStack>
-
-          {/* Email Alerts */}
-          <HStack justify="space-between">
-            <HStack>
-              <FiMail />
-              <Text>Email Alerts</Text>
-            </HStack>
-            <Switch
-              size="lg"
-              colorScheme="teal"
-              isChecked={emailAlertsEnabled}
-              onChange={() => setEmailAlertsEnabled(!emailAlertsEnabled)}
-            />
-          </HStack>
+          <Box
+            p={4}
+            bg={cardBg}
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor="transparent"
+            _hover={{ borderColor: useColorModeValue("gray.200", "gray.600") }}
+          >
+            <VStack align="stretch" spacing={4}>
+              <HStack justify="space-between">
+                <HStack>
+                  <FiBell />
+                  <Text>In-App Notifications</Text>
+                </HStack>
+                <Switch
+                  size="lg"
+                  colorScheme="teal"
+                  isChecked={notificationsEnabled}
+                  onChange={() => setNotificationsEnabled(!notificationsEnabled)}
+                />
+              </HStack>
+              <HStack justify="space-between">
+                <HStack>
+                  <FiMail />
+                  <Text>Email Alerts</Text>
+                </HStack>
+                <Switch
+                  size="lg"
+                  colorScheme="teal"
+                  isChecked={emailAlertsEnabled}
+                  onChange={() => setEmailAlertsEnabled(!emailAlertsEnabled)}
+                />
+              </HStack>
+            </VStack>
+          </Box>
         </VStack>
-
-        <Divider my={4} borderColor={borderColor} />
 
         {/* Save Button */}
         <Button
           bg={primaryColor}
           color="white"
           w="full"
-          mt={4}
-          _hover={{ bg: "#5AA8A9", transform: "scale(1.05)" }}
-          transition="all 0.2s"
+          mt={8}
+          size="lg"
+          borderRadius="full"
+          _hover={{ 
+            bg: useColorModeValue("teal.500", "teal.400"),
+            transform: "translateY(-2px)",
+            boxShadow: "md"
+          }}
+          _active={{
+            transform: "translateY(0)",
+            boxShadow: "none"
+          }}
+          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
           onClick={saveSettings}
           isLoading={loading}
           loadingText="Saving..."

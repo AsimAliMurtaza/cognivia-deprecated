@@ -34,7 +34,7 @@ const subscriptionPlans = [
     features: [
       "200 Credits",
       "20 Quizzes",
-      "50 Requests Per Day for Cognitive AI",
+      "50 Requests Per Day for Cognivia AI",
     ],
     cta: "Get Started",
   },
@@ -44,7 +44,7 @@ const subscriptionPlans = [
     features: [
       "400 Credits",
       "40 Quizzes",
-      "100 Requests Per Day for Cognitive AI",
+      "100 Requests Per Day for Cognivia AI",
     ],
     highlighted: true,
     cta: "Continue to Billing Details",
@@ -56,7 +56,7 @@ const subscriptionPlans = [
       "All Pro Features",
       "700 Credits",
       "70 Quizzes",
-      "Unlimited Requests Per Day for Cognitive AI",
+      "Unlimited Requests Per Day for Cognivia AI",
     ],
     cta: "Get Premium",
   },

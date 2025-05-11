@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Flex,
@@ -10,11 +10,16 @@ import {
   Button,
   useColorModeValue,
   Divider,
+  Badge,
+  Icon,
+  Spinner,
 } from "@chakra-ui/react";
+import { Coins } from "lucide-react";
 import NotesDisplay from "@/components/notes-generation-components/NotesDisplay";
 import SelectionModal from "@/components/notes-generation-components/SelectionModal";
 import InputModal from "@/components/notes-generation-components/InputModal";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function SmartNotesGenerator() {
   const [promptText, setPromptText] = useState("");
@@ -25,6 +30,8 @@ export default function SmartNotesGenerator() {
     { sourceType: string | null; content: string; date: string }[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(true);
   const [sourceType, setSourceType] = useState<
     "prompt" | "youtube" | "file" | null
   >(null);
@@ -37,9 +44,47 @@ export default function SmartNotesGenerator() {
   } = useDisclosure();
   const toast = useToast();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const primaryColor = useColorModeValue("teal.500", "blue.400");
   const buttonColor = useColorModeValue("teal", "blue");
+  const badgeBg = useColorModeValue("teal.100", "teal.800");
+  const badgeColor = useColorModeValue("teal.800", "teal.100");
+
+  const fetchCredits = async () => {
+    try {
+      if (!session?.user?.id) return;
+
+      setCreditsLoading(true);
+      const response = await fetch("/api/credits/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: session.user.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch credits");
+      }
+
+      const data = await response.json();
+      setCredits(data.credits);
+    } catch (error) {
+      console.error("Error fetching credits:", error);
+      toast({
+        title: "Error",
+        description: "Could not load credits information",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setCreditsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredits();
+  }, [session?.user?.id]);
 
   const handleOptionSelect = (type: "prompt" | "youtube" | "file") => {
     setSourceType(type);
@@ -48,6 +93,18 @@ export default function SmartNotesGenerator() {
   };
 
   const handleGenerateNotes = async () => {
+    // Check if user has enough credits (assuming 10 credits per note generation)
+    if (credits !== null && credits < 10) {
+      toast({
+        title: "Insufficient credits",
+        description: "You need at least 10 credits to generate notes",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setLoading(true);
     let notes = "";
     let finalPrompt = "";
@@ -61,7 +118,6 @@ export default function SmartNotesGenerator() {
         break;
       case "file":
         finalPrompt = `Generate Detailed Notes on the following topic: based on the content of this file: ${file?.name}`;
-        // In a real application, you'd likely need to upload and process the file content on the server.
         break;
       default:
         toast({
@@ -77,15 +133,28 @@ export default function SmartNotesGenerator() {
     }
 
     try {
-      const responseData = await fetch("/api/gemini", {
+      const response = await fetch("/api/generate-note", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.user?.accessToken}`,
         },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      }).then((res) => res.json());
+        body: JSON.stringify({
+          prompt: finalPrompt,
+          user_id: session?.user?.id,
+        }),
+      });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 402 && errorData.redirectToPricing) {
+          router.push("/dashboard/pricing");
+          return;
+        }
+        throw new Error(errorData?.error || "Failed to generate notes");
+      }
+
+      const responseData = await response.json();
       notes = responseData?.response || "No notes generated.";
       setGeneratedNotes(notes);
       setChatHistory([
@@ -97,6 +166,12 @@ export default function SmartNotesGenerator() {
         },
       ]);
 
+      // Update credits locally immediately
+      setCredits((prev) => (prev !== null ? prev - 10 : prev));
+
+      // Refresh credits from server to confirm
+      await fetchCredits();
+
       if (session?.user?.id) {
         const saveResponse = await fetch("/api/save-notes", {
           method: "POST",
@@ -106,20 +181,12 @@ export default function SmartNotesGenerator() {
           },
           body: JSON.stringify({
             userId: session.user.id,
-            prompt: finalPrompt, // Send the prompt for saving
-            content: notes, // Send the generated notes (which will be 'generated_quiz' in your schema)
+            prompt: finalPrompt,
+            content: notes,
           }),
         });
 
-        if (saveResponse.ok) {
-          toast({
-            title: "Notes Saved",
-            description: "The generated notes have been saved.",
-            status: "success",
-            duration: 2000,
-            isClosable: true,
-          });
-        } else {
+        if (!saveResponse.ok) {
           const errorData = await saveResponse.json();
           toast({
             title: "Error Saving Notes",
@@ -129,20 +196,12 @@ export default function SmartNotesGenerator() {
             isClosable: true,
           });
         }
-      } else {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to save notes.",
-          status: "warning",
-          duration: 2000,
-          isClosable: true,
-        });
       }
     } catch (error) {
-      console.error("Gemini API Error:", error);
+      console.error("API Error:", error);
       toast({
         title: "Error",
-        description: "Failed to generate notes.",
+        description: (error as Error).message || "Failed to generate notes.",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -176,19 +235,41 @@ export default function SmartNotesGenerator() {
         <Heading size="xl" fontWeight="semibold" color={primaryColor}>
           Smart Notes
         </Heading>
-        <Button
-          colorScheme={buttonColor}
-          size="lg"
-          borderRadius="full"
-          onClick={onOpen}
-          _hover={{
-            transform: "translateY(-2px)",
-            boxShadow: "md",
-          }}
-          transition="all 0.2s"
-        >
-          Create
-        </Button>
+        <Flex align="center" gap={4}>
+          {creditsLoading ? (
+            <Spinner size="sm" />
+          ) : (
+            <Badge
+              display="flex"
+              alignItems="center"
+              gap={2}
+              px={4}
+              py={2}
+              borderRadius="full"
+              bg={badgeBg}
+              color={badgeColor}
+              fontSize="md"
+              fontWeight="semibold"
+            >
+              <Icon as={Coins} boxSize={5} />
+              {credits !== null ? credits : "N/A"} Credits
+            </Badge>
+          )}
+          <Button
+            colorScheme={buttonColor}
+            size="md"
+            borderRadius="full"
+            onClick={onOpen}
+            isDisabled={credits !== null && credits < 10}
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "md",
+            }}
+            transition="all 0.2s"
+          >
+            Create (10 Credits)
+          </Button>
+        </Flex>
       </Flex>
 
       <Divider mb={4} borderColor={useColorModeValue("gray.200", "gray.600")} />
@@ -217,6 +298,7 @@ export default function SmartNotesGenerator() {
         setFile={setFile}
         onGenerate={handleGenerateNotes}
         loading={loading}
+        credits={credits}
       />
     </Box>
   );

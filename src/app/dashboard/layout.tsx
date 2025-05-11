@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useRef } from "react";
 import {
   Box,
   VStack,
@@ -57,7 +57,7 @@ const modules = [
   {
     name: "Cognivia AI",
     icon: FiMessageSquare,
-    path: "/dashboard/ai-assistant",
+    path: "/dashboard/assistant",
   },
   { name: "Reports", icon: FiBarChart2, path: "/dashboard/performance" },
   { name: "Smart Notes", icon: FiEdit, path: "/dashboard/notes" },
@@ -71,14 +71,16 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const sidebarBg = useColorModeValue("white", "gray.800");
   const hoverBg = useColorModeValue("gray.100", "gray.700");
   const textColor = useColorModeValue("gray.800", "gray.100");
   const primaryColor = useColorModeValue("teal.600", "blue.300");
-
   const dividerColor = useColorModeValue("gray.200", "gray.600");
   const surfaceColor = useColorModeValue("gray.50", "gray.900");
+  const menuListColor = useColorModeValue("rgba(255, 255, 255, 0.8)", "rgba(26, 32, 44, 0.8)");
 
   if (status === "loading")
     return (
@@ -185,13 +187,17 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           {!collapsed ? "Upgrade" : <BiRocket size={20} />}
         </Button>
 
-        <Menu>
+        <Menu 
+          onOpen={() => setIsMenuOpen(true)}
+          onClose={() => setIsMenuOpen(false)}
+        >
           <Tooltip
+            hasArrow
             label={!isMobile && collapsed ? "Profile" : ""}
             placement="right"
-            hasArrow
           >
             <MenuButton
+              ref={menuButtonRef}
               as={Button}
               variant="ghost"
               borderRadius="full"
@@ -223,7 +229,12 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </MenuButton>
           </Tooltip>
 
-          <MenuList>
+          <MenuList 
+            backdropFilter="blur(10px)"
+            bg={menuListColor}
+            border="none"
+            boxShadow="lg"
+          >
             <MenuItem
               icon={<BiUser />}
               onClick={() => router.push("/dashboard/profile")}
@@ -241,6 +252,26 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <Flex minH="100vh" bg={surfaceColor}>
+      {/* Blur overlay when menu is open */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <MotionBox
+            position="fixed"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            bg="blackAlpha.600"
+            backdropFilter="blur(4px)"
+            zIndex={999}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => menuButtonRef.current?.click()} // Close menu when clicking outside
+          />
+        )}
+      </AnimatePresence>
+
       {/* Desktop Sidebar */}
       {!isMobile && (
         <AnimatePresence>
@@ -293,9 +324,12 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       {/* Main Content */}
       <Box
         flex="1"
-        // p={{ base: 4, md: 8 }}
         ml={!isMobile ? sidebarWidth : 0}
         transition="margin-left 0.3s ease"
+        style={{
+          filter: isMenuOpen ? "blur(4px)" : "none",
+          transition: "filter 0.2s ease",
+        }}
       >
         <SessionLogger />
 

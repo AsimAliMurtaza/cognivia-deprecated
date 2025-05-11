@@ -218,11 +218,8 @@ export default function AIAssistant() {
         {!isMobile && (
           <Box
             w="300px"
-            borderRadius="xl"
             borderColor={dividerColor}
             overflowY="auto"
-            px={4}
-            py={6}
           >
             <ChatHistory
               chatHistory={chatHistory}
@@ -235,7 +232,7 @@ export default function AIAssistant() {
         )}
 
         {/* Main Chat Area */}
-        <Box flex={1} overflowY="auto" px={4} py={6}>
+        <Box flex={1} overflowY="auto">
           <ChatWindow
             query={query}
             setQuery={setQuery}
