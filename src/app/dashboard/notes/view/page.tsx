@@ -425,7 +425,7 @@ export default function ViewNotesPage() {
       </VStack>
 
       <Modal isOpen={isOpen} onClose={onClose} size="4xl">
-        <ModalOverlay bg="blackAlpha.600" />
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
         <ModalContent bg={surfaceColor} borderRadius="2xl" overflow="hidden">
           <ModalHeader
             bg={primaryContainer}

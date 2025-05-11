@@ -4,6 +4,7 @@ import dbConnect from "@/lib/mongodb";
 import Quiz from "@/models/Quiz";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { quizId: string } }
