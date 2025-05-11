@@ -69,6 +69,7 @@ export const authOptions: NextAuthOptions = {
             is2FAEnabled: true,
             is2FAVerified: true,
             role: user.role || "user",
+            credits: user.credits || 0,
           };
         }
 
@@ -130,6 +131,7 @@ export const authOptions: NextAuthOptions = {
           gender: user.gender,
           role: user.role || "user",
           is2FAEnabled: false,
+          credits: user.credits || 0,
         };
       },
     }),
@@ -157,6 +159,7 @@ export const authOptions: NextAuthOptions = {
         token.gender = user.gender;
         token.is2FAEnabled = user.is2FAEnabled;
         token.is2FAVerified = user.is2FAVerified;
+        token.credits = user.credits || 0;
         if (user) {
           token.role = user.role || "user";
         }
@@ -178,6 +181,7 @@ export const authOptions: NextAuthOptions = {
           is2FAEnabled: token.is2FAEnabled,
           is2FAVerified: token.is2FAVerified,
           accessToken: token.accessToken,
+          credits: token.credits,
         },
       };
     },

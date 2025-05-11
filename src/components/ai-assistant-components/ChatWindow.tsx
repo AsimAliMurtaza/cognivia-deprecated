@@ -50,8 +50,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onAskAI,
   onCopyResponse,
 }) => {
-  const surfaceColor = useColorModeValue("white", "gray.800");
-  const inputBg = useColorModeValue("gray.50", "gray.700");
+  const surfaceColor = useColorModeValue("gray.50", "gray.900");
+  const inputBg = useColorModeValue("gray.50", "gray.900");
   const textColor = useColorModeValue("gray.800", "gray.200");
   const subTextColor = useColorModeValue("gray.600", "gray.400");
   const primaryColor = useColorModeValue("teal.600", "blue.300");
@@ -143,13 +143,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   return (
-    <Flex direction="column" h="90vh" gap={4}>
+    <Flex direction="column" h="100vh" gap={4}>
       <Box
         flex={1}
-        borderRadius="xl"
-        bg={surfaceColor}
         p={4}
-        boxShadow="sm"
+        bg={surfaceColor}
         overflowY="auto"
         css={scrollbarStyles}
       >

@@ -16,6 +16,7 @@ declare module "next-auth" {
     is2FAEnabled?: boolean;
     is2FAVerified?: boolean;
     requires2FA?: boolean;
+    credits?: number;
   }
 
   /**
@@ -40,5 +41,6 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     is2FAVerified?: boolean;
     requires2FA?: boolean;
+    credits?: number;
   }
 }
