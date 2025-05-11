@@ -24,9 +24,79 @@ import { useEffect, useState } from "react";
 const MotionCard = motion(Card);
 
 const extractNoteTitle = (prompt: string): string => {
-  // Match text between ":" and "(" to extract actual topic
   const match = prompt.match(/:\s*(.+?)\s*(?:\(|$)/);
   return match ? match[1].trim() : prompt;
+};
+
+interface DashboardStatProps {
+  icon: React.ElementType;
+  title: string;
+  value: string;
+  bgGradient: string;
+}
+
+const DashboardStatCard = ({
+  icon,
+  title,
+  value,
+  bgGradient,
+}: DashboardStatProps) => {
+  return (
+    <MotionCard
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      bgGradient={bgGradient}
+      color="white"
+      borderRadius="xl"
+      p={6}
+      boxShadow="md"
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <CardBody>
+        <VStack align="flex-start" spacing={3}>
+          <HStack>
+            <Icon as={icon} boxSize={5} opacity={0.8} />
+            <Text fontSize="md" fontWeight="medium" letterSpacing="wide">
+              {title}
+            </Text>
+          </HStack>
+          <Text fontSize="2xl" fontWeight="bold" lineHeight="1">
+            {value}
+          </Text>
+        </VStack>
+      </CardBody>
+    </MotionCard>
+  );
+};
+
+interface RecentActivityItemProps {
+  title: string;
+  date: string;
+}
+
+const RecentActivityItem = ({ title, date }: RecentActivityItemProps) => {
+  const secondaryText = useColorModeValue("gray.600", "gray.400");
+  const boxBg = useColorModeValue("gray.100", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+
+  return (
+    <Box
+      p={3}
+      border="1px solid"
+      borderColor={borderColor}
+      borderRadius="md"
+      bg={boxBg}
+    >
+      <HStack justify="space-between">
+        <Text fontWeight="medium">{title}</Text>
+        <Text fontSize="sm" color={secondaryText}>
+          {date}
+        </Text>
+      </HStack>
+    </Box>
+  );
 };
 
 export default function DashboardPage() {
@@ -47,7 +117,6 @@ export default function DashboardPage() {
   const cardBg = useColorModeValue("white", "gray.800");
   const secondaryText = useColorModeValue("gray.600", "gray.300");
   const accentColor = useColorModeValue("teal.500", "blue.400");
-  const boxColor = useColorModeValue("gray.50", "gray.800");
   const bgGradientColors = useColorModeValue(
     "linear(to-br, teal.400, teal.500)",
     "linear(to-br, blue.400, blue.500)"
@@ -68,7 +137,12 @@ export default function DashboardPage() {
   const gridColumns = useBreakpointValue({
     base: "1fr",
     md: "repeat(2, 1fr)",
-    lg: "repeat(3, 1fr)",
+    lg: "repeat(4, 1fr)", // Adjusted to 4 columns for stats
+  });
+
+  const recentActivityColumns = useBreakpointValue({
+    base: "1fr",
+    md: "repeat(2, 1fr)",
   });
 
   useEffect(() => {
@@ -121,7 +195,7 @@ export default function DashboardPage() {
     takenQuizCount,
   } = dashboardData;
 
-  const stats = [
+  const statsData = [
     {
       icon: FaCheckCircle,
       title: "Quizzes Created",
@@ -150,80 +224,48 @@ export default function DashboardPage() {
 
   return (
     <Box bg={bgColor} minH="100vh" p={{ base: 4, md: 8 }}>
-      <VStack spacing={6} align="stretch" maxW="7xl" mx="auto">
+      <VStack spacing={8} align="stretch" maxW="7xl" mx="auto">
         {/* Overview */}
         <MotionCard
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.3 }}
           bg={cardBg}
-          borderRadius="2xl"
+          borderRadius="xl"
           boxShadow="sm"
         >
-          <CardHeader pb={0}>
+          <CardHeader pb={2}>
             <Heading
               as="h1"
-              size="lg"
+              size="xl"
               fontWeight="semibold"
               color={accentColor}
-              mb={2}
             >
-              Overview
+              Dashboard
             </Heading>
             <Text color={secondaryText} fontSize="md">
               Welcome back, {session?.user?.name || session?.user?.email}!
-              Here&apos;s your progress.
             </Text>
           </CardHeader>
         </MotionCard>
 
         {/* Stats */}
-        <Grid templateColumns={gridColumns} gap={6}>
-          {stats.map((stat, index) => (
-            <MotionCard
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              bgGradient={stat.bgGradient}
-              color="white"
-              borderRadius="2xl"
-              p={6}
-              boxShadow="sm"
-              whileHover={{ y: -4 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <CardBody>
-                <VStack align="flex-start" spacing={4}>
-                  <HStack>
-                    <Icon as={stat.icon} boxSize={6} opacity={0.9} />
-                    <Text
-                      fontSize="lg"
-                      fontWeight="medium"
-                      letterSpacing="wide"
-                    >
-                      {stat.title}
-                    </Text>
-                  </HStack>
-                  <Text fontSize="3xl" fontWeight="bold" lineHeight="1">
-                    {stat.value}
-                  </Text>
-                </VStack>
-              </CardBody>
-            </MotionCard>
+        <Grid templateColumns={gridColumns} gap={4}>
+          {statsData.map((stat) => (
+            <DashboardStatCard key={stat.title} {...stat} />
           ))}
         </Grid>
 
         {/* Recent Activity */}
         <MotionCard
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
           bg={cardBg}
-          borderRadius="2xl"
+          borderRadius="xl"
           boxShadow="sm"
         >
-          <CardHeader>
+          <CardHeader pb={2}>
             <Heading
               as="h2"
               size="md"
@@ -234,7 +276,7 @@ export default function DashboardPage() {
             </Heading>
           </CardHeader>
           <CardBody>
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
+            <Grid templateColumns={recentActivityColumns} gap={6}>
               {/* Recent Quizzes */}
               <Box>
                 <Text fontWeight="medium" color={secondaryText} mb={2}>
@@ -245,25 +287,25 @@ export default function DashboardPage() {
                     No recent quizzes
                   </Text>
                 ) : (
-                  recentQuizzes.map((quiz, i) => (
-                    <Box
-                      key={i}
-                      p={3}
-                      border="1px solid"
-                      borderColor="gray.200"
-                      borderRadius="lg"
-                      mb={2}
-                      _dark={{ borderColor: "gray.700" }}
-                      bg={boxColor}
-                    >
-                      <HStack justify="space-between">
-                        <Text fontWeight="medium">{quiz.topic}</Text>
-                        <Text fontSize="xs" color="gray.500">
-                          {new Date(quiz.createdAt).toLocaleDateString()}
-                        </Text>
-                      </HStack>
-                    </Box>
-                  ))
+                  recentQuizzes
+                    .slice(0, 3)
+                    .map((quiz) => (
+                      <RecentActivityItem
+                        key={quiz.topic}
+                        title={quiz.topic}
+                        date={new Date(quiz.createdAt).toLocaleDateString()}
+                      />
+                    ))
+                )}
+                {recentQuizzes.length > 3 && (
+                  <Text
+                    mt={2}
+                    fontSize="sm"
+                    color={accentColor}
+                    cursor="pointer"
+                  >
+                    See All Quizzes
+                  </Text>
                 )}
               </Box>
 
@@ -277,27 +319,25 @@ export default function DashboardPage() {
                     No recent notes
                   </Text>
                 ) : (
-                  recentNotes.map((note, i) => (
-                    <Box
-                      key={i}
-                      p={3}
-                      border="1px solid"
-                      borderColor="gray.200"
-                      borderRadius="lg"
-                      mb={2}
-                      _dark={{ borderColor: "gray.700" }}
-                      bg={boxColor}
-                    >
-                      <HStack justify="space-between">
-                        <Text fontWeight="medium">
-                          {extractNoteTitle(note.prompt)}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          {new Date(note.createdAt).toLocaleDateString()}
-                        </Text>
-                      </HStack>
-                    </Box>
-                  ))
+                  recentNotes
+                    .slice(0, 3)
+                    .map((note) => (
+                      <RecentActivityItem
+                        key={note.prompt}
+                        title={extractNoteTitle(note.prompt)}
+                        date={new Date(note.createdAt).toLocaleDateString()}
+                      />
+                    ))
+                )}
+                {recentNotes.length > 3 && (
+                  <Text
+                    mt={2}
+                    fontSize="sm"
+                    color={accentColor}
+                    cursor="pointer"
+                  >
+                    See All Notes
+                  </Text>
                 )}
               </Box>
             </Grid>

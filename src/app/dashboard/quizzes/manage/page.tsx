@@ -194,7 +194,7 @@ export default function ManageQuizzesPage() {
 
   return (
     <Box bg={bg} minH="100vh">
-      <Container maxW="6xl">
+      <Container p={12} maxW="6xl">
         <Heading
           as="h1"
           size="xl"
@@ -207,7 +207,7 @@ export default function ManageQuizzesPage() {
 
         <Flex mb={4} alignItems="center">
           <Text mr={2} fontWeight="semibold" color={textColor}>
-            Filter Quizzes:
+            Filter by:
           </Text>
           <Select
             value={filter}
