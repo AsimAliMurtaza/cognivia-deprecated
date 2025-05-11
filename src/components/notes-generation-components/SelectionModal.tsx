@@ -68,7 +68,7 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
-      <ModalOverlay />
+      <ModalOverlay backdropFilter="blur(5px)" />
       <ModalContent borderRadius="2xl" bg={surfaceColor}>
         <ModalHeader>
           <Flex align="center" gap={3}>

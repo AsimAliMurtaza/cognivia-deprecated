@@ -19,6 +19,7 @@ import {
   Flex,
   Avatar,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import { FiUpload, FiLink, FiEdit2 } from "react-icons/fi";
 
@@ -34,6 +35,7 @@ interface InputModalProps {
   setFile: (file: File | null) => void;
   onGenerate: () => void;
   loading: boolean;
+  credits: number | null;
 }
 
 const InputModal: React.FC<InputModalProps> = ({
@@ -48,6 +50,7 @@ const InputModal: React.FC<InputModalProps> = ({
   setFile,
   onGenerate,
   loading,
+  credits,
 }) => {
   const surfaceColor = useColorModeValue("white", "gray.800");
   const inputBg = useColorModeValue("gray.50", "gray.700");
@@ -55,6 +58,7 @@ const InputModal: React.FC<InputModalProps> = ({
   const subTextColor = useColorModeValue("gray.600", "gray.400");
   const primaryColor = useColorModeValue("teal.600", "blue.300");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+  const errorColor = useColorModeValue("red.500", "red.300");
 
   const getModalTitle = () => {
     switch (sourceType) {
@@ -82,10 +86,25 @@ const InputModal: React.FC<InputModalProps> = ({
     }
   };
 
+  const hasSufficientCredits = credits !== null && credits >= 10;
+  const isInputValid = () => {
+    if (sourceType === "prompt") return promptText.trim().length > 0;
+    if (sourceType === "youtube") return youtubeLink.trim().length > 0;
+    if (sourceType === "file") return file !== null;
+    return false;
+  };
+
+  const handleGenerate = () => {
+    if (!hasSufficientCredits) {
+      return;
+    }
+    onGenerate();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
-      <ModalOverlay />
-      <ModalContent borderRadius="2xl" bg={surfaceColor}>
+      <ModalOverlay backdropFilter="blur(10px)" />
+      <ModalContent borderRadius="2xl" bg={surfaceColor} >
         <ModalHeader>
           <Flex align="center" gap={3}>
             <Avatar icon={getIcon()} bg={primaryColor} color="white" />
@@ -106,6 +125,22 @@ const InputModal: React.FC<InputModalProps> = ({
         <ModalCloseButton />
         <ModalBody pb={6}>
           <VStack spacing={4}>
+            {!hasSufficientCredits && (
+              <Box
+                w="full"
+                p={3}
+                bg="red.50"
+                borderRadius="md"
+                border="1px solid"
+                borderColor="red.100"
+              >
+                <Text color={errorColor} fontSize="sm" fontWeight="medium">
+                  You need at least 10 credits to generate notes. Current
+                  credits: {credits}
+                </Text>
+              </Box>
+            )}
+
             {sourceType === "prompt" && (
               <FormControl>
                 <Textarea
@@ -180,28 +215,35 @@ const InputModal: React.FC<InputModalProps> = ({
         </ModalBody>
 
         <ModalFooter>
-          <Button
-            variant="outline"
-            mr={3}
-            onClick={onClose}
-            borderRadius="full"
-          >
-            Cancel
-          </Button>
-          <Button
-            colorScheme="blue"
-            onClick={onGenerate}
-            isLoading={loading}
-            isDisabled={
-              (sourceType === "prompt" && !promptText) ||
-              (sourceType === "youtube" && !youtubeLink) ||
-              (sourceType === "file" && !file)
-            }
-            borderRadius="full"
-            px={6}
-          >
-            Generate Notes
-          </Button>
+          <Flex align="center" justify="space-between" w="full">
+
+            <Flex gap={3}>
+              <Button variant="outline" onClick={onClose} borderRadius="full">
+                Cancel
+              </Button>
+              <Tooltip
+                label={
+                  !hasSufficientCredits
+                    ? "You need at least 10 credits"
+                    : !isInputValid()
+                    ? "Please provide valid input"
+                    : ""
+                }
+                isDisabled={hasSufficientCredits && isInputValid()}
+              >
+                <Button
+                  colorScheme="blue"
+                  onClick={handleGenerate}
+                  isLoading={loading}
+                  isDisabled={!hasSufficientCredits || !isInputValid()}
+                  borderRadius="full"
+                  px={6}
+                >
+                  Generate (10 Credits)
+                </Button>
+              </Tooltip>
+            </Flex>
+          </Flex>
         </ModalFooter>
       </ModalContent>
     </Modal>
