@@ -26,7 +26,7 @@ const HeroSection = () => {
     <Box
       display="flex"
       minH={{ base: "auto", md: "70vh" }}
-      py={20}
+      py={28}
       alignItems="center"
       bg={useColorModeValue("white", "gray.800")}
       px={6}

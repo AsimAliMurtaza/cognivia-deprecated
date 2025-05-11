@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Button,
   Container,
   Heading,
   Text,
@@ -11,55 +10,33 @@ import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   useColorModeValue,
   GridItem,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 
 const pricingPlans = [
   {
     name: "Basic",
-    price: "Free",
-    features: [
-      "Limited AI Assistance",
-      "5 Quizzes per Month",
-      "Basic Analytics",
-    ],
-    buttonLabel: "Get Started",
+    price: "$9.99/mo",
+    features: ["200 Credits", "20 Quizzes", "50 Requests/Day"],
     colorScheme: "gray",
   },
   {
     name: "Pro",
-    price: "$9.99",
-    period: "per month",
-    features: [
-      "Unlimited AI Assistance",
-      "Unlimited Quizzes",
-      "Advanced Analytics",
-      "Priority Support",
-    ],
-    buttonLabel: "Upgrade to Pro",
-    colorScheme: "blue",
+    price: "$16.66/mo",
+    features: ["400 Credits", "40 Quizzes", "100 Requests/Day"],
     popular: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    features: [
-      "All Pro Features",
-      "Team Collaboration",
-      "Dedicated Support",
-      "API Access",
-    ],
-    buttonLabel: "Contact Us",
+    name: "Premium",
+    price: "$25.00/mo",
+    features: ["700 Credits", "70 Quizzes", "Unlimited Requests/Day"],
     colorScheme: "teal",
   },
 ];
 
 export default function PricingSection() {
-  const router = useRouter();
 
   // Material You inspired colors
   const bgColor = useColorModeValue("white", "gray.900");
@@ -140,11 +117,11 @@ export default function PricingSection() {
                           >
                             {plan.price}
                           </Text>
-                          {plan.period && (
+                          {/* {plan.period && (
                             <Text fontSize="sm" color={subTextColor}>
                               {plan.period}
                             </Text>
-                          )}
+                          )} */}
                         </Box>
                       </VStack>
                     </CardHeader>
@@ -167,23 +144,6 @@ export default function PricingSection() {
                         ))}
                       </VStack>
                     </CardBody>
-
-                    <CardFooter pt={0}>
-                      <Button
-                        colorScheme={plan.colorScheme}
-                        size="lg"
-                        w="full"
-                        borderRadius="full"
-                        onClick={() => router.push("/pricing")}
-                        _hover={{
-                          transform: "translateY(-2px)",
-                          boxShadow: "md",
-                        }}
-                        transition="all 0.2s"
-                      >
-                        {plan.buttonLabel}
-                      </Button>
-                    </CardFooter>
                   </Card>
                 </motion.div>
               </GridItem>

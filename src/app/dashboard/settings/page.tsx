@@ -34,7 +34,6 @@ export default function AppSettingsPage() {
 
   // Get Material You colors from theme
   const [primary, primaryDark] = useToken("colors", ["teal.400", "blue.500"]);
-  const [surface, surfaceDark] = useToken("colors", ["white", "gray.900"]);
   const [onSurface, onSurfaceDark] = useToken("colors", ["gray.900", "white"]);
   const [surfaceVariant, surfaceVariantDark] = useToken("colors", [
     "gray.100",
@@ -42,7 +41,6 @@ export default function AppSettingsPage() {
   ]);
 
   // Dynamic colors based on theme
-  const bg = useColorModeValue(surface, surfaceDark);
   const textColor = useColorModeValue(onSurface, onSurfaceDark);
   const cardBg = useColorModeValue(surfaceVariant, surfaceVariantDark);
   const primaryColor = useColorModeValue(primary, primaryDark);
@@ -106,9 +104,7 @@ export default function AppSettingsPage() {
     <Container maxW="100vw" py={6}>
       <Box
         p={6}
-        bg={bg}
         borderRadius="xl"
-        boxShadow={useColorModeValue("sm", "dark-lg")}
       >
         {/* Header */}
         <HStack w="full" justify="space-between" mb={8}>

@@ -40,35 +40,38 @@ const FeatureCard = ({
     <Link href={href} style={{ textDecoration: "none" }}>
       <MotionBox
         bg={cardBg}
-        p={8}
-        borderRadius="2xl"
-        boxShadow="md"
+        p={6} // Reduced padding
+        borderRadius="xl" // Slightly less rounded
+        boxShadow="sm" // Softer initial shadow
         border="1px solid"
         borderColor={borderColor}
         whileHover={{
-          y: -5,
-          boxShadow: "lg",
+          y: -3, // Subtler lift
+          boxShadow: "md", // Slightly stronger hover shadow
           borderColor: primaryColor,
         }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        whileTap={{ scale: 0.99 }} // Less intense tap
+        transition={{ type: "spring", stiffness: 300, damping: 18 }} // Smoother spring
         cursor="pointer"
         h="full"
+        display="flex"
+        flexDirection="column"
+        justifyContent="space-between" // Distribute content vertically
       >
-        <VStack spacing={5} align="center" h="full">
+        <VStack spacing={4} align="center">
           <Flex
             align="center"
             justify="center"
-            w={16}
-            h={16}
-            borderRadius="xl"
-            bg={`${primaryColor}10`}
+            w={12} // Smaller icon container
+            h={12} // Smaller icon container
+            borderRadius="md" // Less rounded
+            bg={`${primaryColor}15`} // Slightly stronger background
             color={primaryColor}
           >
-            <Icon size={28} />
+            <Icon size={24} /> {/* Smaller icon */}
           </Flex>
           <Heading
-            size="md"
+            size="sm" // Smaller heading
             textAlign="center"
             color={textColor}
             fontWeight="semibold"
@@ -78,22 +81,22 @@ const FeatureCard = ({
           <Text
             color={useColorModeValue("gray.600", "gray.400")}
             textAlign="center"
-            fontSize="sm"
-            lineHeight="tall"
+            fontSize="xs" // Smaller description
+            lineHeight="relaxed" // More relaxed line height
           >
             {description}
           </Text>
-          <Box mt="auto" w="full">
-            <Box
-              h={1}
-              w="40%"
-              mx="auto"
-              bg={secondaryColor}
-              borderRadius="full"
-              opacity={0.7}
-            />
-          </Box>
         </VStack>
+        <Box mt={4} w="full">
+          <Box
+            h={1}
+            w="30%" // Slightly smaller indicator
+            mx="auto"
+            bg={secondaryColor}
+            borderRadius="full"
+            opacity={0.6} // Slightly less opaque
+          />
+        </Box>
       </MotionBox>
     </Link>
   );
@@ -101,91 +104,99 @@ const FeatureCard = ({
 
 export default function QuizGenerationModule() {
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 }, // Subtler initial position
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        staggerChildren: 0.2,
+        duration: 0.4, // Faster transition
+        staggerChildren: 0.15, // Quicker stagger
       },
     },
   };
 
-  const bgColor = useColorModeValue("gray.50", "gray.900");
-  const primaryColor = useColorModeValue("teal.600", "blue.400");
+  const bgColor = useColorModeValue("gray.100", "gray.900"); // Lighter background
   const textColor = useColorModeValue("gray.700", "gray.300");
 
   return (
-    <Box minH="100vh" bg={bgColor} py={8}>
-      <Container maxW="6xl">
+    <Box minH="100vh" bg={bgColor} py={10}>
+      {" "}
+      {/* Reduced vertical padding */}
+      <Container maxW="5xl">
+        {" "}
+        {/* Slightly smaller container */}
         <VStack
-          spacing={12}
+          spacing={10} // Adjusted spacing
+          align="center"
           as={motion.div}
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <VStack spacing={5} textAlign="center" maxW="3xl">
-            <Box
-              bg={`${primaryColor}10`}
-              px={4}
-              py={2}
-              borderRadius="full"
-              display="inline-flex"
-            ></Box>
+          <VStack spacing={3} textAlign="center" maxW="2xl">
+            {" "}
             <Heading
               as="h1"
-              size="2xl"
+              size="xl" // Slightly smaller main heading
               fontWeight="bold"
               color={textColor}
               lineHeight="shorter"
             >
-              Create Smart Quizzes in Seconds
+              Generate Engaging Quizzes Effortlessly
             </Heading>
             <Text
-              fontSize={{ base: "lg", md: "xl" }}
+              fontSize={{ base: "md", md: "lg" }} // Adjusted font sizes
               color={useColorModeValue("gray.600", "gray.400")}
-              lineHeight="tall"
+              lineHeight="relaxed" // More relaxed line height
             >
-              Transform any content into interactive quizzes using our advanced
-              AI technology. Choose your preferred method below to get started.
+              Unleash the power of AI to create interactive quizzes from various
+              sources. Choose a method below and start building your
+              personalized assessments in no time.
             </Text>
           </VStack>
           <SimpleGrid
             columns={{ base: 1, md: 3 }}
-            spacing={{ base: 6, md: 8 }}
+            spacing={{ base: 4, md: 6 }} // Adjusted spacing
             w="full"
           >
             <FeatureCard
               icon={FileText}
-              title="Text Prompt"
-              description="Generate quizzes instantly by describing your topic or pasting content"
+              title="Text Input"
+              description="Describe your quiz topic or paste text content to generate questions."
               href="/dashboard/quizzes/generate/text"
             />
             <FeatureCard
               icon={Upload}
               title="Document Upload"
-              description="Upload PDFs, Word docs or text files for automatic quiz creation"
+              description="Upload your PDFs, DOCX files, or plain text to automatically create quizzes."
               href="/dashboard/quizzes/generate/document"
             />
             <FeatureCard
               icon={ImageIcon}
-              title="Image Upload"
-              description="Extract text from images or diagrams to create quizzes"
+              title="Image to Quiz"
+              description="Upload images containing text or diagrams to extract content for quiz generation."
               href="/dashboard/quizzes/generate/image"
             />
           </SimpleGrid>
-          <Divider my={8} /> {/* Horizontal separator */}
+          <Divider opacity={0.4} /> {/* Subtler divider */}
+          <Heading
+            as="h2"
+            size="lg" // Slightly smaller section heading
+            fontWeight="semibold"
+            color={textColor}
+            textAlign="center"
+          >
+            Manage Your Quizzes
+          </Heading>
           <SimpleGrid
             columns={{ base: 1, md: 1 }}
-            spacing={{ base: 6, md: 8 }}
+            spacing={{ base: 4, md: 6 }}
             w="full"
           >
             <FeatureCard
               icon={ListChecks}
-              title="Manage Quizzes"
-              description="View, edit, and organize your created quizzes"
+              title="Manage & Organize"
+              description="View, edit, and organize all the quizzes you've created in one central location."
               href="/dashboard/quizzes/manage"
             />
           </SimpleGrid>
