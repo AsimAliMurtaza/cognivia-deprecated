@@ -9,6 +9,8 @@ interface IQuiz extends Document {
   options: string[][];
   answers: string[];
   createdAt: Date;
+  isTaken?: boolean;
+  score?: number;
 }
 
 const QuizSchema: Schema = new Schema({
@@ -19,6 +21,8 @@ const QuizSchema: Schema = new Schema({
   options: { type: [[String]], required: true },
   answers: { type: [String], required: true },
   createdAt: { type: Date, default: Date.now },
+  isTaken: { type: Boolean, default: false },
+  score: { type: Number, default: 0 },
 });
 
 const Quiz = mongoose.models.Quiz || mongoose.model<IQuiz>("Quiz", QuizSchema);
