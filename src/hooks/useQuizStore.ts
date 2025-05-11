@@ -7,6 +7,7 @@ interface QuizData {
   options: string[][];
   answers: string[];
   userID: string;
+  isTaken?: boolean;
 }
 
 interface QuizStore {

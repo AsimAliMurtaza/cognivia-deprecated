@@ -1,6 +1,6 @@
 // app/api/generate-quiz/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { generateGeminiContent } from "@/lib/gemini"; 
+import { generateGeminiContent } from "@/lib/gemini";
 import dbConnect from "@/lib/mongodb";
 import Quiz from "@/models/Quiz";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -66,7 +66,7 @@ async function formatQuiz(geminiOutput: string): Promise<{
             options.push(currentOptions);
           }
           questionCounter = parseInt(questionMatch[1]);
-          console.log("Question Counter:", questionCounter); 
+          console.log("Question Counter:", questionCounter);
           currentQuestion = questionMatch[2].trim();
           currentOptions = [];
         } else if (currentQuestion) {
@@ -101,7 +101,7 @@ async function formatQuiz(geminiOutput: string): Promise<{
             answerMatchLetterOnly[1].toUpperCase();
         } else if (answerMatchLetterColonValue) {
           const letter = answerMatchLetterColonValue[1].toUpperCase();
-          console.log("Letter:", letter); 
+          console.log("Letter:", letter);
           const value = answerMatchLetterColonValue[2].trim().toUpperCase();
           // Try to infer the question number based on the order
           if (
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Get token from Authorization header
     const authHeader = req.headers.get("authorization");
-    const token = authHeader?.split(" ")[1]; 
+    const token = authHeader?.split(" ")[1];
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { prompt, userID } = await req.json(); 
+    const { prompt, userID } = await req.json();
     const user_id = userID;
 
     if (!prompt || !user_id) {
@@ -222,9 +222,11 @@ export async function POST(req: NextRequest) {
         questions: formattedQuiz?.questions,
         options: formattedQuiz?.options,
         answers: formattedQuiz?.answers,
+        isTaken: false,
+        score: 0,
       });
 
-      console.log("quiz ID:", newQuiz._id); 
+      console.log("quiz ID:", newQuiz._id);
 
       const savedQuiz = await newQuiz.save();
       console.log(savedQuiz);
@@ -263,6 +265,7 @@ export async function POST(req: NextRequest) {
             questions: formattedQuiz.questions,
             options: formattedQuiz.options,
             answers: formattedQuiz.answers,
+            isTaken: false,
           },
           { status: 200 }
         );

@@ -181,6 +181,7 @@ const TextQuizGeneration = () => {
             options: data.options,
             answers: data.answers,
             userID: session?.user?.id as string,
+            isTaken: data.isTaken,
           },
         });
 

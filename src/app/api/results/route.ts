@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import QuizResult from "@/models/QuizResult";
+import Quiz from "@/models/Quiz";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,8 +32,14 @@ export async function POST(req: NextRequest) {
       percentage,
     });
 
+    const updatedQuiz = await Quiz.findOneAndUpdate(
+      { _id: quizID },
+      { score, isTaken: true },
+      { new: true }
+    );
+
     return NextResponse.json(
-      { message: "Result stored successfully", result },
+      { message: "Result stored successfully", result, updatedQuiz },
       { status: 201 }
     );
   } catch (error) {
