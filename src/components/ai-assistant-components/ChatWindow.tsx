@@ -21,9 +21,10 @@ import {
   HeadingProps,
   TextProps,
 } from "@chakra-ui/react";
-import { FaCopy, FaRobot, FaUser } from "react-icons/fa";
+import { FaCopy, FaMicrophone, FaUser } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { ArrowUpIcon } from "@chakra-ui/icons";
+import { MdAssistant } from "react-icons/md";
 
 const MotionBox = motion(Box);
 
@@ -160,7 +161,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             color={subTextColor}
           >
             <Avatar
-              icon={<FaRobot />}
+              icon={<MdAssistant />}
               size="xl"
               mb={4}
               bg={primaryColor}
@@ -206,7 +207,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
                   <Flex align="center" gap={3}>
                     <Avatar
-                      icon={<FaRobot />}
+                      icon={<MdAssistant />}
                       size="sm"
                       bg={primaryColor}
                       color="white"
@@ -262,7 +263,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
                   <Flex align="center" gap={3}>
                     <Avatar
-                      icon={<FaRobot />}
+                      icon={<MdAssistant />}
                       size="sm"
                       bg={primaryColor}
                       color="white"
@@ -307,6 +308,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             boxShadow: "none",
           }}
         />
+        <IconButton
+          aria-label="Record"
+          variant="outline"
+          colorScheme={askButtonColor}
+          onClick={() => {}}
+          isLoading={loading}
+          icon={<FaMicrophone />}
+          size="lg"
+          borderRadius="full"
+          _hover={{
+            transform: "translateY(-2px)",
+            boxShadow: "md",
+          }}
+          transition="all 0.2s"
+        ></IconButton>
         <IconButton
           aria-label="Ask AI"
           variant="outline"
