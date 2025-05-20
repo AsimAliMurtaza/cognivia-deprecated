@@ -44,6 +44,9 @@ import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import { useSession } from "next-auth/react";
 import { marked } from "marked";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 interface Note {
   _id: string;
@@ -67,13 +70,19 @@ export default function ViewNotesPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const limit = 6;
   const toast = useToast();
-
+  const router = useRouter();
+  const itemVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0 },
+  };
+  const MotionBox = motion(Box);
   const primaryColor = useColorModeValue("teal.500", "blue.200");
   const primaryContainer = useColorModeValue("teal.100", "blue.900");
   const surfaceColor = useColorModeValue("white", "gray.800");
   const surfaceVariant = useColorModeValue("white", "gray.700");
   const onSurfaceColor = useColorModeValue("gray.800", "gray.100");
   const outlineColor = useColorModeValue("gray.200", "gray.600");
+  const onSurface = useColorModeValue("gray.800", "white");
 
   const userID = session?.user?.id || null;
 
@@ -140,42 +149,67 @@ export default function ViewNotesPage() {
         gfm: true,
       });
 
+      // Create a wrapper element with structured formatting
       const wrapper = document.createElement("div");
       wrapper.innerHTML = `
+      <html>
+      <head>
         <style>
           body {
             font-family: 'Roboto', sans-serif;
             padding: 32px;
             background: #FFFFFF;
             color: #1C1B1F;
-            line-height: 1.6;
+            line-height: 1.5;
           }
+
           h1.title {
             color: #6750A4;
             font-size: 22px;
             font-weight: 600;
             margin-bottom: 8px;
           }
+
           .meta {
             font-size: 14px;
             color: #49454F;
             margin-bottom: 24px;
           }
+
           .content h1, .content h2, .content h3 {
-            margin-top: 24px;
+            margin-top: 18px;
             margin-bottom: 8px;
             color: #6750A4;
           }
+
           .content p {
             margin: 0 0 16px 0;
           }
+
           .content ul {
-            padding-left: 24px;
-            margin-bottom: 16px;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            list-style-type: disc;
           }
+
+          .content ul ul {
+            list-style-type: circle;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            padding-left: 20px;
+          }
+
+          .content ul ul ul {
+            list-style-type: square;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            padding-left: 20px;
+          }
+
           .content li {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
           }
+
           .content pre {
             font-family: 'Fira Code', monospace;
             background: #f5f5f5;
@@ -183,34 +217,48 @@ export default function ViewNotesPage() {
             padding: 12px;
             overflow-x: auto;
             margin-bottom: 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
           }
+
           .content code {
             background: #eee;
             padding: 2px 4px;
             border-radius: 4px;
             font-size: 13px;
           }
+
           strong {
             color: #6750A4;
           }
         </style>
-  
-        <div>
-          <h1 class="title">${note.prompt}</h1>
-          <div class="meta">Created on ${formatDate(note.createdAt)}</div>
-          <div class="content">${parsedHTML}</div>
-        </div>
-      `;
+      </head>
+      <body>
+        <h1 class="title">${extractNoteTitle(note?.prompt || "")}</h1>
+        <div class="meta">Created on ${formatDate(note.createdAt)}</div>
+        <div class="content">${parsedHTML}</div>
+      </body>
+      </html>
+    `;
 
+      // Use html2pdf to render and save the PDF
       await html2pdf()
         .from(wrapper)
         .set({
-          margin: [0.5, 0.5],
-          filename: `${note.prompt
+          margin: 0.5,
+          filename: `${extractNoteTitle(note?.prompt || "")
             .substring(0, 30)
             .replace(/\s+/g, "_")}_notes.pdf`,
-          html2canvas: { scale: 2, backgroundColor: "#FFFFFF" },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+          html2canvas: {
+            scale: 2,
+            backgroundColor: "#FFFFFF",
+            useCORS: true, // Important if images or fonts are loaded externally
+          },
+          jsPDF: {
+            unit: "in",
+            format: "letter",
+            orientation: "portrait",
+          },
         })
         .save();
     } catch (error) {
@@ -307,6 +355,20 @@ export default function ViewNotesPage() {
     <Container maxW="7xl" py={8}>
       <VStack spacing={6} align="stretch">
         <Flex justify="space-between" align="center">
+          <MotionBox variants={itemVariants}>
+            <Button
+              leftIcon={<ArrowLeft size={20} />}
+              variant="ghost"
+              color={onSurface}
+              size="md"
+              borderRadius="full"
+              onClick={() => router.back()}
+              _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
+              _focus={{ boxShadow: "outline" }}
+            >
+              Back
+            </Button>
+          </MotionBox>
           <Heading
             size="xl"
             color={primaryColor}
