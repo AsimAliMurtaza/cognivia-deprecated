@@ -26,24 +26,26 @@ export default function QuizPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [answered, setAnswered] = useState<boolean[]>([]);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(600); // 600 seconds = 10 minutes
   const [submitted, setSubmitted] = useState(false);
   const [wrongAnswersCount, setWrongAnswersCount] = useState(0);
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0); // New state
   const [attemptedQuestionsCount, setAttemptedQuestionsCount] = useState(0); // New state
-
+  
   const router = useRouter();
   const { type } = useParams();
   const toast = useToast();
   const quizDataa = useQuizStore((state) => state.quizData);
   const [quizData, setQuizData] = useState<
-    {
-      question: string;
-      options: string[];
-      correctIndex: number;
-      isTaken?: boolean;
-    }[]
+  {
+    question: string;
+    options: string[];
+    correctIndex: number;
+    isTaken?: boolean;
+    difficulty: string;
+    questionCount: number;
+  }[]
   >([]);
+  const [timeLeft, setTimeLeft] = useState(60 * (quizDataa?.questionCount ?? 1)); // Assuming questionCount is in seconds, default to 1 if undefined
 
   const cardBg = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.700", "gray.100");
@@ -60,6 +62,9 @@ export default function QuizPage() {
         question: q,
         options: quizDataa.options[i],
         correctIndex: letterToIndex(quizDataa.answers[i]),
+        isTaken: quizDataa.isTaken,
+        difficulty: quizDataa.difficulty,
+        questionCount: quizDataa.questionCount,
       }));
       setQuizData(mappedQuizData);
       setSelectedAnswers(Array(mappedQuizData.length).fill(-1));
@@ -211,6 +216,7 @@ export default function QuizPage() {
       align="center"
       justify="center"
       minH="100vh"
+      maxH="100vh"
       bg={flexColor}
       p={4}
     >
@@ -223,8 +229,8 @@ export default function QuizPage() {
         p={{ base: 4, md: 6, lg: 8 }}
         borderRadius="2xl"
         boxShadow="2xl"
-        w="full"
-        maxW={{ base: "100%", sm: "95%", md: "90%", lg: "1200px" }}
+        w="90vw"
+        maxW={{ base: "90%", sm: "85%", md: "90%", lg: "1000px" }}
       >
         <Grid templateColumns={{ base: "1fr", md: "300px 1fr" }} gap={6}>
           <GridItem>

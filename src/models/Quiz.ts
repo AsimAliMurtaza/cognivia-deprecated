@@ -11,6 +11,8 @@ interface IQuiz extends Document {
   createdAt: Date;
   isTaken?: boolean;
   score?: number;
+  difficulty?: string;
+  questionCount?: number;
 }
 
 const QuizSchema: Schema = new Schema({

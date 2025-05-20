@@ -14,12 +14,13 @@ import {
   Icon,
   Spinner,
 } from "@chakra-ui/react";
-import { Coins } from "lucide-react";
+import { ArrowLeft, Coins } from "lucide-react";
 import NotesDisplay from "@/components/notes-generation-components/NotesDisplay";
 import SelectionModal from "@/components/notes-generation-components/SelectionModal";
 import InputModal from "@/components/notes-generation-components/InputModal";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function SmartNotesGenerator() {
   const [promptText, setPromptText] = useState("");
@@ -45,6 +46,12 @@ export default function SmartNotesGenerator() {
   const toast = useToast();
   const { data: session } = useSession();
   const router = useRouter();
+  const itemVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0 },
+  };
+  const onSurface = useColorModeValue("gray.800", "white");
+  const MotionBox = motion(Box);
 
   const primaryColor = useColorModeValue("teal.500", "blue.400");
   const buttonColor = useColorModeValue("teal", "blue");
@@ -232,6 +239,20 @@ export default function SmartNotesGenerator() {
         wrap="wrap"
         gap={4}
       >
+        <MotionBox variants={itemVariants}>
+          <Button
+            leftIcon={<ArrowLeft size={20} />}
+            variant="ghost"
+            color={onSurface}
+            size="md"
+            borderRadius="full"
+            onClick={() => router.back()}
+            _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Back
+          </Button>
+        </MotionBox>
         <Heading size="xl" fontWeight="semibold" color={primaryColor}>
           Smart Notes
         </Heading>
