@@ -14,10 +14,17 @@ import {
   GridItem,
   Divider,
   useToast,
+  HStack,
+  Badge,
+  Stack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHome,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const motivationalQuotes = [
@@ -46,16 +53,20 @@ const ResultPage = () => {
   const [motivationalQuote, setMotivationalQuote] = useState("");
   const [userID, setUserID] = useState("");
   const [quizID, setQuizID] = useState("");
-  const hasSaved = useRef(false); // 🛡️ prevent double-saving
+  const [isLoading, setIsLoading] = useState(false);
+  const hasSaved = useRef(false);
 
-  const bg = useColorModeValue("gray.100", "gray.900");
+  // Color values
+  const bg = useColorModeValue("gray.50", "gray.900");
   const surface = useColorModeValue("white", "gray.800");
-  const primary = useColorModeValue("teal.500", "teal.300");
+  const primary = useColorModeValue("teal.500", "blue.300");
   const onSurface = useColorModeValue("gray.700", "gray.300");
-  const success = useColorModeValue("green.500", "teal.300");
+  const success = useColorModeValue("green.500", "blue.300");
   const error = useColorModeValue("red.500", "red.300");
-  const info = useColorModeValue("teal.500", "teal.300");
-  const subTextColor = useColorModeValue("gray.500", "gray.600");
+  const info = useColorModeValue("blue.500", "blue.300");
+  const subTextColor = useColorModeValue("gray.500", "gray.400");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const headingColor = useColorModeValue("teal.500", "blue.300");
 
   useEffect(() => {
     const scoreParam = parseInt(searchParams.get("score") || "0");
@@ -83,12 +94,13 @@ const ResultPage = () => {
       motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
     );
 
-    // Save result only once when the component mounts and has the necessary data
+    console.log(quizID, userID);
+
     if (!hasSaved.current && scoreParam && totalParam) {
       saveResult(user, quiz, scoreParam, totalParam, calcPercentage);
       hasSaved.current = true;
     }
-  }, [searchParams, quizID, userID]); // Re-run effect when searchParams or hasSavedResult changes
+  }, [searchParams]);
 
   const saveResult = async (
     userID: string,
@@ -97,6 +109,7 @@ const ResultPage = () => {
     total: number,
     percentage: number
   ) => {
+    setIsLoading(true);
     try {
       const response = await fetch("/api/results", {
         method: "POST",
@@ -105,25 +118,15 @@ const ResultPage = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to save result:", errorData);
-        toast({
-          title: "Error saving result",
-          description:
-            errorData.message || "Something went wrong while saving.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        toast({
-          title: "Result saved",
-          description: "Your quiz result has been saved successfully.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
+        throw new Error("Failed to save result");
       }
+      toast({
+        title: "Result saved",
+        description: "Your quiz result has been saved successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error("Error saving result:", error);
       toast({
@@ -133,7 +136,23 @@ const ResultPage = () => {
         duration: 5000,
         isClosable: true,
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const getPerformanceVerdict = () => {
+    if (percentage >= 90) return "Outstanding!";
+    if (percentage >= 80) return "Excellent work!";
+    if (percentage >= 70) return "Good job!";
+    if (percentage >= 50) return "Not bad!";
+    return "Keep practicing!";
+  };
+
+  const getPerformanceColor = () => {
+    if (percentage >= 80) return success;
+    if (percentage >= 60) return primary;
+    return error;
   };
 
   return (
@@ -141,221 +160,174 @@ const ResultPage = () => {
       direction="column"
       align="center"
       justify="center"
-      minH="90vh"
-      w="95vw"
+      minH="100vh"
+      w="full"
       bg={bg}
-      p={8}
+      p={{ base: 2, md: 6 }}
     >
       <Box
         as={motion.div}
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         bg={surface}
-        p={6}
+        p={{ base: 2, md: 6 }}
         borderRadius="xl"
-        boxShadow="lg"
+        boxShadow="xl"
         w="full"
-        h="full"
-        maxW="container.xl"
-        maxH="container.lg"
-        animation={`fadeIn 0.5s ease-out`}
-        display="flex"
-        flexDirection="column"
+        maxW="4xl"
       >
-        <Heading
-          as="h2"
-          size="lg"
-          color={primary}
-          fontWeight="extrabold"
-          letterSpacing="tight"
-          textAlign="center"
-          mb={6}
-        >
-          Quiz Results
-        </Heading>
-
-        <Grid
-          templateColumns={{ base: "1fr", md: "1.2fr 0.8fr" }}
-          gap={8}
-          flexGrow={1}
-        >
-          <GridItem
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Box position="relative" display="inline-flex">
-              <CircularProgress
-                value={percentage}
-                size="200px"
-                color={primary}
-                thickness="10px"
-                borderRadius="full"
-              >
-                <CircularProgressLabel
-                  position="absolute"
-                  top="50%"
-                  left="50%"
-                  transform="translate(-50%, -50%)"
-                  fontWeight="900"
-                  fontSize="4xl"
-                  color={onSurface}
-                >
-                  {Math.round(percentage)}%
-                </CircularProgressLabel>
-              </CircularProgress>
-            </Box>
-
-            <VStack spacing={4} mt={6} textAlign="center">
-              <Text fontSize="xl" color={onSurface} fontWeight="semibold">
-                You scored
-                <Text as="strong" color={primary} ml={1}>
-                  {score}
-                </Text>
-                out of
-                <Text as="strong" color={primary} ml={1}>
-                  {totalQuestions}
-                </Text>
-                questions.
-              </Text>
-
-              {percentage >= 70 ? (
-                <Flex
-                  align="center"
-                  color={success}
-                  fontWeight="bold"
-                  fontSize="lg"
-                >
-                  <Icon as={FaCheckCircle} boxSize={7} mr={2} />
-                  <Text>Congratulations! You passed.</Text>
-                </Flex>
-              ) : (
-                <Flex
-                  align="center"
-                  color={error}
-                  fontWeight="bold"
-                  fontSize="lg"
-                >
-                  <Icon as={FaTimesCircle} boxSize={7} mr={2} />
-                  <Text>Better luck next time. Keep learning!</Text>
-                </Flex>
-              )}
-            </VStack>
-          </GridItem>
-
-          <GridItem
-            display="flex"
-            flexDirection="column"
-            justifyContent="space-between"
-          >
-            <VStack spacing={8} align="start">
-              <Heading size="md" color={info} fontWeight="bold">
-                Details
-              </Heading>
-              <Box
-                borderWidth="1px"
-                borderColor="gray.300"
-                borderRadius="md"
-                p={6}
-                w="full"
-              >
-                <VStack spacing={3} align="start">
-                  <Flex align="center">
-                    <Text fontWeight="semibold" color={onSurface} fontSize="lg">
-                      Correct Answers:
-                    </Text>
-                    <Text
-                      ml={2}
-                      color={success}
-                      fontWeight="medium"
-                      fontSize="lg"
-                    >
-                      {correctAnswers}
-                    </Text>
-                  </Flex>
-                  <Divider />
-                  <Flex align="center">
-                    <Text fontWeight="semibold" color={onSurface} fontSize="lg">
-                      Wrong Answers:
-                    </Text>
-                    <Text
-                      ml={2}
-                      color={error}
-                      fontWeight="medium"
-                      fontSize="lg"
-                    >
-                      {wrongAnswers}
-                    </Text>
-                  </Flex>
-                  <Divider />
-                  <Flex align="center">
-                    <Text fontWeight="semibold" color={onSurface} fontSize="lg">
-                      Attempted Questions:
-                    </Text>
-                    <Text
-                      ml={2}
-                      color={primary}
-                      fontWeight="medium"
-                      fontSize="lg"
-                    >
-                      {attemptedQuestions}
-                    </Text>
-                  </Flex>
-                  <Divider />
-                  <Flex align="center">
-                    <Text fontWeight="semibold" color={onSurface} fontSize="lg">
-                      Remaining Time:
-                    </Text>
-                    <Text
-                      ml={2}
-                      color={primary}
-                      fontWeight="medium"
-                      fontSize="lg"
-                    >
-                      {remainingTime}
-                    </Text>
-                  </Flex>
-                </VStack>
-              </Box>
-            </VStack>
-            <Box
-              mt={6}
-              borderWidth="1px"
-              borderColor="gray.300"
-              borderRadius="md"
-              p={6}
-              w="full"
-              bg={useColorModeValue("gray.50", "gray.700")}
+        <VStack spacing={6} align="stretch">
+          {/* Header */}
+          <Box textAlign="center">
+            <Heading
+              as="h1"
+              size="lg"
+              fontWeight="bold"
+              bg={headingColor}
+              bgClip="text"
+              mb={2}
             >
-              <Text
-                fontSize="md"
-                fontStyle="italic"
-                color={subTextColor}
-                textAlign="center"
-              >
-                &quot;{motivationalQuote}&quot;
-              </Text>
-            </Box>
-          </GridItem>
-        </Grid>
+              Quiz Results
+            </Heading>
+            <Text fontSize="lg" color={subTextColor}>
+              Here&apos;s how you performed
+            </Text>
+          </Box>
 
-        <Flex justify="center" mt={10}>
-          <Button
-            colorScheme="teal"
-            size="lg"
-            borderRadius="full"
-            boxShadow="md"
-            _hover={{ boxShadow: "lg", transform: "scale(1.02)" }}
-            onClick={() => router.push("/dashboard")}
-            fontSize="lg"
-            fontWeight="semibold"
-            px={8}
-            py={5}
+          {/* Main Content */}
+          <Grid
+            templateColumns={{ base: "1fr", md: "1fr 1fr" }}
+            gap={8}
+            alignItems="center"
           >
-            Go to Dashboard
-          </Button>
-        </Flex>
+            {/* Score Visualization */}
+            <GridItem>
+              <VStack spacing={6}>
+                <Box position="relative" textAlign="center">
+                  <CircularProgress
+                    value={percentage}
+                    size="180px"
+                    color={getPerformanceColor()}
+                    thickness="12px"
+                    capIsRound
+                  >
+                    <CircularProgressLabel
+                      fontSize="3xl"
+                      fontWeight="bold"
+                      color={onSurface}
+                    >
+                      {Math.round(percentage)}%
+                    </CircularProgressLabel>
+                  </CircularProgress>
+                  <Text
+                    mt={4}
+                    fontSize="lg"
+                    fontWeight="semibold"
+                    color={getPerformanceColor()}
+                  >
+                    {getPerformanceVerdict()}
+                  </Text>
+                </Box>
+
+                <Box textAlign="center">
+                  <Text fontSize="xl" fontWeight="medium" color={onSurface}>
+                    You scored{" "}
+                    <Badge
+                      colorScheme={percentage >= 70 ? "green" : "red"}
+                      fontSize="lg"
+                      px={2}
+                      py={1}
+                    >
+                      {score}/{totalQuestions}
+                    </Badge>
+                  </Text>
+                  <Text mt={2} color={subTextColor}>
+                    {percentage >= 70
+                      ? "You passed the quiz!"
+                      : "Keep learning and try again!"}
+                  </Text>
+                </Box>
+              </VStack>
+            </GridItem>
+
+            {/* Detailed Stats */}
+            <GridItem>
+              <VStack spacing={6} align="stretch">
+                <Box
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                  borderRadius="lg"
+                  p={6}
+                >
+                  <Heading size="md" mb={4} color={info}>
+                    Detailed Breakdown
+                  </Heading>
+                  <VStack
+                    spacing={3}
+                    align="stretch"
+                    divider={<Divider borderColor={borderColor} />}
+                  >
+                    <Flex justify="space-between">
+                      <HStack>
+                        <Icon as={FaCheckCircle} color={success} />
+                        <Text>Correct Answers</Text>
+                      </HStack>
+                      <Text fontWeight="bold">{correctAnswers}</Text>
+                    </Flex>
+                    <Flex justify="space-between">
+                      <HStack>
+                        <Icon as={FaTimesCircle} color={error} />
+                        <Text>Wrong Answers</Text>
+                      </HStack>
+                      <Text fontWeight="bold">{wrongAnswers}</Text>
+                    </Flex>
+                    <Flex justify="space-between">
+                      <Text>Attempted Questions</Text>
+                      <Text fontWeight="bold">{attemptedQuestions}</Text>
+                    </Flex>
+                    <Flex justify="space-between">
+                      <Text>Time Remaining</Text>
+                      <Text fontWeight="bold">{remainingTime}</Text>
+                    </Flex>
+                  </VStack>
+                </Box>
+
+                {/* Motivational Quote */}
+                <Box
+                  bg={useColorModeValue(`${primary}10`, `${primary}20`)}
+                  borderRadius="lg"
+                  p={4}
+                  borderLeftWidth="4px"
+                  borderLeftColor={primary}
+                >
+                  <Text fontStyle="italic" color={onSurface}>
+                    &quot;{motivationalQuote}&quot;
+                  </Text>
+                </Box>
+              </VStack>
+            </GridItem>
+          </Grid>
+
+          {/* Action Buttons */}
+          <Stack
+            direction={{ base: "column", sm: "row" }}
+            spacing={4}
+            justify="center"
+            mt={8}
+          >
+            <Button
+              leftIcon={<FaHome />}
+              colorScheme="teal"
+              variant="solid"
+              size="md"
+              borderRadius="full"
+              onClick={() => router.push("/dashboard")}
+              isLoading={isLoading}
+            >
+              Dashboard
+            </Button>
+          </Stack>
+        </VStack>
       </Box>
     </Flex>
   );

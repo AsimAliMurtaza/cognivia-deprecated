@@ -27,7 +27,7 @@ const Footer = () => {
         <SimpleGrid columns={{ base: 1, md: 3, lg: 4 }} spacing={10}>
           {/* Column 1 - Logo & Company */}
           <Stack align="flex-start">
-            <Image src="/logo.svg" alt="Cognivia Logo" h="30px" mb={4} />
+            <Image src="/logo.svg" alt="Cognivia" h="30px" mb={4} />
             <Text fontWeight="bold">Company</Text>
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Careers
@@ -38,9 +38,9 @@ const Footer = () => {
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Blogs
             </Link>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            {/* <Link href="#" _hover={{ color: linkHoverColor }}>
               Investor Relations
-            </Link>
+            </Link> */}
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Contact Us
             </Link>
@@ -49,7 +49,7 @@ const Footer = () => {
           {/* Column 2 - Products */}
           <Stack align="flex-start">
             <Text fontWeight="bold">Products</Text>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            <Link href="/" _hover={{ color: linkHoverColor }}>
               Cognivia
             </Link>
             <Link
@@ -75,15 +75,15 @@ const Footer = () => {
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Cognivia Community
             </Link>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            {/* <Link href="#" _hover={{ color: linkHoverColor }}>
               Marketplace
-            </Link>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            </Link> */}
+            <Link href="/login" _hover={{ color: linkHoverColor }}>
               My Account
             </Link>
-            <Link fontWeight="bold" href="#" _hover={{ color: linkHoverColor }}>
+            {/* <Link fontWeight="bold" href="#" _hover={{ color: linkHoverColor }}>
               Create support ticket →
-            </Link>
+            </Link> */}
           </Stack>
 
           {/* Column 4 - Learn & Social */}
@@ -92,9 +92,9 @@ const Footer = () => {
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Partners
             </Link>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            {/* <Link href="#" _hover={{ color: linkHoverColor }}>
               Training & Certification
-            </Link>
+            </Link> */}
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Documentation
             </Link>
@@ -151,9 +151,9 @@ const Footer = () => {
             <Link href="#" _hover={{ color: linkHoverColor }}>
               Terms
             </Link>
-            <Link href="#" _hover={{ color: linkHoverColor }}>
+            {/* <Link href="#" _hover={{ color: linkHoverColor }}>
               Impressum
-            </Link>
+            </Link> */}
           </Stack>
           <IconButton
             aria-label="Change language"

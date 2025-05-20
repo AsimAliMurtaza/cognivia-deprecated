@@ -4,6 +4,7 @@ import dbConnect from "@/lib/mongodb";
 import Quiz from "@/models/Quiz";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import QuizResult from "@/models/QuizResult";
 
 export async function DELETE(
   req: NextRequest,
@@ -32,8 +33,17 @@ export async function DELETE(
       userID: session.user.id,
     });
 
+    const deleteQuizResult = await QuizResult.findOneAndDelete({
+      quizID: quizId,
+      userID: session.user.id,
+    })
+
     if (!deletedQuiz) {
       return NextResponse.json({ message: "Quiz not found" }, { status: 404 });
+    }
+
+    if(deleteQuizResult){
+      console.log("Quiz result deleted", deleteQuizResult)
     }
 
     return NextResponse.json(

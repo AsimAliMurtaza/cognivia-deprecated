@@ -13,7 +13,6 @@ import {
   Divider,
   FormControl,
   FormLabel,
-  FormHelperText,
   useToast,
   Container,
   Flex,
@@ -57,6 +56,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setLoading(true);
     setError("");
+    console.log(error);
 
     try {
       const result = await signIn("credentials", {
@@ -88,7 +88,7 @@ export default function LoginPage() {
       toast({
         title: "Login failed",
         description:
-          error instanceof Error ? error.message : "Invalid credentials",
+          error instanceof Error ? "Check your network connection or try again after some time." : "Invalid credentials",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -224,13 +224,13 @@ export default function LoginPage() {
                   </FormControl>
                 )}
 
-                {error && (
+                {/* {error && (
                   <FormControl>
                     <FormHelperText color="red.500" textAlign="center">
                       {error}
                     </FormHelperText>
                   </FormControl>
-                )}
+                )} */}
 
                 <Button
                   borderRadius="full"
