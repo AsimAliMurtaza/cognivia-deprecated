@@ -8,6 +8,8 @@ interface QuizData {
   answers: string[];
   userID: string;
   isTaken?: boolean;
+  difficulty: string;
+  questionCount: number;
 }
 
 interface QuizStore {

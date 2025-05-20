@@ -167,6 +167,9 @@ const PdfQuizGeneration = () => {
               options: data.options,
               answers: data.answers,
               userID: session?.user?.id as string,
+              isTaken: false,
+              difficulty: data.difficulty || "easy",
+              questionCount: data.questionCount || 0,
             },
           });
         }

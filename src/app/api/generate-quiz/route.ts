@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { prompt, userID } = await req.json();
+    const { prompt, userID, difficulty, questionCount } = await req.json();
     const user_id = userID;
 
     if (!prompt || !user_id) {
@@ -208,7 +208,7 @@ export async function POST(req: NextRequest) {
     }
 
     const geminiOutput = await generateGeminiContent(
-      `Generate a 10-question multiple-choice quiz on the following topic. Format each question with the question number followed by the question statement. Then, list four options, each on a new line, starting with the option letter (A, B, C, D) optionally followed by a parenthesis or a space, and then the option text. Provide the correct answers at the end, clearly labeled "Answers:", with each answer indicating the correct option letter, optionally preceded by the question number and a period.: ${sanitizedPrompt}`
+      `Generate a ${questionCount}-question multiple-choice quiz on the following topic with ${difficulty} difficulty level. Format each question with the question number followed by the question statement. Then, list four options, each on a new line, starting with the option letter (A, B, C, D) optionally followed by a parenthesis or a space, and then the option text. Provide the correct answers at the end, clearly labeled "Answers:", with each answer indicating the correct option letter, optionally preceded by the question number and a period.: ${sanitizedPrompt}`
     );
 
     if (geminiOutput) {
@@ -223,6 +223,9 @@ export async function POST(req: NextRequest) {
         options: formattedQuiz?.options,
         answers: formattedQuiz?.answers,
         isTaken: false,
+        difficulty: difficulty,
+        questionCount: questionCount,
+        createdAt: new Date(),
         score: 0,
       });
 
@@ -265,6 +268,8 @@ export async function POST(req: NextRequest) {
             questions: formattedQuiz.questions,
             options: formattedQuiz.options,
             answers: formattedQuiz.answers,
+            difficulty: difficulty,
+            questionCount: questionCount,
             isTaken: false,
           },
           { status: 200 }

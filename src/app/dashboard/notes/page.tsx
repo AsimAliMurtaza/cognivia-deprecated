@@ -35,7 +35,7 @@ const FeatureCard = ({
   onClick,
 }: FeatureCardProps) => {
   const bgColor = useColorModeValue("white", "gray.800");
-  const hoverBgColor = useColorModeValue("gray.100", "gray.700");
+  const hoverBgColor = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("gray.600", "gray.400"); // Slightly softer text
   const titleColor = useColorModeValue("teal.500", "blue.300"); // Slightly less intense
   const shadowColor = useColorModeValue("rgba(0,0,0,0.06)", "rgba(0,0,0,0.15)"); // Subtler shadow
@@ -94,10 +94,7 @@ const FeatureCard = ({
 export default function SmartNotesPage() {
   const router = useRouter();
   const bgColor = useColorModeValue("gray.100", "gray.900"); // Lighter background
-  const heroGradient = useColorModeValue(
-    "linear-gradient(to right bottom, teal.50, white)", // Softer gradient
-    "linear-gradient(to right bottom, blue.700, gray.800)" // Darker, subtler gradient
-  );
+  const heroGradient = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.600", "gray.400"); // Consistent softer text
   const titleColor = useColorModeValue("teal.500", "blue.300"); // Consistent less intense title
   const btnColor = useColorModeValue("teal", "blue"); // Consistent button color
@@ -109,7 +106,6 @@ export default function SmartNotesPage() {
       <Container maxW="container.lg">
         {" "}
         {/* Slightly smaller container */}
-        {/* Hero Section */}
         <Flex
           bg={heroGradient}
           borderRadius="xl" // More common border radius
