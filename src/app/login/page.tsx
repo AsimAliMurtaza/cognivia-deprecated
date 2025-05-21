@@ -88,7 +88,9 @@ export default function LoginPage() {
       toast({
         title: "Login failed",
         description:
-          error instanceof Error ? "Check your network connection or try again after some time." : "Invalid credentials",
+          error instanceof Error
+            ? "Check your network connection or try again after some time."
+            : "Invalid credentials",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -99,7 +101,12 @@ export default function LoginPage() {
   };
 
   return (
-    <Flex justify="center" align="center" minH="100vh" bgGradient={bgColor}>
+    <Flex
+      justify="center"
+      align="center"
+      minH="100vh"
+      bgGradient={bgColor}
+    >
       <Container maxW="2xl">
         <motion.div
           initial={{ opacity: 0, y: -30 }}

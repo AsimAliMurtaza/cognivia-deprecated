@@ -18,13 +18,16 @@ import {
   useColorMode,
   useColorModeValue,
   IconButton,
+  Select,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowLeft, FiSun, FiMoon } from "react-icons/fi";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [roleSelected, setRoleSelected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -48,7 +51,7 @@ export default function SignUpPage() {
   };
 
   const handleSignup = async () => {
-    if (!email || !password) {
+    if (!email || !password || !role) {
       setError("All fields are required!");
       return;
     }
@@ -58,7 +61,7 @@ export default function SignUpPage() {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, role }),
     });
 
     setLoading(false);
@@ -67,7 +70,7 @@ export default function SignUpPage() {
       toast({
         title: "Account created!",
         description:
-          "Verify your acount by clicking on the email link sent to you.",
+          "Verify your account by clicking on the email link sent to you.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -98,10 +101,9 @@ export default function SignUpPage() {
           maxW="900px"
           p={8}
           w="auto"
-          h="auto"
         >
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-            {/* Left Side Content */}
+            {/* Left Content */}
             <GridItem
               display="flex"
               flexDirection="column"
@@ -125,20 +127,13 @@ export default function SignUpPage() {
                 _hover={{ color: buttonHoverColor }}
                 onClick={() => router.push("/")}
               >
-                <FiArrowLeft
-                  style={{
-                    marginRight: "8px",
-                    marginBottom: "2px",
-                    fontSize: "2em",
-                  }}
-                />
+                <FiArrowLeft style={{ marginRight: "8px", fontSize: "2em" }} />
               </Button>
             </GridItem>
 
-            {/* Right Side - Sign Up Form */}
+            {/* Right Side */}
             <GridItem>
               <VStack spacing={5} align="stretch">
-                {/* Color Mode Toggle Button */}
                 <IconButton
                   aria-label="Toggle dark mode"
                   borderRadius="full"
@@ -154,68 +149,119 @@ export default function SignUpPage() {
                   </Text>
                 )}
 
-                <Heading size="md" fontWeight="lg" mb={4} color={textColor}>
+                <Heading size="md" fontWeight="lg" mb={2} color={textColor}>
                   Create your account
                 </Heading>
 
-                <FormControl id="signUp-email" isRequired>
-                  <FormLabel fontSize="sm" color={textColor}>
-                    Email
-                  </FormLabel>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    bg={inputBgColor}
-                    borderRadius="full"
-                    color="black"
-                    border="1px solid #ccc"
-                    onChange={handleInputChange}
-                    name="email"
-                    _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
-                  />
-                </FormControl>
-
-                <FormControl id="signUp-password" isRequired>
-                  <FormLabel fontSize="sm" color={textColor}>
-                    Password
-                  </FormLabel>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    bg={inputBgColor}
-                    color="black"
-                    borderRadius="full"
-                    border="1px solid #ccc"
-                    onChange={handleInputChange}
-                    name="password"
-                    _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
-                  />
-                </FormControl>
-
-                <Button
-                  onClick={handleSignup}
-                  bg={buttonBgColor}
-                  color="white"
-                  _hover={{ bg: buttonHoverColor }}
-                  borderRadius="full"
-                  isLoading={loading}
-                  w="full"
-                >
-                  Sign Up
-                </Button>
-
-                <Divider />
-
-                <Text fontSize="sm" textAlign="center" color={textColor}>
-                  Already have an account?{" "}
-                  <Button
-                    variant="link"
-                    color="blue.500"
-                    onClick={() => router.push("/login")}
+                {!roleSelected && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
                   >
-                    Log in
-                  </Button>
-                </Text>
+                    <FormControl id="signUp-role" isRequired>
+                      <FormLabel fontSize="sm" color={textColor}>
+                        I am a
+                      </FormLabel>
+                      <Select
+                        bg={inputBgColor}
+                        borderRadius="full"
+                        onChange={(e) => {
+                          setRole(e.target.value.toLowerCase());
+                          setRoleSelected(true);
+                        }}
+                      >
+                        <option value="" disabled selected>
+                          Select your role
+                        </option>
+                        <option value="Student" >Student</option>
+                        <option value="Teacher" disabled selected>Teacher</option>
+                      </Select>
+                    </FormControl>
+                  </motion.div>
+                )}
+
+                <AnimatePresence>
+                  {roleSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <VStack spacing={5} align="stretch" mt={4}>
+                        <FormControl id="signUp-email" isRequired>
+                          <FormLabel fontSize="sm" color={textColor}>
+                            Email
+                          </FormLabel>
+                          <Input
+                            type="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            bg={inputBgColor}
+                            color="black"
+                            borderRadius="full"
+                            border="1px solid #ccc"
+                            onChange={handleInputChange}
+                            _focus={{
+                              borderColor: "blue.500",
+                              boxShadow: "outline",
+                            }}
+                          />
+                        </FormControl>
+
+                        <FormControl id="signUp-password" isRequired>
+                          <FormLabel fontSize="sm" color={textColor}>
+                            Password
+                          </FormLabel>
+                          <Input
+                            type="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            bg={inputBgColor}
+                            color="black"
+                            borderRadius="full"
+                            border="1px solid #ccc"
+                            onChange={handleInputChange}
+                            _focus={{
+                              borderColor: "blue.500",
+                              boxShadow: "outline",
+                            }}
+                          />
+                        </FormControl>
+
+                        <Button
+                          onClick={handleSignup}
+                          bg={buttonBgColor}
+                          color="white"
+                          _hover={{ bg: buttonHoverColor }}
+                          borderRadius="full"
+                          isLoading={loading}
+                          w="full"
+                        >
+                          Sign Up
+                        </Button>
+
+                        <Divider />
+
+                        <Text
+                          fontSize="sm"
+                          textAlign="center"
+                          color={textColor}
+                        >
+                          Already have an account?{" "}
+                          <Button
+                            variant="link"
+                            color="blue.500"
+                            onClick={() => router.push("/login")}
+                          >
+                            Log in
+                          </Button>
+                        </Text>
+                      </VStack>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </VStack>
             </GridItem>
           </Grid>

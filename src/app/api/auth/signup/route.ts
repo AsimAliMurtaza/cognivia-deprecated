@@ -9,7 +9,7 @@ import { sendVerificationEmail } from "@/lib/mailer";
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { email, password } = await req.json();
+    const { email, password, role } = await req.json();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const existingUser = await User.findOne({ email });
@@ -21,12 +21,12 @@ export async function POST(req: Request) {
     }
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
-
     const newUser = new User({
       email,
       password: hashedPassword,
       verified: false,
       verificationToken,
+      role,
     });
 
     await newUser.save();

@@ -28,6 +28,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }
 
+    if (isUserDashboard && token?.role === "teacher") {
+    return NextResponse.redirect(new URL("/teacher", req.url));
+  }
+
   let userAction = "";
   if (token?.role === "admin") {
     userAction = "View Admin Dashboard";
@@ -55,5 +59,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*"],
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/teacher/:path*"],
 };

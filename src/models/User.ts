@@ -6,7 +6,7 @@ export interface IUser extends Document {
   name?: string;
   image?: string;
   gender?: string;
-  role?: string;
+  role: string;
   verified: boolean;
   verificationToken?: string;
   is2FAEnabled?: boolean;
@@ -90,8 +90,7 @@ const UserSchema: Schema = new Schema({
   gender: { type: String, enum: ["male", "female", "other", ""], default: "" },
   role: {
     type: String,
-    enum: ["admin", "user"],
-    default: "user",
+    enum: ["admin", "teacher", "student"],
   },
   accessToken: {
     type: String,
