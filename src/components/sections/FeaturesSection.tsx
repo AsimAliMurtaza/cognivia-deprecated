@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FaBrain, FaClock, FaBookOpen, FaMobileAlt } from "react-icons/fa";
+import { MdAssistant, MdOutlineNotes } from "react-icons/md";
 
 export default function FeaturesSection() {
   const features = [
@@ -21,6 +22,18 @@ export default function FeaturesSection() {
       description:
         "Automatically generated quizzes tailored to your learning needs with our advanced algorithms.",
       icon: FaBrain,
+    },
+     {
+      title: "AI-Powered Notes",
+      description:
+        "Create and manage notes, export them to pdf and take them anywhere with you. ",
+      icon: MdOutlineNotes,
+    },
+    {
+      title: "Cognivia AI",
+      description:
+        "Cognivia AI anytime, anywhere - Summzarize, Explain, Brainstorming Ideas with Cognivia AI",
+      icon: MdAssistant,
     },
     {
       title: "Real-Time Feedback",
@@ -57,7 +70,7 @@ export default function FeaturesSection() {
       display="flex"
       alignItems="center"
     >
-      <Container maxW="container.lg">
+      <Container maxW="container.xl">
         <VStack spacing={12} textAlign="center">
           {/* Title Section */}
           <motion.div

@@ -120,7 +120,6 @@ export default function ContactSection() {
                 bg={cardBg}
                 p={8}
                 borderRadius="xl"
-                boxShadow="md"
                 height="100%"
               >
                 <VStack spacing={6} align="stretch">
@@ -207,7 +206,7 @@ export default function ContactSection() {
                       </ListItem>
                       <ListItem display="flex" alignItems="center">
                         <ListIcon as={FaPhoneAlt} color={primaryColor} />
-                        <Text color={textColor}>(123) 456-7890</Text>
+                        <Text color={textColor}>(+92) 317-1822-090</Text>
                       </ListItem>
                       <ListItem display="flex" alignItems="flex-start">
                         <ListIcon
@@ -216,9 +215,7 @@ export default function ContactSection() {
                           mt={1}
                         />
                         <Text color={textColor}>
-                          123 Learning Street
-                          <br />
-                          San Francisco, CA 94107
+                          Lahore, Pakistan
                         </Text>
                       </ListItem>
                     </List>
